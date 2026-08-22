@@ -204,6 +204,36 @@ function fillCard(card, data) {
   img.alt = `${currentPrompt} — image ${data.index}`;
   card.prepend(img);
 
+  // --- Auto-delete countdown badge ---
+  const AUTO_DELETE_SECONDS = 120;
+  const timerBadge = document.createElement('div');
+  timerBadge.className = 'auto-delete-timer';
+  card.appendChild(timerBadge);
+
+  let remaining = AUTO_DELETE_SECONDS;
+  const renderTimer = () => {
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    timerBadge.textContent = `Auto-delete in ${m}:${s.toString().padStart(2, '0')}`;
+  };
+  renderTimer();
+
+  const timerInterval = setInterval(() => {
+    remaining -= 1;
+    if (remaining <= 0) {
+      clearInterval(timerInterval);
+      card.classList.add('expired-card');
+      timerBadge.textContent = 'Expired — removed';
+      setTimeout(() => {
+        card.remove();
+        images = images.filter(i => i.filename !== data.filename);
+        downloadAllBtn.disabled = images.length === 0;
+      }, 1500);
+      return;
+    }
+    renderTimer();
+  }, 1000);
+
   const actions = document.createElement('div');
   actions.className = 'card-actions';
   actions.innerHTML = `
@@ -221,6 +251,11 @@ function fillCard(card, data) {
     document.body.appendChild(a);
     a.click();
     a.remove();
+
+    // File is safely downloaded — cancel the countdown and show that.
+    clearInterval(timerInterval);
+    timerBadge.textContent = 'Downloaded ✓';
+    timerBadge.classList.add('downloaded');
   });
 
   actions.querySelector('.card-delete-btn').addEventListener('click', async () => {
@@ -233,6 +268,7 @@ function fillCard(card, data) {
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || 'Delete failed.');
+      clearInterval(timerInterval);
       card.remove();
       images = images.filter(i => i.filename !== data.filename);
       downloadAllBtn.disabled = images.length === 0;

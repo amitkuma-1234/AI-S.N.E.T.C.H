@@ -7,6 +7,28 @@
   box-sizing: border-box;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
+.auto-delete-timer {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  right: 6px;
+  text-align: center;
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffb4b4;
+  z-index: 5;
+}
+
+.auto-delete-timer.downloaded {
+  color: #9dffb0;
+}
+
+.expired-card {
+  opacity: 0.4;
+  transition: opacity 1.5s ease;
+}
 
 html, body {
   background: #060309;
