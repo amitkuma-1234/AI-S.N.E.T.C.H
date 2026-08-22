@@ -963,7 +963,46 @@ def save_image(batch_id, index, image_bytes, ext="jpg"):
     if ext not in ("jpg", "png", "webp", "gif", "bmp"):
         ext = "jpg"
     filename = f"image_{index}.{ext}"
-    path = os.path.join(batch_dir(batch_id), filename)
+    folder = batch_dir(batch_id)
+    os.makedirs(folder, exist_ok=True)   # cleanup thread ne folder hataya ho toh wapas bana do
+    path = os.path.join(folder, filename)
     with open(path, "wb") as f:
         f.write(image_bytes)
     return filename
+
+
+import threading as _threading_module  # already imported as `threading` above
+
+AUTO_DELETE_SECONDS = 120  # 2 minutes
+
+def _cleanup_old_images():
+    """Background sweeper: deletes any image file older than
+    AUTO_DELETE_SECONDS across all batches. Runs forever in a daemon
+    thread so it never blocks app shutdown."""
+    while True:
+        try:
+            now = time.time()
+            if os.path.isdir(GENERATED_ROOT):
+                for batch_id in os.listdir(GENERATED_ROOT):
+                    folder = os.path.join(GENERATED_ROOT, batch_id)
+                    if not os.path.isdir(folder):
+                        continue
+                    for fname in os.listdir(folder):
+                        fpath = os.path.join(folder, fname)
+                        try:
+                            if os.path.isfile(fpath) and (now - os.path.getmtime(fpath)) > AUTO_DELETE_SECONDS:
+                                os.remove(fpath)
+                        except OSError:
+                            pass
+                    try:
+                        if os.path.isdir(folder) and not os.listdir(folder):
+                            os.rmdir(folder)
+                    except OSError:
+                        pass
+        except Exception:
+            pass
+        time.sleep(30)
+
+
+_cleanup_thread = threading.Thread(target=_cleanup_old_images, daemon=True)
+_cleanup_thread.start()
