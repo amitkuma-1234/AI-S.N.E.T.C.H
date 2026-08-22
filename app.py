@@ -1176,17 +1176,25 @@ def api_imagecreater_view(batch_id, filename):
 
 @app.route("/api/imagecreater/download/<batch_id>/<filename>")
 def api_imagecreater_download(batch_id, filename):
-    # Same ownership-check gap as /view above — fixed the same way.
     if (not imagecreater.is_valid_batch_id(batch_id) or not imagecreater.is_valid_filename(filename)
             or batch_id != session.get("imagecreater_batch_id")):
         abort(404)
     folder = imagecreater.batch_dir(batch_id)
-    if not os.path.isfile(os.path.join(folder, filename)):
+    filepath = os.path.join(folder, filename)
+    if not os.path.isfile(filepath):
         abort(404)
-    return send_from_directory(
+    response = send_from_directory(
         folder, filename, as_attachment=True,
         download_name=imagecreater.download_filename(batch_id, filename),
     )
+    # Delete right after this response is fully sent to the browser
+    @response.call_on_close
+    def _delete_after_download():
+        try:
+            os.remove(filepath)
+        except OSError:
+            pass
+    return response
 
 
 @app.route("/api/imagecreater/delete", methods=["POST"])

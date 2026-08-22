@@ -372,6 +372,42 @@ def _load_yolo():
         _yolo_load_error = str(e)
         raise RuntimeError(_yolo_load_error)
 
+import threading as _threading_module  # already imported as `threading` above — skip if duplicate
+
+AUTO_DELETE_SECONDS = 120  # 2 minutes
+
+def _cleanup_old_images():
+    """Background sweeper: deletes any image file older than
+    AUTO_DELETE_SECONDS across all batches. Runs forever in a daemon
+    thread so it never blocks app shutdown."""
+    while True:
+        try:
+            now = time.time()
+            if os.path.isdir(GENERATED_ROOT):
+                for batch_id in os.listdir(GENERATED_ROOT):
+                    folder = os.path.join(GENERATED_ROOT, batch_id)
+                    if not os.path.isdir(folder):
+                        continue
+                    for fname in os.listdir(folder):
+                        fpath = os.path.join(folder, fname)
+                        try:
+                            if os.path.isfile(fpath) and (now - os.path.getmtime(fpath)) > AUTO_DELETE_SECONDS:
+                                os.remove(fpath)
+                        except OSError:
+                            pass
+                    # remove the batch folder too if it's now empty
+                    try:
+                        if os.path.isdir(folder) and not os.listdir(folder):
+                            os.rmdir(folder)
+                    except OSError:
+                        pass
+        except Exception:
+            pass
+        time.sleep(30)  # check every 30 seconds
+
+
+_cleanup_thread = threading.Thread(target=_cleanup_old_images, daemon=True)
+_cleanup_thread.start()
 
 def _load_face_cascade():
     global _face_cascade, _face_cascade_load_error
