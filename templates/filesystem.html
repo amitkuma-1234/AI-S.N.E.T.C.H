@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S.N.E.T.C.H · File System Manager</title>
+  <!-- Font & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="filesystem.css" />
+</head>
+<body>
+  <!-- ====== SPACE BACKGROUND (canvas) ====== -->
+  <canvas id="spaceCanvas"></canvas>
+
+  <!-- ====== MAIN WRAPPER ====== -->
+  <div class="app-container">
+
+    <!-- ====== LEFT SIDEBAR ====== -->
+    <aside class="sidebar">
+      <div class="sidebar-nav">
+        <button class="nav-btn" id="homeBtn" title="Return to Home Dashboard">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ====== MAIN CONTENT ====== -->
+    <main class="main-content">
+
+      <!-- ====== HEADER ====== -->
+      <header class="top-header">
+        <div class="header-left">
+          <div class="folder-icon-glow">
+            <i class="fas fa-folder-open"></i>
+          </div>
+          <div class="header-titles">
+            <h1>File System Manager</h1>
+            <p>Create, update, delete, rename, and open files &amp; folders anywhere on your system.</p>
+          </div>
+        </div>
+      </header>
+
+      <!-- ====== ACTION CARDS GRID ====== -->
+      <section class="cards-grid">
+        <!-- Card 1: Create -->
+        <div class="action-card" data-action="create">
+          <div class="card-icon"><i class="fas fa-plus-circle"></i></div>
+          <h3>Create File or Folder</h3>
+          <p>Create a new file or folder in one or many locations at once.</p>
+          <button class="card-btn" data-flow="create">Create Now</button>
+        </div>
+        <!-- Card 2: Update -->
+        <div class="action-card" data-action="update">
+          <div class="card-icon"><i class="fas fa-pen"></i></div>
+          <h3>Update File or Folder</h3>
+          <p>Replace an existing file, or add to / replace a folder.</p>
+          <button class="card-btn" data-flow="update">Update Now</button>
+        </div>
+        <!-- Card 3: Delete -->
+        <div class="action-card" data-action="delete">
+          <div class="card-icon"><i class="fas fa-trash-alt"></i></div>
+          <h3>Delete File or Folder</h3>
+          <p>Delete a selected file or folder permanently.</p>
+          <button class="card-btn" data-flow="delete">Delete Now</button>
+        </div>
+        <!-- Card 4: Rename -->
+        <div class="action-card" data-action="rename">
+          <div class="card-icon"><i class="fas fa-i-cursor"></i></div>
+          <h3>Rename File or Folder</h3>
+          <p>Rename a selected file or folder.</p>
+          <button class="card-btn" data-flow="rename">Rename Now</button>
+        </div>
+        <!-- Card 5: Open -->
+        <div class="action-card" data-action="open">
+          <div class="card-icon"><i class="fas fa-folder-open"></i></div>
+          <h3>Open File or Folder</h3>
+          <p>Open any selected file or folder with your system defaults.</p>
+          <button class="card-btn" data-flow="open">Open Now</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ====== MODAL OVERLAY (hidden by default) ====== -->
+  <div id="modalOverlay" class="modal-overlay hidden">
+    <div class="modal-glass">
+      <div class="modal-header">
+        <div class="modal-header-text">
+          <h2 id="modalTitle">Action</h2>
+          <div class="modal-steps" id="modalSteps"></div>
+        </div>
+        <button id="closeModalBtn" class="close-modal"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- dynamic content via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TOAST CONTAINER ====== -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- ====== SCRIPTS ====== -->
+  <script src="filesystem.js"></script>
+</body>
+</html>

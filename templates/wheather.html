@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S.N.E.T.C.H · AI Weather Center</title>
+  <!-- Font & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <!-- CSS (separate) -->
+  <link rel="stylesheet" href="wheather.css" />
+</head>
+<body>
+
+  <!-- ===== ANIMATED SPACE BACKGROUND (base layer) ===== -->
+  <div id="space-bg">
+    <div class="stars-layer" id="stars"></div>
+    <div class="nebula purple"></div>
+    <div class="nebula blue"></div>
+    <div class="shooting-stars"></div>
+    <div class="particles" id="particles"></div>
+  </div>
+
+  <!-- ===== CINEMATIC WEATHER SCENE (dynamic layer, switches per condition) ===== -->
+  <div id="weather-scene" class="scene" data-scene="sunny">
+
+    <!-- ---------- SUNNY SCENE ---------- -->
+    <div class="scene-layer scene-sunny">
+      <div class="sun">
+        <div class="sun-core"></div>
+        <div class="sun-rays"></div>
+      </div>
+      <div class="sky-gradient"></div>
+      <div class="clouds-soft">
+        <span class="cloud c1"></span>
+        <span class="cloud c2"></span>
+        <span class="cloud c3"></span>
+      </div>
+      <div class="birds">
+        <span class="bird b1">〜</span>
+        <span class="bird b2">〜</span>
+        <span class="bird b3">〜</span>
+      </div>
+      <div class="waterfall">
+        <span class="fall-stream s1"></span>
+        <span class="fall-stream s2"></span>
+        <span class="fall-stream s3"></span>
+        <div class="fall-mist"></div>
+      </div>
+      <div class="trees-row">
+        <span class="tree t1"></span>
+        <span class="tree t2"></span>
+        <span class="tree t3"></span>
+        <span class="tree t4"></span>
+      </div>
+    </div>
+
+    <!-- ---------- RAINY SCENE ---------- -->
+    <div class="scene-layer scene-rainy">
+      <div class="sky-gradient rainy-sky"></div>
+      <div class="dark-clouds">
+        <span class="dcloud dc1"></span>
+        <span class="dcloud dc2"></span>
+        <span class="dcloud dc3"></span>
+      </div>
+      <div class="forest-row">
+        <span class="ftree f1"></span>
+        <span class="ftree f2"></span>
+        <span class="ftree f3"></span>
+        <span class="ftree f4"></span>
+        <span class="ftree f5"></span>
+      </div>
+      <div class="rain-layer" id="rainLayer"></div>
+      <div class="wet-ground"></div>
+      <div class="splash-layer" id="splashLayer"></div>
+    </div>
+
+    <!-- ---------- CLOUDY / STORM SCENE ---------- -->
+    <div class="scene-layer scene-cloudy">
+      <div class="sky-gradient storm-sky"></div>
+      <div class="huge-clouds">
+        <span class="hcloud hc1"></span>
+        <span class="hcloud hc2"></span>
+        <span class="hcloud hc3"></span>
+        <span class="hcloud hc4"></span>
+      </div>
+      <div class="lightning-flash" id="lightningFlash"></div>
+      <div class="lightning-bolt" id="lightningBolt">⚡</div>
+    </div>
+
+    <!-- ---------- WINDY SCENE ---------- -->
+    <div class="scene-layer scene-windy">
+      <div class="sky-gradient windy-sky"></div>
+      <div class="fast-clouds">
+        <span class="wcloud wc1"></span>
+        <span class="wcloud wc2"></span>
+        <span class="wcloud wc3"></span>
+      </div>
+      <div class="tornado">
+        <span class="funnel"></span>
+      </div>
+      <div class="bending-trees">
+        <span class="btree bt1"></span>
+        <span class="btree bt2"></span>
+        <span class="btree bt3"></span>
+      </div>
+      <div class="wind-lines" id="windLines"></div>
+      <div class="dust-layer" id="dustLayer"></div>
+      <div class="leaves-layer" id="leavesLayer"></div>
+    </div>
+
+    <!-- ---------- SNOWY SCENE ---------- -->
+    <div class="scene-layer scene-snowy">
+      <div class="sky-gradient snowy-sky"></div>
+      <div class="mountains">
+        <span class="mountain m1"></span>
+        <span class="mountain m2"></span>
+        <span class="mountain m3"></span>
+      </div>
+      <div class="snow-village">
+        <span class="house h1"><span class="roof"></span></span>
+        <span class="house h2"><span class="roof"></span></span>
+        <span class="pine p1"></span>
+        <span class="pine p2"></span>
+        <span class="pine p3"></span>
+      </div>
+      <div class="snow-layer" id="snowLayer"></div>
+      <div class="ice-sparkle"></div>
+    </div>
+
+  </div>
+
+  <!-- ===== HIDDEN AUDIO ELEMENT (single, source swapped by JS) ===== -->
+  <audio id="weatherAudio" preload="none" loop></audio>
+
+  <!-- ===== SOUND TOGGLE (fixed, top-right) ===== -->
+  <button id="soundToggle" class="sound-toggle" title="Toggle weather sound" aria-label="Toggle weather sound">
+    <i class="fas fa-volume-xmark"></i>
+  </button>
+
+  <!-- ===== MAIN UI ===== -->
+  <div class="app-container">
+
+    <!-- TOP LEFT: HOME BUTTON (only button here) -->
+    <div class="home-btn-wrapper">
+      <a href="/" class="home-btn" id="homeBtn" title="Home">
+        <i class="fas fa-home"></i>
+      </a>
+    </div>
+
+    <!-- HEADER -->
+    <header class="weather-header">
+      <div class="header-icon"><i class="fas fa-cloud-sun-rain"></i></div>
+      <h1 class="brand-title">S.N.E.T.C.H</h1>
+      <h2 class="forecast-title">AI Weather Center</h2>
+      <p class="subtitle">Live, cinematic weather for your location — and anywhere else.</p>
+    </header>
+
+    <main class="weather-panel glass-card">
+
+      <!-- ================= CURRENT LOCATION WEATHER ================= -->
+      <section class="current-section">
+        <h3 class="section-label"><i class="fas fa-location-crosshairs"></i> Current Location</h3>
+        <p class="section-desc">Detected automatically — no input needed.</p>
+
+        <div id="currentStatus" class="status-msg loading">
+          <span class="spinner"></span> Detecting your location...
+        </div>
+
+        <div id="currentWeatherCard" class="weather-result glass-card" style="display:none;">
+          <div class="result-header">
+            <span class="result-location"><i class="fas fa-location-dot"></i>
+              <span data-field="location">--</span>
+            </span>
+            <span class="result-icon"><i data-field="icon" class="fas fa-cloud"></i></span>
+          </div>
+          <div class="result-temp-section">
+            <span class="result-temp"><span data-field="temperature">--</span>°C</span>
+            <span class="result-condition" data-field="condition">--</span>
+          </div>
+          <div class="result-details grid-2col">
+            <div><i class="fas fa-temperature-low"></i> Feels like <span data-field="feels_like">--</span>°C</div>
+            <div><i class="fas fa-droplet"></i> Humidity <span data-field="humidity">--</span>%</div>
+            <div><i class="fas fa-wind"></i> Wind <span data-field="wind_speed">--</span> km/h</div>
+            <div><i class="fas fa-eye"></i> Visibility <span data-field="visibility">--</span> km</div>
+            <div><i class="fas fa-compress"></i> Pressure <span data-field="pressure">--</span> hPa</div>
+            <div><i class="fas fa-sun"></i> UV Index <span data-field="uv_index">--</span></div>
+            <div><i class="fas fa-sunrise"></i> Sunrise <span data-field="sunrise">--</span></div>
+            <div><i class="fas fa-sunset"></i> Sunset <span data-field="sunset">--</span></div>
+          </div>
+          <div class="result-updated">
+            <i class="fas fa-rotate"></i> Last updated: <span data-field="last_updated">--</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="section-divider"></div>
+
+      <!-- ================= SEARCH WEATHER ================= -->
+      <section class="input-section">
+        <h3 class="section-label"><i class="fas fa-magnifying-glass-location"></i> Search Any City</h3>
+        <p class="section-desc">Type a city name — e.g. Jaipur, Delhi, Mumbai, London, Tokyo, New York.</p>
+        <div class="input-group">
+          <span class="input-icon left"><i class="fas fa-search"></i></span>
+          <input type="text" id="locationInput" placeholder="e.g. Jaipur, Delhi, Mumbai, London, New York..." autocomplete="off" />
+          <span class="input-icon right"><i class="fas fa-map-pin"></i></span>
+        </div>
+        <div id="validationMessage" class="validation-msg"></div>
+      </section>
+
+      <section class="action-section">
+        <button id="getWeatherBtn" class="glow-btn">
+          <i class="fas fa-cloud-sun-rain"></i> Get Weather
+        </button>
+      </section>
+
+      <!-- SEARCHED WEATHER RESULT CARD -->
+      <div id="weatherResult" class="weather-result glass-card" style="display: none;">
+        <div class="result-header">
+          <span class="result-location"><i class="fas fa-location-dot"></i>
+            <span data-field="location">--</span>
+          </span>
+          <span class="result-icon"><i data-field="icon" class="fas fa-cloud"></i></span>
+        </div>
+        <div class="result-temp-section">
+          <span class="result-temp"><span data-field="temperature">--</span>°C</span>
+          <span class="result-condition" data-field="condition">--</span>
+        </div>
+        <div class="result-details grid-2col">
+          <div><i class="fas fa-temperature-low"></i> Feels like <span data-field="feels_like">--</span>°C</div>
+          <div><i class="fas fa-droplet"></i> Humidity <span data-field="humidity">--</span>%</div>
+          <div><i class="fas fa-wind"></i> Wind <span data-field="wind_speed">--</span> km/h</div>
+          <div><i class="fas fa-eye"></i> Visibility <span data-field="visibility">--</span> km</div>
+          <div><i class="fas fa-compress"></i> Pressure <span data-field="pressure">--</span> hPa</div>
+          <div><i class="fas fa-sun"></i> UV Index <span data-field="uv_index">--</span></div>
+          <div><i class="fas fa-sunrise"></i> Sunrise <span data-field="sunrise">--</span></div>
+          <div><i class="fas fa-sunset"></i> Sunset <span data-field="sunset">--</span></div>
+        </div>
+        <div class="result-updated">
+          <i class="fas fa-rotate"></i> Last updated: <span data-field="last_updated">--</span>
+        </div>
+      </div>
+
+      <!-- FOOTER CARD -->
+      <footer class="footer-card glass-card">
+        <i class="fas fa-shield-alt shield-icon"></i>
+        <span>Weather data is provided for informational purposes only.</span>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- JavaScript (separate) -->
+  <script src="wheather.js"></script>
+</body>
+</html>

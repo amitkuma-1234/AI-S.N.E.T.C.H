@@ -1,0 +1,24 @@
+{
+  "name": "S.N.E.T.C.H",
+  "short_name": "SNETCH",
+  "description": "Smart Neural Engine Tech Command Hub",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020810",
+  "theme_color": "#020810",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NiA1NiIgZmlsbD0ibm9uZSI+PHBvbHlnb24gcG9pbnRzPSIyOCwyIDUyLDE1IDUyLDQxIDI4LDU0IDQsNDEgNCwxNSIgc3Ryb2tlPSJyZ2JhKDAsMjQ1LDI1NSwwLjUpIiBzdHJva2Utd2lkdGg9IjEuNSIgZmlsbD0ibm9uZSIvPjxwb2x5Z29uIHBvaW50cz0iMjgsOCA0NiwxOC41IDQ2LDM3LjUgMjgsNDggMTAsMzcuNSAxMCwxOC41IiBzdHJva2U9InJnYmEoMCwyNDUsMjU1LDAuMikiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NiA1NiIgZmlsbD0ibm9uZSI+PHBvbHlnb24gcG9pbnRzPSIyOCwyIDUyLDE1IDUyLDQxIDI4LDU0IDQsNDEgNCwxNSIgc3Ryb2tlPSJyZ2JhKDAsMjQ1LDI1NSwwLjUpIiBzdHJva2Utd2lkdGg9IjEuNSIgZmlsbD0ibm9uZSIvPjxwb2x5Z29uIHBvaW50cz0iMjgsOCA0NiwxOC41IDQ2LDM3LjUgMjgsNDggMTAsMzcuNSAxMCwxOC41IiBzdHJva2U9InJnYmEoMCwyNDUsMjU1LDAuMikiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

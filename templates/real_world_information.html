@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Real World Information AI · S.N.E.T.C.H</title>
+  <!-- Fonts & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <!-- Markdown renderer (client-side formatting only) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js"></script>
+  <!-- external CSS & JS (separate) -->
+  <link rel="stylesheet" href="real_world_information.css" />
+</head>
+<body>
+  <!-- ====== SPACE BACKGROUND ====== -->
+  <div id="space-bg">
+    <div class="stars-layer"></div>
+    <div class="nebula nebula-purple"></div>
+    <div class="nebula nebula-blue"></div>
+    <div class="shooting-stars"></div>
+    <div class="particles"></div>
+  </div>
+
+  <!-- ====== MAIN WRAPPER (glassmorphism) ====== -->
+  <div class="app-wrapper">
+
+    <!-- ====== TOP BAR — HOME ONLY ====== -->
+    <header class="top-bar">
+      <button class="home-btn glass-panel" id="homeBtn" title="Home">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </button>
+
+      <div class="brand-block">
+        <span class="brand-sn">S.N.E.T.C.H</span>
+        <span class="brand-sub">REAL WORLD INFORMATION AI</span>
+      </div>
+
+      <div class="top-bar-spacer"></div>
+    </header>
+
+    <!-- ====== MAIN CONTENT ====== -->
+    <main class="main-content">
+
+      <!-- HEADER -->
+      <section class="main-header">
+        <div class="header-icon"><i class="fas fa-globe-americas"></i></div>
+        <div class="header-text">
+          <h1>Real World Information AI</h1>
+          <p>Ask anything about the real world and get accurate, AI-powered answers instantly.</p>
+        </div>
+      </section>
+
+      <!-- MODE SELECTOR (landing options) -->
+      <section class="mode-select" id="modeSelect">
+        <button class="mode-card" id="typeModeBtn" data-mode="type">
+          <div class="mode-icon"><i class="fas fa-keyboard"></i></div>
+          <div class="mode-info">
+            <h3>Type Question</h3>
+            <p>Type any real-world question and press Enter</p>
+          </div>
+        </button>
+        <button class="mode-card" id="voiceModeBtn" data-mode="voice">
+          <div class="mode-icon"><i class="fas fa-microphone"></i></div>
+          <div class="mode-info">
+            <h3>Voice Question</h3>
+            <p>Just speak — your answer appears automatically</p>
+          </div>
+        </button>
+      </section>
+
+      <!-- CHAT PANEL -->
+      <section class="chat-panel" id="chatPanel">
+        <div class="chat-messages" id="chatMessages">
+          <div class="message ai-message">
+            <div class="msg-icon"><i class="fas fa-robot"></i></div>
+            <div class="msg-bubble">
+              <div class="msg-content"><p>Hello! I'm your Real World Information AI. Choose <strong>Type Question</strong> or <strong>Voice Question</strong> above, or start typing below to ask me about countries, history, science, technology, culture, and more.</p></div>
+              <span class="msg-time">Just now</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- voice listening overlay -->
+        <div class="listening-indicator" id="listeningIndicator" style="display:none;">
+          <div class="mic-pulse">
+            <i class="fas fa-microphone"></i>
+          </div>
+          <p id="listeningText">Listening... speak your question</p>
+        </div>
+
+        <!-- chat controls (floating bar) -->
+        <div class="chat-input-bar glass-panel" id="chatInputBar">
+          <textarea id="chatInput" rows="1" placeholder="Ask anything about the real world..."></textarea>
+          <button class="input-btn" id="voiceBtn" title="Ask with voice"><i class="fas fa-microphone"></i></button>
+          <button class="input-btn send-btn" id="sendBtn" title="Send"><i class="fas fa-paper-plane"></i></button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ====== TOAST (error / status messages) ====== -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- JavaScript separate -->
+  <script src="real_world_information.js"></script>
+</body>
+</html>

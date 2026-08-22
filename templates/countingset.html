@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S.N.E.T.C.H · Countdown &amp; Stopwatch Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="countingset.css" />
+</head>
+<body>
+
+  <!-- ===== BACKGROUND LAYERS ===== -->
+  <div id="space-bg">
+    <div id="stars"></div>
+    <div id="twinkling"></div>
+    <div id="nebula"></div>
+    <div id="galaxy-glow"></div>
+    <div id="particles"></div>
+    <div class="shooting-star" style="top:10%; left:80%; animation-delay:0s;"></div>
+    <div class="shooting-star" style="top:30%; left:20%; animation-delay:4s;"></div>
+    <div class="shooting-star" style="top:60%; left:70%; animation-delay:8s;"></div>
+    <div class="shooting-star" style="top:75%; left:35%; animation-delay:11s;"></div>
+  </div>
+
+  <!-- ===== MAIN WRAPPER ===== -->
+  <div class="app-container" id="appContainer">
+
+    <!-- TOP LEFT: HOME BUTTON (only button here) -->
+    <div class="topbar">
+      <button class="home-btn glass" id="homeBtn" type="button">
+        <i class="fas fa-home"></i> Home
+      </button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SCREEN: MAIN DASHBOARD (3 premium cards)                      -->
+    <!-- ============================================================ -->
+    <section class="screen active" id="screen-main">
+      <div class="header-center">
+        <div class="hourglass-icon"><i class="fas fa-hourglass-half"></i></div>
+        <h1 class="snetch-title">S.N.E.T.C.H</h1>
+        <h2 class="counting-sub">COUNTDOWN &amp; STOPWATCH DASHBOARD</h2>
+      </div>
+
+      <div class="cards-row">
+        <div class="card glass" id="cardSetCountdown">
+          <div class="card-icon"><i class="fas fa-hourglass-start"></i></div>
+          <h3>Set Countdown</h3>
+          <p class="card-desc">Precision countdowns with a live analog dial, animated sand clock and red alert finish.</p>
+          <button class="card-btn" type="button">Open</button>
+        </div>
+
+        <div class="card glass" id="cardStopwatch">
+          <div class="card-icon"><i class="fas fa-stopwatch"></i></div>
+          <h3>Stopwatch</h3>
+          <p class="card-desc">Track elapsed time with a synchronized analog dial and digital readout.</p>
+          <button class="card-btn" type="button">Open</button>
+        </div>
+
+        <div class="card glass" id="cardTimerLists">
+          <div class="card-icon"><i class="fas fa-list-ul"></i></div>
+          <h3>Timer Lists</h3>
+          <p class="card-desc">Browse, modify and manage every saved countdown and stopwatch record.</p>
+          <button class="card-btn" type="button">Open</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SCREEN: SET COUNTDOWN (input)                                 -->
+    <!-- ============================================================ -->
+    <section class="screen" id="screen-countdown-setup">
+      <div class="panel glass narrow">
+        <h2 class="panel-title"><i class="fas fa-hourglass-start"></i> Set Countdown</h2>
+        <div class="hms-row">
+          <div class="hms-field">
+            <label>Hours</label>
+            <input type="number" id="cdHours" min="0" max="99" value="0" inputmode="numeric" />
+          </div>
+          <div class="hms-sep">:</div>
+          <div class="hms-field">
+            <label>Minutes</label>
+            <input type="number" id="cdMinutes" min="0" max="59" value="5" inputmode="numeric" />
+          </div>
+          <div class="hms-sep">:</div>
+          <div class="hms-field">
+            <label>Seconds</label>
+            <input type="number" id="cdSeconds" min="0" max="59" value="0" inputmode="numeric" />
+          </div>
+        </div>
+        <button class="panel-btn primary" id="cdBeginBtn" type="button">
+          <i class="fas fa-play"></i> Begin Countdown
+        </button>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SCREEN: COUNTDOWN RUNNING (visualizations)                    -->
+    <!-- ============================================================ -->
+    <section class="screen" id="screen-countdown-run">
+      <div class="run-stage" id="cdStage">
+
+        <div class="viz-row">
+          <!-- Circular Analog Timer -->
+          <div class="viz-box glass">
+            <div class="viz-label">Analog Timer</div>
+            <svg viewBox="0 0 220 220" class="analog-svg" id="cdAnalogSvg">
+              <circle cx="110" cy="110" r="98" class="analog-ring-bg"></circle>
+              <circle cx="110" cy="110" r="98" class="analog-ring-fg" id="cdAnalogProgress"></circle>
+              <g id="cdTicks"></g>
+              <line x1="110" y1="110" x2="110" y2="26" class="analog-hand" id="cdHand"></line>
+              <circle cx="110" cy="110" r="6" class="analog-hub"></circle>
+              <text x="110" y="150" text-anchor="middle" class="analog-cycle-text" id="cdCycleText">0</text>
+              <text x="110" y="168" text-anchor="middle" class="analog-cycle-label">cycles</text>
+            </svg>
+          </div>
+
+          <!-- Animated Sand Clock -->
+          <div class="viz-box glass">
+            <div class="viz-label">Sand Clock</div>
+            <svg viewBox="0 0 160 220" class="hourglass-svg" id="cdHourglassSvg">
+              <defs>
+                <clipPath id="topChamberClip">
+                  <path d="M20 14 H140 V90 L80 118 L20 90 Z"></path>
+                </clipPath>
+                <clipPath id="bottomChamberClip">
+                  <path d="M20 206 H140 V130 L80 102 L20 130 Z"></path>
+                </clipPath>
+              </defs>
+              <path d="M20 14 H140 V90 L80 118 L20 90 Z M20 206 H140 V130 L80 102 L20 130 Z"
+                    class="hourglass-frame"></path>
+              <rect id="cdSandTop" x="20" y="14" width="120" height="76" class="sand-fill" clip-path="url(#topChamberClip)"></rect>
+              <rect id="cdSandBottom" x="20" y="130" width="120" height="76" class="sand-fill" clip-path="url(#bottomChamberClip)"></rect>
+              <rect x="78" y="106" width="4" height="12" class="sand-stream" id="cdSandStream"></rect>
+              <rect x="10" y="8" width="140" height="10" rx="4" class="hourglass-cap"></rect>
+              <rect x="10" y="202" width="140" height="10" rx="4" class="hourglass-cap"></rect>
+            </svg>
+          </div>
+
+          <!-- Digital Countdown -->
+          <div class="viz-box glass">
+            <div class="viz-label">Digital Countdown</div>
+            <div class="digital-display" id="cdDigital">00 : 05 : 00</div>
+            <div class="digital-sub" id="cdOriginalLabel">Original 00:05:00</div>
+          </div>
+        </div>
+
+        <div class="completed-banner" id="cdCompletedBanner">
+          <i class="fas fa-check-circle"></i> Countdown Completed
+        </div>
+
+        <div class="control-row">
+          <button class="ctrl-btn start" id="cdStartBtn" type="button"><i class="fas fa-play"></i> Start</button>
+          <button class="ctrl-btn pause" id="cdPauseBtn" type="button"><i class="fas fa-pause"></i> Pause</button>
+          <button class="ctrl-btn restart" id="cdRestartBtn" type="button"><i class="fas fa-rotate-right"></i> Restart</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SCREEN: STOPWATCH                                             -->
+    <!-- ============================================================ -->
+    <section class="screen" id="screen-stopwatch">
+      <div class="run-stage">
+        <div class="viz-row two-col">
+          <!-- Circular Analog Stopwatch -->
+          <div class="viz-box glass">
+            <div class="viz-label">Analog Stopwatch</div>
+            <svg viewBox="0 0 220 220" class="analog-svg" id="swAnalogSvg">
+              <circle cx="110" cy="110" r="98" class="analog-ring-bg"></circle>
+              <circle cx="110" cy="110" r="98" class="analog-ring-fg sw" id="swAnalogProgress"></circle>
+              <g id="swTicks"></g>
+              <line x1="110" y1="110" x2="110" y2="26" class="analog-hand sw" id="swHand"></line>
+              <circle cx="110" cy="110" r="6" class="analog-hub"></circle>
+              <text x="110" y="150" text-anchor="middle" class="analog-cycle-text" id="swCycleText">0</text>
+              <text x="110" y="168" text-anchor="middle" class="analog-cycle-label">cycles</text>
+            </svg>
+          </div>
+
+          <!-- Digital Stopwatch -->
+          <div class="viz-box glass">
+            <div class="viz-label">Digital Stopwatch</div>
+            <div class="digital-display sw" id="swDigital">00 : 00 : 00</div>
+            <div class="digital-sub">Counting Up</div>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <button class="ctrl-btn start" id="swStartBtn" type="button"><i class="fas fa-play"></i> Start</button>
+          <button class="ctrl-btn pause" id="swPauseBtn" type="button"><i class="fas fa-pause"></i> Pause</button>
+          <button class="ctrl-btn restart" id="swRestartBtn" type="button"><i class="fas fa-rotate-right"></i> Restart</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SCREEN: TIMER LISTS (menu)                                    -->
+    <!-- ============================================================ -->
+    <section class="screen" id="screen-lists-menu">
+      <div class="header-center small">
+        <h2 class="panel-title"><i class="fas fa-list-ul"></i> Timer Lists</h2>
+      </div>
+      <div class="cards-row">
+        <div class="card glass" id="cardCountdownList">
+          <div class="card-icon"><i class="fas fa-hourglass"></i></div>
+          <h3>Countdown List</h3>
+          <p class="card-desc">Every completed countdown, saved with its name, number and cycle count.</p>
+          <button class="card-btn" type="button">View List</button>
+        </div>
+        <div class="card glass" id="cardStopwatchList">
+          <div class="card-icon"><i class="fas fa-stopwatch-20"></i></div>
+          <h3>Stopwatch List</h3>
+          <p class="card-desc">Every recorded stopwatch session, saved with its name, number and cycle count.</p>
+          <button class="card-btn" type="button">View List</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SCREEN: COUNTDOWN LIST TABLE                                  -->
+    <!-- ============================================================ -->
+    <section class="screen" id="screen-countdown-list">
+      <div class="panel glass wide">
+        <h2 class="panel-title"><i class="fas fa-hourglass"></i> Countdown List</h2>
+        <div class="table-wrap">
+          <table class="premium-table">
+            <thead>
+              <tr>
+                <th>Countdown Name</th>
+                <th>Countdown Number</th>
+                <th>Original Time</th>
+                <th>Completed Cycles</th>
+                <th>Created Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="countdownListBody"></tbody>
+          </table>
+          <div class="empty-state" id="countdownListEmpty">No countdown records yet.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SCREEN: STOPWATCH LIST TABLE                                  -->
+    <!-- ============================================================ -->
+    <section class="screen" id="screen-stopwatch-list">
+      <div class="panel glass wide">
+        <h2 class="panel-title"><i class="fas fa-stopwatch-20"></i> Stopwatch List</h2>
+        <div class="table-wrap">
+          <table class="premium-table">
+            <thead>
+              <tr>
+                <th>Stopwatch Name</th>
+                <th>Stopwatch Number</th>
+                <th>Recorded Time</th>
+                <th>Completed Cycles</th>
+                <th>Created Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="stopwatchListBody"></tbody>
+          </table>
+          <div class="empty-state" id="stopwatchListEmpty">No stopwatch records yet.</div>
+        </div>
+      </div>
+    </section>
+
+  </div> <!-- end app-container -->
+
+  <!-- ============================================================ -->
+  <!-- MODALS                                                        -->
+  <!-- ============================================================ -->
+
+  <!-- Countdown Completed -> Save -->
+  <div id="cdSaveModal" class="modal-overlay">
+    <div class="modal-box glass">
+      <h3><i class="fas fa-flag-checkered"></i> Save Completed Countdown</h3>
+      <div class="modal-field">
+        <label>Countdown Name</label>
+        <input type="text" id="cdSaveName" placeholder="e.g. HIIT Round" />
+      </div>
+      <div class="modal-field">
+        <label>Countdown Number <span class="hint">(numeric or points)</span></label>
+        <input type="text" id="cdSaveNumber" placeholder="e.g. 3 or 150 pts" />
+      </div>
+      <div class="modal-summary">
+        <div><span>Total Duration</span><strong id="cdSaveDuration">00:00:00</strong></div>
+        <div><span>Completed Cycles</span><strong id="cdSaveCycles">0</strong></div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn primary" id="cdSaveConfirmBtn" type="button">Save Record</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stopwatch Stopped -> Save -->
+  <div id="swSaveModal" class="modal-overlay">
+    <div class="modal-box glass">
+      <h3><i class="fas fa-flag-checkered"></i> Save Stopwatch Session</h3>
+      <div class="modal-field">
+        <label>Stopwatch Name</label>
+        <input type="text" id="swSaveName" placeholder="e.g. 5K Run" />
+      </div>
+      <div class="modal-field">
+        <label>Stopwatch Number <span class="hint">(numeric or points)</span></label>
+        <input type="text" id="swSaveNumber" placeholder="e.g. Lap 2" />
+      </div>
+      <div class="modal-field">
+        <label>Recorded Time <span class="hint">(read only)</span></label>
+        <input type="text" id="swSaveTime" readonly />
+      </div>
+      <div class="modal-summary">
+        <div><span>Completed Cycles</span><strong id="swSaveCycles">0</strong></div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn primary" id="swSaveConfirmBtn" type="button">Save Record</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modify record (shared for both lists) -->
+  <div id="modifyModal" class="modal-overlay">
+    <div class="modal-box glass">
+      <h3><i class="fas fa-pen"></i> Modify Record</h3>
+      <div class="modal-field">
+        <label id="modifyNameLabel">Name</label>
+        <input type="text" id="modifyNameInput" />
+      </div>
+      <div class="modal-field">
+        <label id="modifyNumberLabel">Number</label>
+        <input type="text" id="modifyNumberInput" />
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn primary" id="modifySaveBtn" type="button">Save Changes</button>
+        <button class="modal-btn secondary" id="modifyCancelBtn" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete confirmation -->
+  <div id="deleteModal" class="modal-overlay">
+    <div class="modal-box glass small">
+      <h3><i class="fas fa-exclamation-triangle"></i> Delete Record</h3>
+      <p class="modal-text">This record will be permanently removed. Continue?</p>
+      <div class="modal-actions">
+        <button class="modal-btn danger" id="deleteConfirmBtn" type="button">Delete</button>
+        <button class="modal-btn secondary" id="deleteCancelBtn" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="countingset.js"></script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S.N.E.T.C.H · AI Email Center</title>
+  <!-- Font & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="smtp.css" />
+</head>
+<body>
+  <!-- SPACE BACKGROUND (CSS only) -->
+  <div id="space-bg"></div>
+
+  <!-- TOP-LEFT: HOME BUTTON (floating, only nav element) -->
+  <a href="/" id="homeBtn" aria-label="Home Dashboard">
+    <i class="fas fa-home"></i>
+    <span class="home-label">Home</span>
+  </a>
+
+  <!-- MAIN WRAPPER -->
+  <main id="app">
+
+    <!-- HEADER (always visible) -->
+    <header id="mainHeader">
+      <div class="header-icon">
+        <i class="fas fa-envelope"></i>
+      </div>
+      <h1>S.N.E.T.C.H <span>AI Email Center</span></h1>
+      <p class="subtitle">Compose, attach, and send secure emails instantly.</p>
+    </header>
+
+    <!-- DYNAMIC CONTENT -->
+    <section id="contentArea">
+
+      <!-- 1. SEND MAIL BUTTON (initial visible) -->
+      <div id="sendMailTrigger" class="glow-btn-wrapper">
+        <button id="sendMailBtn" class="primary-glow-btn">
+          <i class="fas fa-envelope"></i> Send Mail
+        </button>
+      </div>
+
+      <!-- 2. EMAIL FORM (hidden by default) -->
+      <div id="emailFormContainer" class="glass-form hidden">
+        <form id="emailForm" novalidate>
+
+          <!-- Sender Email -->
+          <div class="input-group floating-label">
+            <i class="fas fa-user-astronaut input-icon"></i>
+            <input type="email" id="senderEmail" placeholder=" " required autocomplete="email" />
+            <label for="senderEmail">Sender Email Address</label>
+            <span class="validation-msg"></span>
+          </div>
+
+          <!-- Receiver Email -->
+          <div class="input-group floating-label">
+            <i class="fas fa-inbox input-icon"></i>
+            <input type="email" id="receiverEmail" placeholder=" " required autocomplete="off" />
+            <label for="receiverEmail">Receiver Email Address</label>
+            <span class="validation-msg"></span>
+          </div>
+
+          <!-- Subject -->
+          <div class="input-group floating-label">
+            <i class="fas fa-tag input-icon"></i>
+            <input type="text" id="subject" placeholder=" " required maxlength="200" />
+            <label for="subject">Subject</label>
+            <span class="validation-msg"></span>
+          </div>
+
+          <!-- Message (textarea) -->
+          <div class="input-group floating-label textarea-group">
+            <i class="fas fa-pen-fancy input-icon"></i>
+            <textarea id="message" placeholder=" " rows="5" required></textarea>
+            <label for="message">Message</label>
+            <span class="validation-msg"></span>
+          </div>
+
+          <!-- ATTACHMENTS -->
+          <div class="attach-section">
+            <div class="attach-header">
+              <span class="attach-title"><i class="fas fa-paperclip"></i> Attachments</span>
+              <span class="attach-hint" id="attachHint">Up to 15 files, 25MB total</span>
+            </div>
+
+            <input type="file" id="fileInput" multiple hidden />
+            <button type="button" id="browseFilesBtn" class="browse-btn">
+              <i class="fas fa-folder-open"></i> Browse Files
+            </button>
+
+            <ul id="attachmentList" class="attachment-list"></ul>
+            <div id="attachError" class="attach-error hidden"></div>
+          </div>
+
+          <!-- SEND BUTTON (form submit) -->
+          <button type="submit" id="submitMailBtn" class="primary-glow-btn send-btn">
+            <i class="fas fa-paper-plane"></i> Send Email
+          </button>
+
+          <!-- status message (success/error) -->
+          <div id="statusMessage" class="status-card hidden"></div>
+        </form>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- SUCCESS OVERLAY (checkmark burst) -->
+  <div id="successOverlay" class="success-overlay hidden">
+    <div class="success-check">
+      <i class="fas fa-check"></i>
+    </div>
+    <p>Email Sent Successfully</p>
+  </div>
+
+  <!-- SHOOTING STARS (pure CSS extras) -->
+  <div class="shooting-star" style="--delay:0s; --top:10%; --left:70%;"></div>
+  <div class="shooting-star" style="--delay:3s; --top:20%; --left:40%;"></div>
+  <div class="shooting-star" style="--delay:6s; --top:5%; --left:85%;"></div>
+
+  <script src="smtp.js"></script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="S.N.E.T.C.H AI Music Downloader — Search and download your favorite songs in high quality MP3." />
+  <title>S.N.E.T.C.H · AI Music Downloader</title>
+  <!-- Font & icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="songdownload.css" />
+</head>
+<body>
+  <!-- ====== SPACE BACKGROUND ====== -->
+  <div id="space-bg">
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+    <div class="nebula nebula-purple"></div>
+    <div class="nebula nebula-blue"></div>
+    <div class="nebula nebula-cyan"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star second"></div>
+    <div class="shooting-star third"></div>
+    <div class="particle-container"></div>
+  </div>
+
+  <!-- ====== MAIN APP ====== -->
+  <div class="app-wrapper">
+
+    <!-- HOME BUTTON (floating, top-left) -->
+    <a href="/" class="home-btn" id="homeBtn" aria-label="Home">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="icon-glow">
+        <i class="fas fa-headphones-alt"></i>
+      </div>
+      <h1>S.N.E.T.C.H <span>AI Music Downloader</span></h1>
+      <p class="subtitle">Search any song and download in premium quality.</p>
+    </header>
+
+    <!-- MAIN CARD (glassmorphism) -->
+    <main class="glass-card" id="mainCard">
+
+      <!-- ═══ STEP 1: SEARCH ═══ -->
+      <section class="input-section" id="searchSection">
+        <h2><i class="fas fa-search section-icon"></i> Enter Song Name</h2>
+        <p class="step-desc">Type the name of any song you want to download.</p>
+
+        <div class="search-wrapper" id="searchWrapper">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" id="songInput" placeholder="e.g. Believer, Shape of You, Faded..." autocomplete="off" />
+          <i class="fas fa-music music-icon"></i>
+        </div>
+
+        <!-- DOWNLOAD BUTTON -->
+        <button class="download-btn" id="downloadBtn">
+          <i class="fas fa-download"></i> Download
+        </button>
+      </section>
+
+      <!-- ═══ STEP 2: DOWNLOAD PROGRESS ═══ -->
+      <section class="progress-section hidden" id="progressSection">
+
+        <!-- Song info card -->
+        <div class="song-info-card" id="songInfoCard">
+          <div class="song-cover-wrapper">
+            <img src="" alt="Song Cover" id="songCover" class="song-cover" />
+            <div class="cover-glow"></div>
+          </div>
+          <div class="song-details">
+            <h3 class="song-title" id="songTitle">—</h3>
+            <p class="song-artist" id="songArtist">—</p>
+            <p class="song-album" id="songAlbum">—</p>
+            <p class="song-duration" id="songDuration">—</p>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="progress-container">
+          <div class="progress-header">
+            <span class="progress-label" id="progressLabel">Downloading...</span>
+            <span class="progress-pct" id="progressPct">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+            <div class="progress-glow" id="progressGlow"></div>
+          </div>
+        </div>
+
+        <!-- Stats grid -->
+        <div class="stats-grid">
+          <div class="stat-item">
+            <i class="fas fa-tachometer-alt"></i>
+            <div>
+              <span class="stat-label">Speed</span>
+              <span class="stat-value" id="statSpeed">—</span>
+            </div>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-download"></i>
+            <div>
+              <span class="stat-label">Downloaded</span>
+              <span class="stat-value" id="statDownloaded">—</span>
+            </div>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-database"></i>
+            <div>
+              <span class="stat-label">Total Size</span>
+              <span class="stat-value" id="statTotal">—</span>
+            </div>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-clock"></i>
+            <div>
+              <span class="stat-label">ETA</span>
+              <span class="stat-value" id="statEta">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status text -->
+        <div class="status-indicator" id="statusIndicator">
+          <div class="status-dot"></div>
+          <span id="statusText">Preparing download...</span>
+        </div>
+      </section>
+
+      <!-- ═══ STEP 3: DOWNLOAD COMPLETE ═══ -->
+      <section class="complete-section hidden" id="completeSection">
+        <div class="success-icon-wrap">
+          <div class="success-ring"></div>
+          <i class="fas fa-check-circle success-icon"></i>
+        </div>
+        <h2 class="complete-title">Download Completed Successfully</h2>
+
+        <div class="complete-info-card">
+          <img src="" alt="Song Cover" id="completeCover" class="complete-cover" />
+          <div class="complete-details">
+            <h3 id="completeTitle">—</h3>
+            <p id="completeArtist">—</p>
+            <p class="complete-location" id="completeLocation">
+              <i class="fas fa-folder-open"></i> <span>—</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ ERROR DISPLAY ═══ -->
+      <section class="error-section hidden" id="errorSection">
+        <div class="error-icon-wrap">
+          <i class="fas fa-exclamation-triangle error-icon"></i>
+        </div>
+        <h2 class="error-title" id="errorTitle">Something went wrong</h2>
+        <p class="error-message" id="errorMessage">—</p>
+        <button class="retry-btn" id="retryBtn">
+          <i class="fas fa-redo"></i> Try Again
+        </button>
+      </section>
+
+      <!-- FOOTER CARD -->
+      <div class="footer-info">
+        <i class="fas fa-shield-alt shield-icon"></i>
+        <span>Only for personal use. Please respect artists and copyright.</span>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ====== JAVASCRIPT ====== -->
+  <script src="songdownload.js"></script>
+</body>
+</html>

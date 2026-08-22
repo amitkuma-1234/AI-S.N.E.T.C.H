@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.N.E.T.C.H · AI Astrology Assistant</title>
+    <!-- Font & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="horoscopeapi.css">
+</head>
+<body>
+    <!-- ===== ANIMATED SPACE BACKGROUND ===== -->
+    <div id="space-bg">
+        <div class="stars-layer" id="stars"></div>
+        <div class="nebula purple"></div>
+        <div class="nebula blue"></div>
+        <div class="shooting-stars"></div>
+        <div class="particles" id="particles"></div>
+    </div>
+
+    <div class="app-container">
+
+        <!-- TOP LEFT: HOME BUTTON (only nav element, as required) -->
+        <div class="home-btn-wrapper" style="position: relative; z-index: 100;">
+            <a href="/" class="home-btn" id="homeBtn" title="Home">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+        </div>
+
+        <div class="ha-shell">
+
+            <!-- ============================================================
+                 SCREEN 1 — PREMIUM WELCOME
+            ============================================================ -->
+            <section class="ha-screen ha-welcome" id="screenWelcome">
+                <div class="ha-welcome-card glass-panel">
+                    <div class="ha-welcome-icon"><i class="fas fa-hat-wizard"></i></div>
+                    <span class="ha-eyebrow">S.N.E.T.C.H · Premium</span>
+                    <h1>AI Astrology Assistant</h1>
+                    <p class="ha-welcome-sub">
+                        A personal, AI-guided Vedic consultation — share your birth details,
+                        ask what's on your mind, and receive a deeply personalized reading
+                        crafted around your unique cosmic blueprint.
+                    </p>
+                    <button class="ha-btn ha-btn-primary ha-glow" id="startReadingBtn">
+                        <i class="fas fa-star"></i> Start Astrology Reading
+                    </button>
+                    <div class="ha-welcome-badges">
+                        <span><i class="fas fa-shield-halved"></i> Private &amp; Secure</span>
+                        <span><i class="fas fa-wand-magic-sparkles"></i> Personalized</span>
+                        <span><i class="fas fa-bolt"></i> Instant Insight</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================
+                 SCREEN 2 — STEP WIZARD (Steps 1-5)
+            ============================================================ -->
+            <section class="ha-screen hidden" id="screenWizard">
+                <div class="ha-wizard-card glass-panel">
+
+                    <div class="ha-progress">
+                        <div class="ha-progress-track"><div class="ha-progress-fill" id="progressFill"></div></div>
+                        <div class="ha-progress-dots" id="progressDots">
+                            <span class="ha-dot active" data-dot="1">1</span>
+                            <span class="ha-dot" data-dot="2">2</span>
+                            <span class="ha-dot" data-dot="3">3</span>
+                            <span class="ha-dot" data-dot="4">4</span>
+                            <span class="ha-dot" data-dot="5">5</span>
+                        </div>
+                    </div>
+
+                    <form id="wizardForm" autocomplete="off">
+                        <!-- STEP 1 : Full Name -->
+                        <div class="ha-step active" data-step="1">
+                            <div class="ha-step-icon"><i class="fas fa-user"></i></div>
+                            <h2>What's your full name?</h2>
+                            <p class="ha-step-hint">So your reading feels personal, right from the start.</p>
+                            <input type="text" id="inputName" class="ha-input" placeholder="e.g. Aarav Sharma" maxlength="80">
+                            <div class="ha-step-actions ha-step-actions-single">
+                                <button type="button" class="ha-btn ha-btn-primary ha-next" data-next="1">Next <i class="fas fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- STEP 2 : Date of Birth -->
+                        <div class="ha-step" data-step="2">
+                            <div class="ha-step-icon"><i class="fas fa-cake-candles"></i></div>
+                            <h2>When were you born?</h2>
+                            <p class="ha-step-hint">Your Date of Birth anchors your entire birth chart.</p>
+                            <input type="date" id="inputDob" class="ha-input">
+                            <div class="ha-step-actions">
+                                <button type="button" class="ha-btn ha-btn-ghost ha-back" data-back="2"><i class="fas fa-arrow-left"></i> Back</button>
+                                <button type="button" class="ha-btn ha-btn-primary ha-next" data-next="2">Next <i class="fas fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- STEP 3 : Zodiac Sign -->
+                        <div class="ha-step" data-step="3">
+                            <div class="ha-step-icon"><i class="fas fa-meteor"></i></div>
+                            <h2>What's your zodiac sign?</h2>
+                            <p class="ha-step-hint">Pick the sun sign you identify with.</p>
+                            <select id="inputZodiac" class="ha-input ha-select">
+                                <option value="" disabled selected>Select your zodiac sign</option>
+                                <option>Aries</option><option>Taurus</option><option>Gemini</option>
+                                <option>Cancer</option><option>Leo</option><option>Virgo</option>
+                                <option>Libra</option><option>Scorpio</option><option>Sagittarius</option>
+                                <option>Capricorn</option><option>Aquarius</option><option>Pisces</option>
+                            </select>
+                            <div class="ha-step-actions">
+                                <button type="button" class="ha-btn ha-btn-ghost ha-back" data-back="3"><i class="fas fa-arrow-left"></i> Back</button>
+                                <button type="button" class="ha-btn ha-btn-primary ha-next" data-next="3">Next <i class="fas fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- STEP 4 : Birth Place -->
+                        <div class="ha-step" data-step="4">
+                            <div class="ha-step-icon"><i class="fas fa-location-dot"></i></div>
+                            <h2>Where were you born?</h2>
+                            <p class="ha-step-hint">City &amp; country is perfect — this shapes planetary positions.</p>
+                            <input type="text" id="inputBirthPlace" class="ha-input" placeholder="e.g. Jaipur, India" maxlength="100">
+                            <div class="ha-step-actions">
+                                <button type="button" class="ha-btn ha-btn-ghost ha-back" data-back="4"><i class="fas fa-arrow-left"></i> Back</button>
+                                <button type="button" class="ha-btn ha-btn-primary ha-next" data-next="4">Next <i class="fas fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- STEP 5 : Birth Time -->
+                        <div class="ha-step" data-step="5">
+                            <div class="ha-step-icon"><i class="fas fa-clock"></i></div>
+                            <h2>What time were you born?</h2>
+                            <p class="ha-step-hint">Exact time gives the most accurate reading — an estimate is fine too.</p>
+                            <input type="time" id="inputBirthTime" class="ha-input">
+                            <label class="ha-checkbox">
+                                <input type="checkbox" id="skipBirthTime">
+                                <span>I don't know my exact birth time</span>
+                            </label>
+                            <div class="ha-step-actions">
+                                <button type="button" class="ha-btn ha-btn-ghost ha-back" data-back="5"><i class="fas fa-arrow-left"></i> Back</button>
+                                <button type="button" class="ha-btn ha-btn-primary ha-glow" id="reviewBtn">Review Details <i class="fas fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+                    </form>
+                    <p class="ha-error" id="wizardError"></p>
+                </div>
+            </section>
+
+            <!-- ============================================================
+                 SCREEN 3 — VERIFY DETAILS
+            ============================================================ -->
+            <section class="ha-screen hidden" id="screenVerify">
+                <div class="ha-verify-card glass-panel">
+                    <div class="ha-step-icon"><i class="fas fa-circle-check"></i></div>
+                    <h2>Verify Your Details</h2>
+                    <p class="ha-step-hint">Please confirm everything is correct before we begin.</p>
+
+                    <div class="ha-verify-grid">
+                        <div class="ha-verify-item"><i class="fas fa-user"></i><div><span>Full Name</span><strong id="verifyName">—</strong></div></div>
+                        <div class="ha-verify-item"><i class="fas fa-cake-candles"></i><div><span>Date of Birth</span><strong id="verifyDob">—</strong></div></div>
+                        <div class="ha-verify-item"><i class="fas fa-meteor"></i><div><span>Zodiac Sign</span><strong id="verifyZodiac">—</strong></div></div>
+                        <div class="ha-verify-item"><i class="fas fa-location-dot"></i><div><span>Birth Place</span><strong id="verifyBirthPlace">—</strong></div></div>
+                        <div class="ha-verify-item"><i class="fas fa-clock"></i><div><span>Birth Time</span><strong id="verifyBirthTime">—</strong></div></div>
+                    </div>
+
+                    <div class="ha-step-actions">
+                        <button type="button" class="ha-btn ha-btn-ghost" id="editBtn"><i class="fas fa-pen"></i> Edit</button>
+                        <button type="button" class="ha-btn ha-btn-primary ha-glow" id="confirmBtn">Confirm <i class="fas fa-check"></i></button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================
+                 SCREEN 4 — CHAT CONSULTATION
+            ============================================================ -->
+            <section class="ha-screen hidden" id="screenChat">
+                <header class="ha-chat-header glass-panel">
+                    <div class="ha-chat-header-icon"><i class="fas fa-star-of-life"></i></div>
+                    <div class="ha-chat-header-text">
+                        <h1>Astrology Consultation</h1>
+                        <p id="chatSubtitle">Your personalized session</p>
+                    </div>
+                    <button type="button" class="ha-btn ha-btn-ghost ha-btn-sm" id="newReadingBtn">
+                        <i class="fas fa-rotate"></i> New Reading
+                    </button>
+                </header>
+
+                <div class="ha-chat-scroll" id="chatScroll">
+                    <div class="ha-chat-messages" id="chatMessages"></div>
+                </div>
+
+                <div class="ha-chat-bar glass-panel" id="chatBar">
+                    <div class="ha-input-wrapper">
+                        <button class="ha-mic-btn" id="micBtn" type="button" title="Speak your question">
+                            <i class="fas fa-microphone"></i>
+                            <span class="ha-mic-pulse"></span>
+                        </button>
+                        <textarea id="chatInput" rows="1" placeholder="Type your answer, or tap the mic to speak..."></textarea>
+                        <button class="ha-send-btn" id="sendBtn" type="button" title="Send"><i class="fas fa-arrow-up"></i></button>
+                        <button class="ha-stop-btn hidden" id="stopBtn" type="button" title="Stop Response">
+                            <i class="fas fa-stop"></i>
+                        </button>
+                    </div>
+                    <p class="ha-voice-status" id="voiceStatus"></p>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="horoscopeapi.js"></script>
+</body>
+</html>

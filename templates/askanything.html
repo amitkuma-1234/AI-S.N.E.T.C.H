@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>S.N.E.T.C.H · ASK ANYTHING</title>
+  <!-- Font & Icons (same as the rest of S.N.E.T.C.H) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <!-- CSS (separate) -->
+  <link rel="stylesheet" href="askanything.css">
+</head>
+<body>
+
+  <!-- ===== COSMIC BACKGROUND ===== -->
+  <div id="space-bg">
+    <div class="cosmic-vignette"></div>
+    <div class="nebula-cloud nebula-purple-1"></div>
+    <div class="nebula-cloud nebula-blue-1"></div>
+    <div class="nebula-cloud nebula-purple-2"></div>
+    <div class="nebula-cloud nebula-blue-2"></div>
+
+    <div class="star-field" id="starField"></div>
+    <div class="shooting-star-field" id="shootingStarField"></div>
+    <div class="particle-field" id="particleField"></div>
+
+    <div class="orbit-system">
+      <div class="cosmic-core">
+        <div class="cosmic-core-glow"></div>
+        <div class="cosmic-core-inner"></div>
+      </div>
+
+      <div class="orbit-track track-1"></div>
+      <div class="orbit-spin spin-1">
+        <div class="orbit-planet planet-a"><span class="planet-tail tail-a"></span></div>
+      </div>
+
+      <div class="orbit-track track-2"></div>
+      <div class="orbit-spin spin-2">
+        <div class="orbit-planet planet-b"><span class="planet-tail tail-b"></span></div>
+      </div>
+
+      <div class="orbit-track track-3"></div>
+      <div class="orbit-spin spin-3">
+        <div class="orbit-planet planet-c"><span class="planet-tail tail-c"></span></div>
+      </div>
+
+      <div class="orbit-track track-4"></div>
+      <div class="orbit-spin spin-4">
+        <div class="orbit-planet planet-d"><span class="planet-tail tail-d"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="aa-app">
+
+    <!-- ===== LEFT SIDEBAR ===== -->
+    <aside class="aa-sidebar" id="aaSidebar">
+      <div class="aa-sidebar-top">
+        <button class="aa-home-btn" id="homeBtn" title="Home"><i class="fas fa-home"></i> Home</button>
+        <button class="aa-sidebar-close" id="sidebarCloseBtn" title="Close"><i class="fas fa-xmark"></i></button>
+      </div>
+
+      <button class="aa-new-chat-btn" id="newChatBtn">
+        <i class="fas fa-plus"></i> New Chat
+      </button>
+
+      <div class="aa-search-wrap">
+        <i class="fas fa-magnifying-glass"></i>
+        <input type="text" id="searchChatsInput" placeholder="Search chats..." autocomplete="off">
+      </div>
+
+      <button class="aa-archive-entry-btn" id="archiveChatsBtn">
+        <i class="fas fa-box-archive"></i> Archive Chats
+      </button>
+
+      <div class="aa-chat-lists" id="aaChatLists">
+        <div class="aa-section" id="pinnedSection">
+          <div class="aa-section-title">📌 Pinned Chats</div>
+          <ul class="aa-chat-list" id="pinnedList"></ul>
+        </div>
+
+        <div class="aa-section" id="recentSection">
+          <div class="aa-section-title">Recent Chats</div>
+          <ul class="aa-chat-list" id="recentList"></ul>
+        </div>
+
+        <div class="aa-empty-state" id="chatsEmptyState">
+          <i class="fas fa-comments"></i>
+          <p>No chats yet.<br>Start a New Chat to begin.</p>
+        </div>
+      </div>
+    </aside>
+
+    <div class="aa-sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- ===== MAIN CHAT PANEL ===== -->
+    <main class="aa-main">
+      <div class="aa-topbar">
+        <button class="aa-mobile-menu-btn" id="mobileMenuBtn" title="Chats"><i class="fas fa-bars"></i></button>
+        <div class="aa-chat-title" id="chatTitleDisplay">S.N.E.T.C.H Assistant</div>
+        <div class="aa-topbar-spacer"></div>
+      </div>
+
+      <div class="aa-chat-scroll" id="chatScroll">
+        <div class="aa-welcome" id="aaWelcome">
+          <h1 class="aa-welcome-title">S.N.E.T.C.H</h1>
+          <p class="aa-welcome-sub">Ask me anything. I'm ready when you are.</p>
+        </div>
+
+        <div class="aa-messages" id="messagesContainer"></div>
+      </div>
+
+      <div class="aa-input-bar">
+        <div class="aa-input-wrap">
+          <textarea id="chatInput" placeholder="Message S.N.E.T.C.H..." rows="1" maxlength="8000"></textarea>
+          <button class="aa-mic-btn" id="micBtn" title="Voice input"><i class="fas fa-microphone"></i></button>
+          <button class="aa-send-btn" id="sendBtn" title="Send"><i class="fas fa-paper-plane"></i></button>
+        </div>
+        <div class="aa-input-hint">S.N.E.T.C.H can make mistakes. Enter ↵ to send · Shift+Enter for a new line</div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ===== RENAME MODAL ===== -->
+  <div class="modal-overlay" id="renameModal">
+    <div class="modal glass">
+      <div class="modal-header"><i class="fas fa-pen"></i> Rename Chat</div>
+      <div class="modal-body">
+        <input type="text" id="renameInput" class="aa-text-input" placeholder="Chat title" maxlength="80">
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" id="renameCancelBtn">Cancel</button>
+        <button class="modal-btn save" id="renameSaveBtn"><i class="fas fa-check"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DELETE CONFIRM MODAL ===== -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal glass">
+      <div class="modal-header"><i class="fas fa-trash"></i> Delete Chat</div>
+      <div class="modal-body">
+        <p>This chat will be permanently deleted. This can't be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" id="deleteCancelBtn">Cancel</button>
+        <button class="modal-btn danger" id="deleteConfirmBtn"><i class="fas fa-trash"></i> Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ARCHIVE PANEL ===== -->
+  <div class="modal-overlay" id="archiveModal">
+    <div class="modal glass aa-archive-modal">
+      <div class="modal-header"><i class="fas fa-box-archive"></i> Archived Chats</div>
+      <div class="modal-body">
+        <ul class="aa-chat-list" id="archivedList"></ul>
+        <div class="aa-empty-state" id="archiveEmptyState">
+          <i class="fas fa-box-open"></i>
+          <p>No archived chats.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" id="archiveCloseBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PER-CHAT THREE-DOT MENU (positioned dynamically by JS) ===== -->
+  <div class="aa-dropdown" id="chatDropdown">
+    <button type="button" data-action="download"><i class="fas fa-download"></i> Download Chat</button>
+    <button type="button" data-action="rename"><i class="fas fa-pen"></i> Rename Chat</button>
+    <button type="button" data-action="delete" class="aa-dropdown-danger"><i class="fas fa-trash"></i> Delete Chat</button>
+    <button type="button" data-action="archive"><i class="fas fa-box-archive"></i> <span class="aa-archive-label">Archive Chat</span></button>
+    <button type="button" data-action="pin"><i class="fas fa-thumbtack"></i> <span class="aa-pin-label">Pin Chat</span></button>
+  </div>
+
+  <!-- JavaScript (separate) -->
+  <script src="askanything.js"></script>
+</body>
+</html>

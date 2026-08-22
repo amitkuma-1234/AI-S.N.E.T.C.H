@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spam Mail Checker · S.N.E.T.C.H</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="spaim_mail.css">
+</head>
+<body>
+  <!-- ====== HOME BUTTON ====== -->
+  <a href="/" class="btn-home-floating glass">
+    <i class="fas fa-arrow-left"></i> Home
+  </a>
+
+  <!-- ====== SPACE BACKGROUND ====== -->
+  <div id="space-bg">
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+    <div class="nebula purple"></div>
+    <div class="nebula blue"></div>
+  </div>
+
+  <!-- ====== APP CONTAINER ====== -->
+  <div class="app-container">
+    
+    <!-- 1. INITIAL VIEW -->
+    <div id="viewInitial" class="view-state">
+      <button class="btn btn-primary btn-huge" id="btnStartCheck">
+        <i class="fas fa-shield-virus"></i> New Spam Mail Checker
+      </button>
+    </div>
+
+    <!-- 2. INPUT VIEW -->
+    <div id="viewInput" class="view-state glass check-card" hidden>
+      <div class="card-header">
+        <h2><i class="fas fa-envelope-open-text"></i> Analyze Message</h2>
+        <p>Paste your email or message below to check for spam.</p>
+      </div>
+      <textarea
+        id="emailInput"
+        placeholder="Paste the email or message text here...&#10;e.g. Congratulations! You've won a free prize, click here to claim now!"
+        rows="10"
+      ></textarea>
+      <div class="check-card-footer">
+        <span class="char-count" id="charCount">0 characters</span>
+        <div class="action-buttons">
+          <button class="btn btn-ghost" id="btnClear" type="button">
+            <i class="fas fa-eraser"></i> Clear
+          </button>
+          <button class="btn btn-primary" id="btnCheckSpam" type="button">
+            <i class="fas fa-magnifying-glass-chart"></i> Check Spam
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. LOADING VIEW -->
+    <div id="viewLoading" class="view-state glass loading-card" hidden>
+      <div class="loader-ring"></div>
+      <h3>Analyzing Message...</h3>
+      <p>Running local AI models</p>
+    </div>
+
+    <!-- 4. RESULT VIEW -->
+    <div id="viewResult" class="view-state glass result-card" hidden>
+      <div class="result-badge" id="resultBadge">
+        <i class="fas fa-check" id="resultBadgeIcon"></i>
+        <span id="resultBadgeText">NOT SPAM</span>
+      </div>
+
+      <div class="confidence-block">
+        <div class="confidence-label">
+          <span>Confidence</span>
+          <span id="confidenceValue">0%</span>
+        </div>
+        <div class="confidence-track">
+          <div class="confidence-fill" id="confidenceFill"></div>
+        </div>
+      </div>
+
+      <div class="result-meta">
+        <div class="meta-item">
+          <span class="meta-label">Spam probability</span>
+          <span class="meta-value" id="spamProbValue">0%</span>
+        </div>
+      </div>
+      
+      <div class="result-error" id="resultError" hidden>
+         <i class="fas fa-triangle-exclamation"></i>
+         <p id="resultErrorText">Something went wrong.</p>
+      </div>
+
+      <button class="btn btn-ghost btn-full" id="btnStartOver" style="margin-top: 24px;">
+        <i class="fas fa-rotate-left"></i> Check Another Email
+      </button>
+    </div>
+
+  </div>
+
+  <script src="spaim_mail.js"></script>
+</body>
+</html>

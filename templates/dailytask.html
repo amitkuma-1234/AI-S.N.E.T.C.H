@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S.N.E.T.C.H · Daily Task Manager</title>
+  <!-- Font Awesome 6 (free) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="dailytask.css?v=3" />
+</head>
+<body>
+
+  <!-- ===== SPACE BACKGROUND ===== -->
+  <div id="space-bg">
+    <div id="stars"></div>
+    <div id="twinkling"></div>
+    <div id="nebula"></div>
+    <div id="galaxy-glow"></div>
+    <div id="particles"></div>
+    <div class="shooting-star" style="top:12%; left:85%; animation-delay:0.2s;"></div>
+    <div class="shooting-star" style="top:35%; left:15%; animation-delay:3.5s;"></div>
+    <div class="shooting-star" style="top:70%; left:60%; animation-delay:7s;"></div>
+    <div class="shooting-star" style="top:45%; left:40%; animation-delay:10s;"></div>
+  </div>
+
+  <!-- ===== MAIN APP ===== -->
+  <div class="app-container">
+
+    <!-- TOP LEFT: ONLY BUTTON ON SCREEN -->
+    <button class="home-btn glass" id="homeBtn">
+      <i class="fas fa-home"></i> Home
+    </button>
+
+    <!-- CENTER HEADER -->
+    <div class="header-center">
+      <div class="header-icon rotating-icon">
+        <i class="fas fa-tasks"></i>
+      </div>
+      <h1 class="snetch-title">S.N.E.T.C.H</h1>
+      <h2 class="page-sub">DAILY TASK MANAGER</h2>
+    </div>
+
+    <!-- ===== 4 MAIN OPTION CARDS ===== -->
+    <div class="cards-grid">
+
+      <div class="card glass">
+        <div class="card-icon"><i class="fas fa-plus-circle"></i></div>
+        <h3>Set Task</h3>
+        <p class="card-desc">Create a task with start time, end time and a custom alert tone.</p>
+        <button class="card-btn" id="openSetTaskBtn">Set Task</button>
+      </div>
+
+      <div class="card glass">
+        <div class="card-icon"><i class="fas fa-edit"></i></div>
+        <h3>Update Task</h3>
+        <p class="card-desc">Edit an existing task's time, name or tone.</p>
+        <button class="card-btn" id="openUpdateTaskBtn">Update Task</button>
+      </div>
+
+      <div class="card glass">
+        <div class="card-icon"><i class="fas fa-trash-alt"></i></div>
+        <h3>Delete Task</h3>
+        <p class="card-desc">Remove one or several tasks at once.</p>
+        <button class="card-btn" id="openDeleteTaskBtn">Delete Task</button>
+      </div>
+
+      <div class="card glass">
+        <div class="card-icon"><i class="fas fa-list-ul"></i></div>
+        <h3>List Tasks</h3>
+        <p class="card-desc">View every saved task with its time and tone.</p>
+        <button class="card-btn" id="openListTaskBtn">List Tasks</button>
+      </div>
+    </div>
+
+    <!-- ===== BOTTOM ROW: UPCOMING + OVERVIEW ===== -->
+    <div class="bottom-row">
+
+      <!-- UPCOMING TASKS -->
+      <div class="upcoming-section glass">
+        <h3><i class="fas fa-clock"></i> Upcoming Tasks</h3>
+        <div id="upcomingList" class="upcoming-list">
+          <!-- dynamic items injected by JS -->
+        </div>
+        <div class="view-all-btn" id="viewAllUpcomingBtn">View All <i class="fas fa-arrow-right"></i></div>
+      </div>
+
+      <!-- TASK OVERVIEW -->
+      <div class="overview-section glass">
+        <h3><i class="fas fa-chart-pie"></i> Task Overview</h3>
+        <div class="overview-stats">
+          <div class="stat-item"><span class="stat-label">Total Tasks</span> <span class="stat-value" id="totalTasks">0</span></div>
+          <div class="stat-item"><span class="stat-label">Scheduled Today</span> <span class="stat-value" id="todayTasks">0</span></div>
+          <div class="stat-item"><span class="stat-label">Custom Tone</span> <span class="stat-value" id="tonedTasks">0</span></div>
+          <div class="stat-item"><span class="stat-label">Default Tone</span> <span class="stat-value" id="defaultTonedTasks">0</span></div>
+        </div>
+        <div class="progress-wrapper">
+          <span class="progress-label">Tasks With Custom Tone</span>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressFill" style="width: 0%;"></div>
+          </div>
+          <span class="progress-percent" id="progressPercent">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- TASK WIZARD (shared by Set Task + Update Task)         -->
+    <!-- ===================================================== -->
+    <div id="wizardOverlay" class="popup-overlay">
+      <div class="popup-box wide glass">
+
+        <!-- STEP 0 (Update only): pick which task -->
+        <div class="wizard-step" id="stepSelect">
+          <h3><i class="fas fa-list"></i> Select a Task to Update</h3>
+          <div id="wizardTaskSelectList" class="task-select-list"></div>
+          <div class="popup-actions">
+            <button class="popup-btn secondary" id="stepSelectCancel">Cancel</button>
+            <button class="popup-btn primary" id="stepSelectNext" disabled>Next</button>
+          </div>
+        </div>
+
+        <!-- STEP 1: Start Time / End Time / Task Name -->
+        <div class="wizard-step" id="stepForm">
+          <h3 id="stepFormTitle"><i class="fas fa-plus-circle"></i> Set Task</h3>
+          <div class="popup-field"><label>Start Time</label><input type="time" id="fieldStart" /></div>
+          <div class="popup-field"><label>End Time</label><input type="time" id="fieldEnd" /></div>
+          <div class="popup-field"><label>Task Name</label><input type="text" id="fieldTaskName" placeholder="e.g. Morning workout" /></div>
+          <div class="popup-actions">
+            <button class="popup-btn secondary" id="stepFormCancel">Cancel</button>
+            <button class="popup-btn primary" id="stepFormNext">Next</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: Task Tone List / Download Task Tone / Skip -->
+        <div class="wizard-step" id="stepTone">
+          <h3><i class="fas fa-music"></i> Task Tone</h3>
+          <p class="tone-current-label">Currently selected: <span id="toneCurrentName">Default Tone</span></p>
+          <div class="tone-option-grid">
+            <button class="tone-option-btn" id="toneOptionList">
+              <i class="fas fa-list-ul"></i>
+              <span>Task Tone List</span>
+            </button>
+            <button class="tone-option-btn" id="toneOptionDownload">
+              <i class="fas fa-download"></i>
+              <span>Download Task Tone</span>
+            </button>
+            <button class="tone-option-btn" id="toneOptionSkip">
+              <i class="fas fa-forward"></i>
+              <span id="toneSkipLabel">Skip</span>
+            </button>
+          </div>
+          <div class="popup-actions">
+            <button class="popup-btn secondary" id="stepToneBack">Back</button>
+          </div>
+        </div>
+
+        <!-- STEP 2a: Task Tone List -->
+        <div class="wizard-step" id="stepToneList">
+          <h3><i class="fas fa-list-ul"></i> Task Tone List</h3>
+          <div id="toneListContainer" class="tone-list-container"></div>
+          <div class="popup-actions">
+            <button class="popup-btn secondary" id="toneListCancel">Cancel</button>
+            <button class="popup-btn primary" id="toneListSave" disabled>Save</button>
+          </div>
+        </div>
+
+        <!-- STEP 2b: Download Task Tone -->
+        <div class="wizard-step" id="stepToneDownload">
+          <h3><i class="fas fa-download"></i> Download Task Tone</h3>
+          <div class="popup-field"><label>Task Tone Name</label><input type="text" id="toneDownloadName" placeholder="e.g. calm chime" /></div>
+          <button class="popup-btn primary download-btn" id="toneDownloadStart">
+            <i class="fas fa-cloud-download-alt"></i> Download
+          </button>
+          <div id="toneDownloadStatus" class="tone-download-status"></div>
+          <div class="popup-actions">
+            <button class="popup-btn secondary" id="toneDownloadCancel">Cancel</button>
+            <button class="popup-btn primary" id="toneDownloadSave" disabled>Save</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- DELETE TASK POPUP -->
+    <div id="deleteTaskPopup" class="popup-overlay">
+      <div class="popup-box wide glass">
+        <h3><i class="fas fa-trash-alt"></i> Delete Task</h3>
+        <div id="deleteTaskList" class="delete-task-list"></div>
+        <div class="popup-actions">
+          <button class="popup-btn secondary" id="cancelDeleteBtn">Cancel</button>
+          <button class="popup-btn primary" id="deleteSelectedBtn">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIST TASKS POPUP -->
+    <div id="listTaskPopup" class="popup-overlay">
+      <div class="popup-box wide glass">
+        <h3><i class="fas fa-list-ul"></i> All Tasks</h3>
+        <div id="listTasksContainer" class="list-tasks-container"></div>
+        <div class="popup-actions">
+          <button class="popup-btn secondary" id="closeListBtn">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW ALL UPCOMING (simple) -->
+    <div id="viewAllUpcomingPopup" class="popup-overlay">
+      <div class="popup-box wide glass">
+        <h3><i class="fas fa-clock"></i> All Upcoming Tasks</h3>
+        <div id="allUpcomingList" class="list-tasks-container"></div>
+        <div class="popup-actions">
+          <button class="popup-btn secondary" id="closeUpcomingAllBtn">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUCCESS TOAST -->
+    <div id="successToast" class="success-toast">
+      <i class="fas fa-check-circle"></i>
+      <span id="successToastMsg">Task saved successfully!</span>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- TASK REMINDER POPUP (auto full-screen, alert + sand clock) -->
+    <!-- ===================================================== -->
+    <div id="reminderOverlay" class="reminder-overlay">
+      <div class="reminder-card glass" id="reminderCard">
+        <div class="reminder-glow-ring"></div>
+
+        <div class="reminder-header">
+          <span class="reminder-eyebrow"><i class="fas fa-bell"></i> Task Reminder</span>
+          <h2 class="reminder-task-name" id="reminderTaskName">Task Name</h2>
+        </div>
+
+        <div class="reminder-body">
+          <div class="hourglass-wrap">
+            <svg id="hourglassSvg" viewBox="0 0 120 200" class="hourglass-svg">
+              <defs>
+                <clipPath id="topChamberClip">
+                  <path d="M24,14 H96 V26 L63,99 H57 L24,26 Z" />
+                </clipPath>
+                <clipPath id="bottomChamberClip">
+                  <path d="M24,186 H96 V174 L63,101 H57 L24,174 Z" />
+                </clipPath>
+                <linearGradient id="sandGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#ffd98a" />
+                  <stop offset="100%" stop-color="#e0a53c" />
+                </linearGradient>
+              </defs>
+
+              <path class="hg-outline" d="M20,10 H100 V28 L65,100 L100,172 V190 H20 V172 L55,100 L20,28 Z" />
+
+              <rect id="topSand" class="hg-sand" clip-path="url(#topChamberClip)" x="24" y="14" width="72" height="0" />
+              <rect id="bottomSand" class="hg-sand" clip-path="url(#bottomChamberClip)" x="24" y="186" width="72" height="0" />
+
+              <rect id="sandStream" class="hg-stream" x="59.2" y="97" width="1.6" height="6" />
+              <circle class="hg-drop" cx="60" cy="103" r="1.4" />
+              <circle class="hg-drop hg-drop-delay" cx="60" cy="103" r="1.4" />
+
+              <path class="hg-frame" d="M14,8 H106 M14,192 H106" />
+              <path class="hg-frame-side" d="M14,8 V4 H106 V8 M14,192 V196 H106 V192" />
+            </svg>
+          </div>
+
+          <div class="reminder-info">
+            <div class="reminder-countdown-digital" id="reminderDigital">00:10</div>
+            <div class="reminder-times">
+              <div class="rt-item"><span class="rt-label">Start</span><span class="rt-value" id="reminderStart">--:--</span></div>
+              <div class="rt-item"><span class="rt-label">End</span><span class="rt-value" id="reminderEnd">--:--</span></div>
+            </div>
+            <div class="reminder-tone-row"><i class="fas fa-music"></i><span id="reminderToneName">Default Tone</span></div>
+          </div>
+        </div>
+
+        <div class="reminder-actions">
+          <button class="reminder-pause-btn" id="reminderPauseBtn">
+            <i class="fas fa-pause" id="reminderPauseIcon"></i> <span id="reminderPauseLabel">Pause</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <audio id="taskToneAudio" preload="none" loop></audio>
+
+  </div> <!-- end app-container -->
+
+  <!-- ===================================================== -->
+  <!-- TASK RUNNING DASHBOARD (full-screen control center)     -->
+  <!-- Auto-shown the moment a scheduled task starts,          -->
+  <!-- auto-hidden the moment it ends. Sits above everything.  -->
+  <!-- ===================================================== -->
+  <div id="taskDashboardOverlay" class="task-dash-overlay">
+
+    <div class="task-dash-bg">
+      <div class="task-dash-glow task-dash-glow-purple"></div>
+      <div class="task-dash-glow task-dash-glow-blue"></div>
+      <div class="task-dash-particles"></div>
+      <div class="task-dash-star task-dash-star-1"></div>
+      <div class="task-dash-star task-dash-star-2"></div>
+      <div class="task-dash-star task-dash-star-3"></div>
+      <div class="task-dash-star task-dash-star-4"></div>
+      <div class="task-dash-star task-dash-star-5"></div>
+      <div class="task-dash-star task-dash-star-6"></div>
+    </div>
+
+    <div class="task-dash-content">
+
+      <!-- TOP: task name + status -->
+      <div class="task-dash-top">
+        <div class="task-dash-status" id="dashStatus">
+          <span class="task-dash-status-dot" id="dashStatusDot"></span> <span id="dashStatusLabel">Running...</span>
+        </div>
+        <h1 class="task-dash-name" id="dashTaskName">Task Name</h1>
+      </div>
+
+      <!-- CENTER: hourglass + progress ring -->
+      <div class="task-dash-center">
+
+        <div class="task-dash-hourglass-wrap">
+          <svg viewBox="0 0 200 320" class="task-dash-hourglass-svg" id="dashHourglassSvg">
+            <defs>
+              <clipPath id="dashTopChamberClip">
+                <path d="M38,22 H162 V44 L106,156 H94 L38,44 Z" />
+              </clipPath>
+              <clipPath id="dashBottomChamberClip">
+                <path d="M38,294 H162 V272 L106,160 H94 L38,272 Z" />
+              </clipPath>
+              <linearGradient id="dashSandGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffe4a8" />
+                <stop offset="100%" stop-color="#e0a53c" />
+              </linearGradient>
+              <filter id="dashHgGlow" x="-60%" y="-60%" width="220%" height="220%">
+                <feGaussianBlur stdDeviation="3.5" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+            <path class="dash-hg-outline" d="M30,16 H170 V46 L108,158 L170,270 V300 H30 V270 L92,158 L30,46 Z" />
+
+            <rect id="dashTopSand" class="dash-hg-sand" clip-path="url(#dashTopChamberClip)" x="38" y="22" width="124" height="0" />
+            <rect id="dashBottomSand" class="dash-hg-sand" clip-path="url(#dashBottomChamberClip)" x="38" y="294" width="124" height="0" />
+
+            <rect id="dashSandStream" class="dash-hg-stream" x="98.5" y="155" width="3" height="12" />
+            <circle class="dash-hg-drop" cx="100" cy="166" r="2.4" />
+            <circle class="dash-hg-drop dash-hg-drop-delay" cx="100" cy="166" r="2.4" />
+
+            <path class="dash-hg-frame" d="M22,12 H178 M22,304 H178" />
+            <path class="dash-hg-frame-side" d="M22,12 V4 H178 V12 M22,304 V312 H178 V304" />
+          </svg>
+
+          <div class="task-dash-chamber-labels">
+            <div class="task-dash-chamber-item">
+              <span class="task-dash-chamber-tag">Upper</span>
+              <span class="task-dash-chamber-val" id="dashUpperPct">100%</span>
+            </div>
+            <div class="task-dash-chamber-item">
+              <span class="task-dash-chamber-tag">Lower</span>
+              <span class="task-dash-chamber-val" id="dashLowerPct">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="task-dash-ring-wrap">
+          <div class="task-dash-ring-spin"></div>
+          <svg viewBox="0 0 220 220" class="task-dash-ring-svg">
+            <defs>
+              <linearGradient id="dashRingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#b090ff" />
+                <stop offset="55%" stop-color="#8a5ae0" />
+                <stop offset="100%" stop-color="#4fa8ff" />
+              </linearGradient>
+              <filter id="dashRingGlow" x="-60%" y="-60%" width="220%" height="220%">
+                <feGaussianBlur stdDeviation="5" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            <circle class="task-dash-ring-track" cx="110" cy="110" r="94" />
+            <circle class="task-dash-ring-fill" id="dashRingFill" cx="110" cy="110" r="94" />
+          </svg>
+          <div class="task-dash-ring-center">
+            <span class="task-dash-ring-percent" id="dashRingPercent">0%</span>
+            <span class="task-dash-ring-label">Complete</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BOTTOM: live timer + currently playing -->
+      <div class="task-dash-bottom">
+        <div class="task-dash-info-box">
+          <span class="task-dash-info-label"><i class="fas fa-hourglass-half"></i> Remaining Time</span>
+          <span class="task-dash-timer" id="dashTimer">00:00:00</span>
+        </div>
+        <div class="task-dash-info-box">
+          <span class="task-dash-info-label"><i class="fas fa-satellite-dish"></i> Currently Playing</span>
+          <span class="task-dash-music" id="dashMusicName"><i class="fas fa-music"></i> No Background Music</span>
+        </div>
+      </div>
+
+      <!-- ACTIONS: Stop / Resume the running task -->
+      <div class="task-dash-actions">
+        <button class="task-dash-pause-btn" id="dashPauseBtn" type="button">
+          <i class="fas fa-pause" id="dashPauseIcon"></i> <span id="dashPauseLabel">Stop</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="dailytask.js"></script>
+</body>
+</html>

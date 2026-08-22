@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+  <title>S.N.E.T.C.H · Real‑Time AI Clock</title>
+  <!-- Fonts & Icons (clean, futuristic) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&family=Orbitron:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <!-- separate CSS -->
+  <link rel="stylesheet" href="time.css" />
+</head>
+<body>
+  <!-- ====== DEEP SPACE BACKGROUND (canvas for particles & stars) ====== -->
+  <canvas id="spaceCanvas"></canvas>
+
+  <!-- ====== MAIN WRAPPER ====== -->
+  <div class="dashboard">
+
+    <!-- TOP LEFT: HOME BUTTON -->
+    <div class="home-btn-wrap">
+      <button class="home-btn" id="homeBtn" aria-label="Home">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </button>
+    </div>
+
+    <!-- HEADER -->
+    <header class="main-header">
+      <h1 class="snetch-title">S.N.E.T.C.H</h1>
+      <div class="title-group">
+        <h2 class="time-title">Time</h2>
+        <span class="subtitle">Real-Time AI Clock Dashboard</span>
+        <div class="live-indicator">
+          <span class="live-dot"></span>
+          <span class="live-label" id="liveLabel">LIVE</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ====== MAIN CLOCK PANEL (glassmorphism card) ====== -->
+    <section class="clock-panel glass-card">
+
+      <!-- left side: analog clock -->
+      <div class="analog-wrapper">
+        <div class="analog-clock" id="analogClock">
+          <!-- clock face, hands, rings will be drawn via CSS + JS -->
+          <canvas id="analogCanvas" width="400" height="400"></canvas>
+          <!-- outer rings & reflections (CSS layers) -->
+          <div class="clock-ring outer-ring"></div>
+          <div class="clock-ring inner-ring"></div>
+          <div class="glass-reflection"></div>
+          <div class="pulse-center"></div>
+        </div>
+      </div>
+
+      <!-- right side: digital clock + info cards -->
+      <div class="info-side">
+        <!-- digital clock -->
+        <div class="digital-clock" id="digitalClock">00:00:00</div>
+        <div class="digital-ampm" id="ampmDisplay">AM</div>
+
+        <!-- five premium glassmorphism cards -->
+        <div class="cards-grid">
+          <div class="info-card glass-card" id="dateCard">
+            <span class="card-label">Date</span>
+            <span class="card-value" id="dateValue">02</span>
+          </div>
+          <div class="info-card glass-card" id="monthCard">
+            <span class="card-label">Month</span>
+            <span class="card-value" id="monthValue">July</span>
+          </div>
+          <div class="info-card glass-card" id="yearCard">
+            <span class="card-label">Year</span>
+            <span class="card-value" id="yearValue">2025</span>
+          </div>
+          <div class="info-card glass-card" id="dayCard">
+            <span class="card-label">Day</span>
+            <span class="card-value" id="dayValue">Wednesday</span>
+          </div>
+          <div class="info-card glass-card" id="weekCard">
+            <span class="card-label">Week</span>
+            <span class="card-value" id="weekValue">Week 27</span>
+          </div>
+        </div>
+
+        <!-- LIVE STATUS (small glowing card) -->
+        <div class="status-card glass-card">
+          <span class="status-label">Current Time</span>
+          <span class="status-running" id="syncStatus">Running...</span>
+          <span class="status-dot"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== TIME NEVER STOPS — CINEMATIC STAGE (Planet Earth section removed; this now fills that space) ====== -->
+    <section class="time-stage glass-card time-stage--expanded" id="timeNeverStops">
+      <div class="stage-header">
+        <h3 class="stage-title"><i class="fas fa-infinity"></i> Time Never Stops</h3>
+        <span class="stage-badge" id="cycleLabel">00s</span>
+      </div>
+
+      <div class="stage-canvas-wrap" id="stageWrap">
+        <!-- floating cosmic dust / light particles confined to this panel -->
+        <div class="stage-particles" id="stageParticles" aria-hidden="true"></div>
+
+        <svg id="stageSvg" viewBox="0 0 900 440" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="stageGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#7a4aff" stop-opacity="0.4"></stop>
+              <stop offset="100%" stop-color="#7a4aff" stop-opacity="0"></stop>
+            </radialGradient>
+
+            <radialGradient id="clockFaceGrad" cx="35%" cy="30%" r="75%">
+              <stop offset="0%" stop-color="#241645" stop-opacity="0.9"></stop>
+              <stop offset="65%" stop-color="#120a28" stop-opacity="0.92"></stop>
+              <stop offset="100%" stop-color="#08050f" stop-opacity="0.96"></stop>
+            </radialGradient>
+
+            <linearGradient id="metallicRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#e7d9ff"></stop>
+              <stop offset="30%" stop-color="#a486e8"></stop>
+              <stop offset="55%" stop-color="#5a3f9e"></stop>
+              <stop offset="80%" stop-color="#c9b6ff"></stop>
+              <stop offset="100%" stop-color="#7a5acc"></stop>
+            </linearGradient>
+
+            <linearGradient id="ropeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#e2c48f"></stop>
+              <stop offset="50%" stop-color="#c8a06a"></stop>
+              <stop offset="100%" stop-color="#7a5530"></stop>
+            </linearGradient>
+
+            <linearGradient id="barrierGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#bfeaff" stop-opacity="0.95"></stop>
+              <stop offset="45%" stop-color="#7fc2ff" stop-opacity="0.8"></stop>
+              <stop offset="100%" stop-color="#3f6eff" stop-opacity="0.65"></stop>
+            </linearGradient>
+
+            <radialGradient id="explosionGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="1"></stop>
+              <stop offset="25%" stop-color="#d6b0ff" stop-opacity="0.95"></stop>
+              <stop offset="55%" stop-color="#9a4aff" stop-opacity="0.7"></stop>
+              <stop offset="100%" stop-color="#5a1fae" stop-opacity="0"></stop>
+            </radialGradient>
+
+            <filter id="softGlow" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="4" result="blur"></feGaussianBlur>
+              <feMerge>
+                <feMergeNode in="blur"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+              </feMerge>
+            </filter>
+
+            <filter id="strongGlow" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur stdDeviation="9" result="blur"></feGaussianBlur>
+              <feMerge>
+                <feMergeNode in="blur"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- ambient glow backdrop -->
+          <ellipse cx="450" cy="220" rx="320" ry="240" fill="url(#stageGlow)" opacity="0.55"></ellipse>
+
+          <!-- ================= PREMIUM ANALOG CLOCK FACE ================= -->
+          <g id="clockFaceGroup" transform="translate(450,220)">
+            <!-- outer metallic ring -->
+            <circle r="188" fill="none" stroke="url(#metallicRingGrad)" stroke-width="7" opacity="0.9"></circle>
+            <circle r="188" fill="none" stroke="#1a0f33" stroke-width="1.5" opacity="0.6"></circle>
+            <!-- glass face -->
+            <circle r="180" fill="url(#clockFaceGrad)"></circle>
+            <!-- inner track ring the second hand rides on -->
+            <circle r="150" fill="none" stroke="rgba(160,110,255,0.18)" stroke-width="2"></circle>
+            <circle r="150" fill="none" stroke="rgba(120,90,220,0.07)" stroke-width="20"></circle>
+            <!-- glass reflection sweep -->
+            <path d="M -120 -130 A 178 178 0 0 1 60 -168" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="22" stroke-linecap="round"></path>
+            <path d="M -95 -145 A 178 178 0 0 1 20 -177" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="10" stroke-linecap="round"></path>
+
+            <!-- hour ticks -->
+            <g id="hourTicks"></g>
+            <!-- minute ticks -->
+            <g id="minuteTicks"></g>
+
+            <!-- barriers ride on the outer track, above the face -->
+            <g id="barriersGroup"></g>
+            <g id="debrisGroup"></g>
+            <g id="explosionGroup"></g>
+
+            <!-- rope, drawn behind the hand pivot cap -->
+            <path id="ropePath" d="" fill="none" stroke="url(#ropeGrad)" stroke-width="6" stroke-linecap="round" filter="url(#softGlow)"></path>
+            <path id="ropePathHighlight" d="" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round"></path>
+            <g id="ropeTensionMarks"></g>
+
+            <!-- hour hand -->
+            <line id="hourHand" x1="0" y1="10" x2="0" y2="-85" stroke="#c6b0ff" stroke-width="7" stroke-linecap="round" filter="url(#softGlow)"></line>
+            <!-- minute hand -->
+            <line id="minuteHand" x1="0" y1="12" x2="0" y2="-125" stroke="#b8d0ff" stroke-width="4.5" stroke-linecap="round" filter="url(#softGlow)"></line>
+
+            <!-- the character, permanently attached behind the second hand -->
+            <g id="characterGroup">
+              <g id="characterLean">
+                <!-- ground/attachment contact glow -->
+                <ellipse cx="0" cy="8" rx="34" ry="7" fill="#7a4aff33"></ellipse>
+
+                <!-- back leg (thigh + shin + foot) -->
+                <g id="legBack">
+                  <line id="thighBack" x1="-6" y1="0" x2="-22" y2="34" stroke="#b7a2f2" stroke-width="9" stroke-linecap="round"></line>
+                  <line id="shinBack" x1="-22" y1="34" x2="-30" y2="66" stroke="#a892e8" stroke-width="7.5" stroke-linecap="round"></line>
+                  <path id="footBack" d="M -30 66 L -42 70" stroke="#9a86dc" stroke-width="7" stroke-linecap="round"></path>
+                </g>
+
+                <!-- front leg (thigh + shin + foot) -->
+                <g id="legFront">
+                  <line id="thighFront" x1="6" y1="0" x2="20" y2="35" stroke="#c9b8ff" stroke-width="9.5" stroke-linecap="round"></line>
+                  <line id="shinFront" x1="20" y1="35" x2="26" y2="68" stroke="#bba6f5" stroke-width="8" stroke-linecap="round"></line>
+                  <path id="footFront" d="M 26 68 L 40 73" stroke="#ad97ef" stroke-width="7.5" stroke-linecap="round"></path>
+                </g>
+
+                <!-- hips -->
+                <ellipse cx="0" cy="-2" rx="15" ry="9" fill="#c9b8ff"></ellipse>
+
+                <!-- torso -->
+                <path id="torso" d="M -13 -4 Q -16 -50 -11 -84 Q 0 -92 11 -84 Q 16 -50 13 -4 Z" fill="#d7c4ff" filter="url(#softGlow)"></path>
+
+                <!-- back arm (upper + forearm + hand) -->
+                <g id="armBack">
+                  <line id="upperArmBack" x1="-10" y1="-78" x2="-30" y2="-52" stroke="#b7a2f2" stroke-width="8" stroke-linecap="round"></line>
+                  <line id="forearmBack" x1="-30" y1="-52" x2="-40" y2="-24" stroke="#a892e8" stroke-width="7" stroke-linecap="round"></line>
+                  <circle id="handBack" cx="-40" cy="-24" r="4.5" fill="#9a86dc"></circle>
+                </g>
+
+                <!-- neck -->
+                <rect x="-5" y="-92" width="10" height="10" rx="3" fill="#d7c4ff"></rect>
+
+                <!-- head -->
+                <g id="headGroup">
+                  <circle id="charHead" cx="0" cy="-106" r="16" fill="#efe4ff" filter="url(#softGlow)"></circle>
+                  <path d="M -10 -112 Q 0 -122 10 -112" fill="none" stroke="#c9b8ff" stroke-width="3" stroke-linecap="round"></path>
+                </g>
+
+                <!-- front arm: reaches back and grips the rope, opposite the hand's rotation -->
+                <g id="armFront">
+                  <line id="upperArmFront" x1="10" y1="-78" x2="34" y2="-58" stroke="#e4d6ff" stroke-width="8.5" stroke-linecap="round"></line>
+                  <line id="forearmFront" x1="34" y1="-58" x2="52" y2="-40" stroke="#d7c4ff" stroke-width="7.5" stroke-linecap="round"></line>
+                  <g id="handFrontGrip" transform="translate(52,-40)">
+                    <circle r="5.5" fill="#efe4ff" filter="url(#softGlow)"></circle>
+                    <line id="finger1" x1="0" y1="0" x2="7" y2="-4" stroke="#efe4ff" stroke-width="2" stroke-linecap="round"></line>
+                    <line id="finger2" x1="0" y1="0" x2="8" y2="1" stroke="#efe4ff" stroke-width="2" stroke-linecap="round"></line>
+                    <line id="finger3" x1="0" y1="0" x2="6" y2="5" stroke="#efe4ff" stroke-width="2" stroke-linecap="round"></line>
+                  </g>
+                </g>
+              </g>
+            </g>
+
+            <!-- giant symbolic second hand, in front of the character -->
+            <g id="handPivot">
+              <line id="bigHand" x1="0" y1="16" x2="0" y2="-150" stroke="#ff8aae" stroke-width="4.5" stroke-linecap="round" filter="url(#softGlow)"></line>
+              <circle r="11" fill="#e0d0ff" filter="url(#strongGlow)"></circle>
+              <circle r="4" fill="#fff"></circle>
+            </g>
+          </g>
+        </svg>
+      </div>
+
+      <div class="stage-legend">
+        <div class="legend-item"><span class="legend-dot rope-dot"></span> Attached behind the Second Hand — pulling against it every second</div>
+        <div class="legend-item"><span class="legend-dot barrier-dot"></span> Barriers rise at 10s · 25s · 40s · 55s of every minute, and never hold</div>
+      </div>
+    </section>
+
+    <!-- footer subtle -->
+    <div class="footer-note">⏣ S.N.E.T.C.H · AI OPERATING SYSTEM</div>
+  </div>
+
+  <!-- separate JS -->
+  <script src="time.js"></script>
+</body>
+</html>

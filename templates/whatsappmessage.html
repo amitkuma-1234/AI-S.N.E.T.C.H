@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S.N.E.T.C.H · WhatsApp Messenger</title>
+  <!-- Font & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <!-- CSS (separate) -->
+  <link rel="stylesheet" href="whatsappmessage.css" />
+</head>
+<body>
+
+  <!-- ===== SPACE BACKGROUND (animated) ===== -->
+  <div id="space-bg">
+    <div class="nebula nebula-purple"></div>
+    <div class="nebula nebula-blue"></div>
+    <div class="stars-layer"></div>
+    <div class="shooting-stars"></div>
+    <div class="floating-particles"></div>
+  </div>
+
+  <!-- ===== MAIN WRAPPER ===== -->
+  <div class="app-container">
+
+    <!-- HOME BUTTON (top left) — only navigation control -->
+    <a href="/" class="home-btn" id="homeBtn" aria-label="Home Dashboard">
+      <i class="fas fa-home"></i>
+      <span class="home-label">Home</span>
+    </a>
+
+    <!-- ===== HEADER ===== -->
+    <header class="app-header">
+      <div class="whatsapp-icon-glow">
+        <i class="fab fa-whatsapp"></i>
+      </div>
+      <h1 class="brand-title">S.N.E.T.C.H</h1>
+      <h2 class="page-title">AI WhatsApp Messenger</h2>
+      <p class="subtitle">Send messages and attachments instantly via your installed WhatsApp Desktop app.</p>
+    </header>
+
+    <!-- ===== MAIN CARD (glassmorphism) ===== -->
+    <main class="main-card">
+
+      <!-- STEP 1: WhatsApp Number -->
+      <section class="step-section">
+        <div class="step-header">
+          <i class="fas fa-phone-alt step-icon"></i>
+          <div>
+            <h3>WhatsApp Number</h3>
+            <p>Select the country and enter the recipient's local number.</p>
+          </div>
+        </div>
+        <div class="phone-field-row">
+          <button type="button" class="country-select-btn" id="countrySelectBtn" aria-haspopup="listbox" aria-expanded="false">
+            <span class="country-flag" id="countryFlag">🇮🇳</span>
+            <span class="country-dial" id="countryDial">+91</span>
+            <i class="fas fa-chevron-down country-caret"></i>
+          </button>
+          <div class="input-wrapper glass-input phone-number-wrapper">
+            <i class="fas fa-phone-alt input-icon"></i>
+            <input type="tel" id="phoneInput" placeholder="98765 43210" autocomplete="tel" inputmode="numeric" />
+          </div>
+
+          <div class="country-dropdown" id="countryDropdown" role="listbox" aria-label="Select country code">
+            <div class="country-search-wrapper">
+              <i class="fas fa-search"></i>
+              <input type="text" id="countrySearch" placeholder="Search country or code..." autocomplete="off" />
+            </div>
+            <div class="country-list" id="countryList"></div>
+          </div>
+        </div>
+        <div class="validation-msg" id="phoneError"></div>
+      </section>
+
+      <!-- STEP 2: Message -->
+      <section class="step-section">
+        <div class="step-header">
+          <i class="fas fa-pencil-alt step-icon"></i>
+          <div>
+            <h3>Message</h3>
+            <p>Type your message — multi-line, emoji and special characters supported.</p>
+          </div>
+        </div>
+        <div class="input-wrapper glass-input textarea-wrapper">
+          <i class="fas fa-pencil-alt input-icon"></i>
+          <textarea id="messageInput" placeholder="Type your message here... 😀" rows="4"></textarea>
+        </div>
+        <div class="validation-msg" id="messageError"></div>
+      </section>
+
+      <!-- STEP 3: Attachments -->
+      <section class="step-section">
+        <div class="step-header">
+          <i class="fas fa-paperclip step-icon"></i>
+          <div>
+            <h3>Attachments</h3>
+            <p>Attach one or more files — documents, images, audio, video, or zip.</p>
+          </div>
+        </div>
+
+        <input
+          type="file"
+          id="fileInput"
+          class="hidden-file-input"
+          multiple
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.rtf,.zip,.rar,.7z,.png,.jpg,.jpeg,.gif,.webp,.bmp,.mp3,.wav,.ogg,.m4a,.aac,.mp4,.mov,.avi,.mkv,.webm"
+        />
+        <button type="button" class="browse-btn" id="browseBtn">
+          <i class="fas fa-paperclip"></i> Browse Attachments
+        </button>
+        <div class="validation-msg" id="fileError"></div>
+
+        <div class="attachments-list" id="attachmentsList" aria-live="polite"></div>
+      </section>
+
+      <!-- STEP 4: Send Message Button -->
+      <section class="step-section send-section">
+        <div class="step-header">
+          <i class="fas fa-paper-plane step-icon"></i>
+          <div>
+            <h3>Send Message</h3>
+            <p>Click below to deliver your message via the WhatsApp Desktop app installed on this computer.</p>
+          </div>
+        </div>
+        <button class="send-btn" id="sendBtn">
+          <span class="btn-label"><i class="fas fa-paper-plane"></i> Send Message</span>
+          <span class="btn-spinner" aria-hidden="true"></span>
+        </button>
+        <div class="validation-msg" id="sendStatus"></div>
+      </section>
+
+      <!-- FOOTER CARD (glass info) -->
+      <div class="footer-card glass-info">
+        <i class="fas fa-shield-alt"></i>
+        <span>Requires WhatsApp Desktop installed &amp; logged in on this device. Only for personal use — please respect privacy and use responsibly.</span>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ===== SUCCESS OVERLAY (shown after a confirmed send) ===== -->
+  <div class="success-overlay" id="successOverlay" role="status" aria-live="assertive">
+    <div class="success-card">
+      <div class="success-check">
+        <svg viewBox="0 0 52 52" class="success-check-svg">
+          <circle class="success-check-circle" cx="26" cy="26" r="24" fill="none"/>
+          <path class="success-check-mark" fill="none" d="M14 27l7 7 17-17"/>
+        </svg>
+      </div>
+      <h3>Message Sent Successfully</h3>
+      <p id="successDetail">Your WhatsApp message is on its way.</p>
+      <button type="button" class="success-close-btn" id="successCloseBtn">Done</button>
+    </div>
+  </div>
+
+  <!-- JavaScript (separate) -->
+  <script src="whatsappmessage.js"></script>
+</body>
+</html>

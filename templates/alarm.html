@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>S.N.E.T.C.H · ALARM SYSTEM</title>
+  <!-- Font & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <!-- CSS (separate) -->
+  <link rel="stylesheet" href="alarm.css">
+</head>
+<body>
+  <!-- ===== SPACE BACKGROUND ===== -->
+  <div id="space-bg">
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+    <div class="nebula purple"></div>
+    <div class="nebula blue"></div>
+    <div class="shooting-stars"></div>
+    <div class="particles"></div>
+    <div class="floating-light"></div>
+  </div>
+
+  <!-- ===== MAIN WRAPPER ===== -->
+  <div class="app-wrapper">
+
+    <!-- TOP LEFT: HOME BUTTON -->
+    <div class="top-left">
+      <div class="glass home-btn" id="homeBtn">
+        <i class="fas fa-home"></i> Home
+      </div>
+    </div>
+
+    <!-- CENTER HEADER -->
+    <div class="center-header">
+      <div class="clock-icon">
+        <i class="fas fa-clock"></i>
+      </div>
+      <div class="brand">S.N.E.T.C.H</div>
+      <div class="sub-brand">ALARM SYSTEM</div>
+    </div>
+
+    <!-- ===== MAIN DASHBOARD CARDS ===== -->
+    <div class="dashboard-grid">
+      <!-- Card 1: Set Alarm -->
+      <div class="glass card" data-card="set">
+        <div class="card-icon"><i class="fas fa-plus-circle"></i></div>
+        <div class="card-title">Set Alarm</div>
+        <div class="card-desc">Create a new alarm with custom time, date, repeat options and label.</div>
+        <button class="card-btn" data-action="set">Set Now</button>
+      </div>
+      <!-- Card 2: Delete Alarm -->
+      <div class="glass card" data-card="delete">
+        <div class="card-icon"><i class="fas fa-trash-alt"></i></div>
+        <div class="card-title">Delete Alarm</div>
+        <div class="card-desc">Delete any existing alarm from the alarm list.</div>
+        <button class="card-btn" data-action="delete">Delete</button>
+      </div>
+      <!-- Card 3: Update Alarm -->
+      <div class="glass card" data-card="update">
+        <div class="card-icon"><i class="fas fa-pen"></i></div>
+        <div class="card-title">Update Alarm</div>
+        <div class="card-desc">Edit alarm time, label, repeat schedule or ringtone.</div>
+        <button class="card-btn" data-action="update">Update</button>
+      </div>
+      <!-- Card 4: Show Alarm List -->
+      <div class="glass card" data-card="list">
+        <div class="card-icon"><i class="fas fa-list-ul"></i></div>
+        <div class="card-title">Show Alarm List</div>
+        <div class="card-desc">Display all saved alarms with complete information.</div>
+        <button class="card-btn" data-action="list">View List</button>
+      </div>
+    </div>
+
+    <!-- ===== BOTTOM SECTION: UPCOMING + NEXT ALARMS ===== -->
+    <div class="bottom-row">
+      <!-- Upcoming Alarm -->
+      <div class="glass upcoming-card">
+        <div class="upcoming-label"><i class="fas fa-bell"></i> Upcoming Alarm</div>
+        <div class="upcoming-time" id="upcomingTime">--:--</div>
+        <div class="upcoming-name" id="upcomingName">No alarm set</div>
+        <div class="upcoming-repeat" id="upcomingRepeat">-</div>
+        <div class="upcoming-countdown" id="upcomingCountdown">-</div>
+      </div>
+
+      <!-- Next 3 Alarms -->
+      <div class="glass next-card">
+        <div class="next-label"><i class="fas fa-clock"></i> Next Scheduled Alarms</div>
+        <div id="nextAlarmsList">
+          <div class="next-item empty">No upcoming alarms</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== POPUPS (MODALS) ===== -->
+
+  <!-- ══════════ SET ALARM MODAL (2-step wizard) ══════════ -->
+  <div class="modal-overlay" id="setModal">
+    <div class="modal glass">
+      <div class="modal-header"><i class="fas fa-clock"></i> <span id="setModalTitle">Set Alarm</span></div>
+
+      <!-- STEP 1: Time + AM/PM -->
+      <div class="wizard-step" id="setStepTime">
+        <div class="premium-date-row" id="setDateRow"><i class="fas fa-calendar-day"></i> <span></span></div>
+        <div class="modal-body time-picker-body">
+          <div class="field"><label>Hour</label><select id="setHour"></select></div>
+          <div class="field"><label>Minute</label><select id="setMinute"></select></div>
+          <div class="field"><label>AM / PM</label>
+            <select id="setAmPm"><option value="AM">AM</option><option value="PM">PM</option></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn cancel" id="setCancel">Cancel</button>
+          <button class="modal-btn save" id="setNext">Next <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Tone selection -->
+      <div class="wizard-step hidden" id="setStepTone">
+        <div class="tone-method-row" id="setMethodRow">
+          <button class="tone-method-btn" data-method="list" data-target="set"><i class="fas fa-music"></i> Alarm Tone List</button>
+          <button class="tone-method-btn" data-method="download" data-target="set"><i class="fas fa-download"></i> Download Alarm Tone</button>
+          <button class="tone-method-btn" data-method="skip" data-target="set"><i class="fas fa-forward"></i> Skip</button>
+        </div>
+
+        <div class="tone-subpanel hidden" id="setToneListPanel">
+          <div class="tone-list" id="setToneListItems"><div class="tone-empty">Loading tones…</div></div>
+          <div class="subpanel-actions"><button class="modal-btn cancel small" id="setToneListCancel">Cancel</button></div>
+        </div>
+
+        <div class="tone-subpanel hidden" id="setDownloadPanel">
+          <div class="futuristic-download-box">
+            <div class="neo-input-wrapper">
+              <i class="fas fa-music neo-icon"></i>
+              <input type="text" id="setDownloadName" class="neo-input" placeholder="Search Tone (e.g. Marimba)...">
+            </div>
+            <button class="neo-download-btn" id="setDownloadBtn">
+              <div class="btn-glow"></div>
+              <i class="fas fa-cloud-download-alt"></i> <span>Download</span>
+            </button>
+            <div class="download-status-container">
+              <span class="download-status" id="setDownloadStatus"></span>
+            </div>
+          </div>
+          <div class="subpanel-actions"><button class="modal-btn cancel small" id="setDownloadCancel">Cancel</button></div>
+        </div>
+
+        <div class="tone-selected-badge hidden" id="setToneSelected"></div>
+
+        <div class="modal-footer">
+          <button class="modal-btn cancel" id="setBack"><i class="fas fa-arrow-left"></i> Back</button>
+          <button class="modal-btn save" id="setSave" disabled><i class="fas fa-check"></i> Save Alarm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ UPDATE ALARM MODAL (pick → edit wizard) ══════════ -->
+  <div class="modal-overlay" id="updateModal">
+    <div class="modal glass">
+      <div class="modal-header"><i class="fas fa-edit"></i> Update Alarm</div>
+
+      <!-- STEP A: pick an alarm -->
+      <div class="wizard-step" id="updateStepPick">
+        <div class="picker-list" id="updatePickList"><div class="tone-empty">Loading alarms…</div></div>
+        <div class="modal-footer">
+          <button class="modal-btn cancel" id="updatePickCancel">Cancel</button>
+        </div>
+      </div>
+
+      <!-- STEP B: edit time/ampm + tone -->
+      <div class="wizard-step hidden" id="updateStepEdit">
+        <div class="premium-date-row" id="updateDateRow"><i class="fas fa-calendar-day"></i> <span></span></div>
+        <div class="modal-body time-picker-body">
+          <div class="field"><label>Hour</label><select id="updateHour"></select></div>
+          <div class="field"><label>Minute</label><select id="updateMinute"></select></div>
+          <div class="field"><label>AM / PM</label>
+            <select id="updateAmPm"><option value="AM">AM</option><option value="PM">PM</option></select>
+          </div>
+        </div>
+
+        <div class="current-tone-row">
+          <span>Current Tone: <strong id="updateCurrentToneName">Default</strong></span>
+          <button class="modal-btn cancel small" id="updateChangeToneBtn"><i class="fas fa-music"></i> Change Tone</button>
+        </div>
+
+        <div class="wizard-step hidden" id="updateToneStep">
+          <div class="tone-method-row" id="updateMethodRow">
+            <button class="tone-method-btn" data-method="list" data-target="update"><i class="fas fa-music"></i> Alarm Tone List</button>
+            <button class="tone-method-btn" data-method="download" data-target="update"><i class="fas fa-download"></i> Download Alarm Tone</button>
+            <button class="tone-method-btn" data-method="skip" data-target="update"><i class="fas fa-forward"></i> Skip</button>
+          </div>
+
+          <div class="tone-subpanel hidden" id="updateToneListPanel">
+            <div class="tone-list" id="updateToneListItems"><div class="tone-empty">Loading tones…</div></div>
+            <div class="subpanel-actions"><button class="modal-btn cancel small" id="updateToneListCancel">Cancel</button></div>
+          </div>
+
+          <div class="tone-subpanel hidden" id="updateDownloadPanel">
+            <div class="futuristic-download-box">
+              <div class="neo-input-wrapper">
+                <i class="fas fa-music neo-icon"></i>
+                <input type="text" id="updateDownloadName" class="neo-input" placeholder="Search Tone (e.g. Marimba)...">
+              </div>
+              <button class="neo-download-btn" id="updateDownloadBtn">
+                <div class="btn-glow"></div>
+                <i class="fas fa-cloud-download-alt"></i> <span>Download</span>
+              </button>
+              <div class="download-status-container">
+                <span class="download-status" id="updateDownloadStatus"></span>
+              </div>
+            </div>
+            <div class="subpanel-actions"><button class="modal-btn cancel small" id="updateDownloadCancel">Cancel</button></div>
+          </div>
+
+          <div class="tone-selected-badge hidden" id="updateToneSelected"></div>
+        </div>
+
+        <input type="hidden" id="updateId">
+        <div class="modal-footer">
+          <button class="modal-btn cancel" id="updateBack"><i class="fas fa-arrow-left"></i> Back</button>
+          <button class="modal-btn save" id="updateSave"><i class="fas fa-sync-alt"></i> Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ DELETE ALARM MODAL (multi-select) ══════════ -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal glass">
+      <div class="modal-header"><i class="fas fa-trash-alt"></i> Delete Alarm</div>
+      <div class="picker-list checklist" id="deletePickList"><div class="tone-empty">Loading alarms…</div></div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" id="deleteCancel">Cancel</button>
+        <button class="modal-btn save danger" id="deleteConfirm" disabled><i class="fas fa-trash"></i> Delete Selected</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ SHOW ALARM LIST MODAL (read-only) ══════════ -->
+  <div class="modal-overlay" id="listModal">
+    <div class="modal glass">
+      <div class="modal-header"><i class="fas fa-list-ul"></i> All Alarms</div>
+      <div class="picker-list readonly" id="showListItems"><div class="tone-empty">Loading alarms…</div></div>
+      <div class="modal-footer" style="justify-content:center;">
+        <button class="modal-btn cancel" id="listCloseBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ CINEMATIC ALARM EXPERIENCE (full-screen, shown while an alarm is ringing) ══════════ -->
+  <div class="cine-overlay" id="ringOverlay">
+    <div class="cine-stage" id="cineStage">
+
+      <!-- Ambient cinematic layers -->
+      <div class="cine-sky"></div>
+      <div class="cine-sunbeam" id="cineSunbeam"></div>
+      <div class="cine-flare" id="cineFlare"></div>
+      <div class="cine-fog cine-fog-1"></div>
+      <div class="cine-fog cine-fog-2"></div>
+      <div class="cine-dust" id="cineDust"></div>
+      <div class="cine-vignette"></div>
+
+      <!-- The room: sleeper + the door of opportunity -->
+      <div class="cine-room">
+        <div class="cine-bed">
+          <div class="cine-pillow"></div>
+          <div class="cine-person" id="cinePerson">
+            <div class="p-head"></div>
+            <div class="p-body"></div>
+          </div>
+        </div>
+
+        <div class="cine-door-wrap">
+          <div class="cine-door-frame">
+            <div class="cine-light-crack" id="cineLightCrack"></div>
+            <div class="cine-door" id="cineDoor">
+              <div class="door-panel-a"></div>
+              <div class="door-panel-b"></div>
+              <div class="door-handle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Text / controls layer -->
+      <div class="cine-hud">
+        <div class="cine-countdown" id="cineCountdown">10</div>
+        <div class="cine-message" id="cineMessage">Every second you sleep&hellip; opportunity slips away.</div>
+        <div class="cine-submessage" id="cineSubMessage"></div>
+        <button class="cine-stop-btn" id="cineStopBtn">STOP</button>
+      </div>
+
+      <!-- Full fade-to-black layer for Scene 3 -->
+      <div class="cine-blackout" id="cineBlackout">
+        <div class="cine-final-message" id="cineFinalMessage"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ SUCCESS ANIMATION (shown after Save / Update / Delete) ══════════ -->
+  <div class="success-burst" id="successBurst">
+    <div class="burst-card">
+      <div class="burst-check"><i class="fas fa-check"></i></div>
+      <div class="burst-text" id="successBurstText">Alarm saved successfully.</div>
+      <div class="burst-sub" id="successBurstSub"></div>
+    </div>
+  </div>
+
+  <!-- JavaScript (separate) -->
+  <script src="alarm.js"></script>
+</body>
+</html>

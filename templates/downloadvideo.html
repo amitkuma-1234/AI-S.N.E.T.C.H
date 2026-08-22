@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S.N.E.T.C.H · Video Downloader</title>
+  <!-- Fonts & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="downloadvideo.css" />
+</head>
+<body>
+  <!-- ====== SPACE BACKGROUND (canvas) ====== -->
+  <canvas id="spaceCanvas"></canvas>
+
+  <!-- ====== TOP BAR (Home only) ====== -->
+  <header class="topbar">
+    <button id="homeBtn" class="home-btn glass-panel">
+      <i class="fas fa-home"></i> <span>Home</span>
+    </button>
+    <div class="topbar-brand">
+      <i class="fas fa-satellite-dish"></i>
+      <span>S.N.E.T.C.H <em>Video Downloader</em></span>
+    </div>
+  </header>
+
+  <!-- ====== MAIN APP ====== -->
+  <main class="app">
+
+    <!-- ====== HERO ====== -->
+    <section class="hero" id="heroScreen">
+      <div class="glow-icon"><i class="fas fa-cloud-download-alt"></i></div>
+      <h1>Download Any YouTube Video</h1>
+      <p class="subtitle">Paste a link, type a video name, or use voice search. We'll handle the rest.</p>
+
+      <!-- download method tabs -->
+      <div class="method-cards">
+        <button class="method-card active" data-method="link" type="button">
+          <i class="fas fa-link"></i>
+          <h3>Paste Link</h3>
+          <p>Paste any YouTube URL</p>
+        </button>
+        <button class="method-card" data-method="name" type="button">
+          <i class="fas fa-heading"></i>
+          <h3>Video Name</h3>
+          <p>Type the video name</p>
+        </button>
+        <button class="method-card" data-method="voice" type="button">
+          <i class="fas fa-microphone"></i>
+          <h3>Voice Search</h3>
+          <p>Speak the video name</p>
+        </button>
+      </div>
+
+      <!-- input + download -->
+      <div class="input-area">
+        <div class="input-wrapper glass-panel">
+          <i class="fas fa-search input-icon"></i>
+          <input type="text" id="mainInput" placeholder="Paste YouTube URL..." autocomplete="off" />
+          <button id="micBtn" class="mic-btn" type="button" title="Voice search">
+            <i class="fas fa-microphone"></i>
+          </button>
+        </div>
+        <button class="download-btn" id="downloadBtn" type="button">
+          <i class="fas fa-cloud-download-alt"></i> <span>Download Video</span>
+        </button>
+      </div>
+
+      <p id="voiceHint" class="voice-hint hidden"><i class="fas fa-circle listening-dot"></i> Listening… speak the video name</p>
+
+      <!-- feature cards -->
+      <div class="feature-grid">
+        <div class="feature-card"><i class="fas fa-bolt"></i><h4>Fast Download</h4><p>Direct high-speed streaming</p></div>
+        <div class="feature-card"><i class="fas fa-star"></i><h4>Best Quality</h4><p>Highest available resolution</p></div>
+        <div class="feature-card"><i class="fas fa-microphone-alt"></i><h4>Voice Search</h4><p>Just say the video name</p></div>
+        <div class="feature-card"><i class="fas fa-shield-alt"></i><h4>Safe & Secure</h4><p>No ads, no trackers</p></div>
+      </div>
+
+      <footer class="copyright">
+        <p>© We respect copyright. Please download only content you have permission to access.</p>
+      </footer>
+    </section>
+
+    <!-- ====== DOWNLOAD PROGRESS SCREEN ====== -->
+    <section class="progress-screen hidden" id="progressScreen">
+      <div class="progress-card glass-panel">
+        <div class="progress-media">
+          <img id="progThumb" class="progress-thumb" src="" alt="Video thumbnail" />
+          <div class="progress-info">
+            <h2 id="progTitle" class="progress-title">Fetching video…</h2>
+            <div class="progress-meta">
+              <span id="progChannel"><i class="fas fa-user-circle"></i> —</span>
+              <span id="progDuration"><i class="fas fa-clock"></i> —</span>
+            </div>
+            <span id="progStatus" class="status-pill">Preparing…</span>
+          </div>
+        </div>
+
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progBarFill" style="width:0%"></div>
+        </div>
+        <div class="progress-percent" id="progPercent">0%</div>
+
+        <div class="progress-stats">
+          <div class="stat"><i class="fas fa-tachometer-alt"></i><span id="statSpeed">— </span><label>Speed</label></div>
+          <div class="stat"><i class="fas fa-database"></i><span id="statDownloaded">—</span><label>Downloaded</label></div>
+          <div class="stat"><i class="fas fa-hdd"></i><span id="statTotal">—</span><label>Total Size</label></div>
+          <div class="stat"><i class="fas fa-hourglass-half"></i><span id="statEta">—</span><label>Remaining</label></div>
+        </div>
+
+        <button id="cancelBtn" class="cancel-btn" type="button"><i class="fas fa-times"></i> Cancel Download</button>
+      </div>
+    </section>
+
+    <!-- ====== COMPLETE SCREEN ====== -->
+    <section class="complete-screen hidden" id="completeScreen">
+      <div class="complete-card glass-panel">
+        <div class="complete-check"><i class="fas fa-check"></i></div>
+        <h2>Download Completed Successfully</h2>
+        <img id="doneThumb" class="done-thumb" src="" alt="Video thumbnail" />
+        <p id="doneTitle" class="done-title">—</p>
+        <p class="done-location"><i class="fas fa-folder-open"></i> Saved to <span id="doneLocation">Downloads</span></p>
+        <p class="reset-hint">Ready for another video in <span id="resetCountdown">3</span>s…</p>
+      </div>
+    </section>
+
+    <!-- ====== ERROR TOAST ====== -->
+    <div class="error-toast hidden" id="errorToast">
+      <i class="fas fa-triangle-exclamation"></i>
+      <span id="errorMessage">Something went wrong.</span>
+      <button id="errorCloseBtn" type="button"><i class="fas fa-times"></i></button>
+    </div>
+
+  </main>
+
+  <script src="downloadvideo.js"></script>
+</body>
+</html>

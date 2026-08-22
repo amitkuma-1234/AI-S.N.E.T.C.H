@@ -1,0 +1,498 @@
+/* ===================================================================
+   askbygoogle.css — S.N.E.T.C.H Web AI Search
+   Premium futuristic space theme — dark, elegant, cinematic
+=================================================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont,
+               'Helvetica Neue', sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background: #05020f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
+  position: relative;
+  color: #fff;
+}
+
+/* ===================================================================
+   CANVAS SPACE BACKGROUND
+=================================================================== */
+#spaceCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  /* Base gradient: very dark, deep space */
+  background:
+    radial-gradient(ellipse 80% 60% at 25% 35%, #120830 0%, #07041a 55%, #03010a 100%);
+}
+
+/* ===================================================================
+   HOME BUTTON (top-left, text only, no emoji/icon)
+=================================================================== */
+.home-btn {
+  position: fixed;
+  top: 24px;
+  left: 28px;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(160, 110, 255, 0.22);
+  border-radius: 60px;
+  padding: 10px 26px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #d8ccff;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  transition: background 0.3s ease, border-color 0.3s ease,
+              box-shadow 0.3s ease, transform 0.25s ease;
+  box-shadow: 0 4px 20px rgba(60, 20, 160, 0.18);
+}
+.home-btn:hover {
+  background: rgba(180, 130, 255, 0.12);
+  border-color: rgba(180, 130, 255, 0.55);
+  box-shadow: 0 0 28px rgba(130, 70, 255, 0.35), 0 4px 20px rgba(60, 20, 160, 0.3);
+  transform: scale(1.03);
+  color: #ede6ff;
+}
+.home-btn:active {
+  transform: scale(0.98);
+}
+
+/* ===================================================================
+   CENTER BRAND — atom logo + S.N.E.T.C.H title
+=================================================================== */
+.center-brand {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.center-brand.hidden {
+  opacity: 0;
+  transform: translate(-50%, -52%) scale(0.93);
+  pointer-events: none;
+}
+
+/* Atom logo (pure CSS) */
+.atom-logo {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin-bottom: 22px;
+  animation: atomFloat 7s ease-in-out infinite;
+}
+.atom-core {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 18px; height: 18px;
+  background: radial-gradient(circle, #e0ccff, #7030e0);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 30px #9060e0, 0 0 70px rgba(80, 30, 200, 0.5);
+  z-index: 5;
+}
+.orbit {
+  position: absolute;
+  top: 50%; left: 50%;
+  border-radius: 50%;
+  border: 1px solid rgba(160, 110, 255, 0.18);
+  transform: translate(-50%, -50%) rotate(0deg);
+  animation: spinOrbit 10s linear infinite;
+}
+.orbit1 { width: 86px;  height: 86px;  border-color: rgba(180, 130, 255, 0.22); animation-duration: 9s; }
+.orbit2 { width: 112px; height: 112px; border-color: rgba(110, 80, 255, 0.15);  animation-duration: 14s; animation-direction: reverse; }
+.orbit3 { width: 68px;  height: 68px;  border-color: rgba(210, 170, 255, 0.2);  animation-duration: 6.5s; }
+.electron {
+  position: absolute;
+  top: -5px; left: 50%;
+  width: 10px; height: 10px;
+  background: radial-gradient(circle, #ead6ff, #9060d0);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 14px #b080ff, 0 0 30px rgba(100, 40, 200, 0.4);
+}
+
+@keyframes spinOrbit {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@keyframes atomFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-9px); }
+}
+
+/* S.N.E.T.C.H title */
+.snetch-title {
+  font-size: 2.7rem;
+  font-weight: 700;
+  letter-spacing: 7px;
+  background: linear-gradient(135deg, #ead6ff, #b080ff, #6830d0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 18px rgba(110, 50, 220, 0.45));
+  margin-top: -4px;
+}
+.snetch-sub {
+  font-size: 0.8rem;
+  letter-spacing: 3px;
+  color: rgba(200, 180, 255, 0.38);
+  margin-top: 8px;
+  text-transform: uppercase;
+  font-weight: 300;
+}
+
+/* ===================================================================
+   SUGGESTION CHIPS
+=================================================================== */
+.suggestions {
+  position: fixed;
+  bottom: 155px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 14px;
+  max-width: 82vw;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.suggestions.hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(16px);
+  pointer-events: none;
+}
+.chip {
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(160, 110, 255, 0.18);
+  border-radius: 40px;
+  padding: 7px 20px;
+  font-size: 0.85rem;
+  color: #c8baee;
+  cursor: pointer;
+  transition: background 0.22s ease, border-color 0.22s ease,
+              transform 0.22s ease, box-shadow 0.22s ease;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
+  letter-spacing: 0.2px;
+  font-weight: 400;
+}
+.chip:hover {
+  background: rgba(170, 130, 255, 0.12);
+  border-color: rgba(170, 120, 255, 0.5);
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 0 22px rgba(120, 70, 255, 0.2);
+  color: #e4d8ff;
+}
+
+/* ===================================================================
+   CHAT HISTORY (search conversation log)
+=================================================================== */
+.chat-history {
+  position: fixed;
+  top: 86px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(760px, 92vw);
+  max-height: calc(100vh - 210px);
+  overflow-y: auto;
+  z-index: 25;
+  padding: 0 4px 24px 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(160, 110, 255, 0.25) transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.chat-history.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.chat-history::-webkit-scrollbar { width: 3px; }
+.chat-history::-webkit-scrollbar-thumb {
+  background: rgba(160, 110, 255, 0.3);
+  border-radius: 10px;
+}
+
+/* Individual chat entry */
+.chat-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: entryFade 0.4s ease;
+}
+@keyframes entryFade {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* User query bubble */
+.chat-user {
+  align-self: flex-end;
+  background: rgba(110, 60, 220, 0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(160, 110, 255, 0.25);
+  border-radius: 22px 22px 6px 22px;
+  padding: 13px 20px;
+  max-width: 80%;
+  font-size: 1rem;
+  color: #ede6ff;
+  line-height: 1.45;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Status / system bubble */
+.chat-status {
+  align-self: flex-start;
+  background: rgba(14, 8, 32, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(130, 90, 220, 0.18);
+  border-radius: 6px 22px 22px 22px;
+  padding: 14px 22px;
+  max-width: 90%;
+  font-size: 0.93rem;
+  line-height: 1.55;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+.chat-status .status-label {
+  font-size: 0.7rem;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: rgba(190, 160, 255, 0.45);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.chat-status .status-original {
+  color: rgba(200, 190, 230, 0.55);
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+.chat-status .status-optimized {
+  color: #c8baff;
+  font-weight: 500;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+}
+.chat-status .open-google-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(110, 60, 220, 0.2);
+  border: 1px solid rgba(160, 110, 255, 0.35);
+  border-radius: 30px;
+  padding: 7px 18px;
+  font-size: 0.82rem;
+  color: #c8baff;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease,
+              box-shadow 0.2s ease, transform 0.2s ease;
+  margin-top: 4px;
+  text-decoration: none;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+.chat-status .open-google-btn:hover {
+  background: rgba(140, 90, 255, 0.3);
+  border-color: rgba(180, 130, 255, 0.6);
+  box-shadow: 0 0 20px rgba(120, 70, 255, 0.3);
+  transform: scale(1.03);
+  color: #ede6ff;
+}
+.chat-timestamp {
+  font-size: 0.68rem;
+  color: rgba(180, 160, 220, 0.3);
+  letter-spacing: 0.5px;
+  padding-left: 6px;
+}
+
+/* ===================================================================
+   SEARCH PANEL (glassmorphism, fixed bottom)
+=================================================================== */
+.search-panel {
+  position: fixed;
+  bottom: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  width: min(680px, 92vw);
+  background: rgba(16, 8, 36, 0.4);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border-radius: 60px;
+  border: 1px solid rgba(160, 110, 255, 0.28);
+  box-shadow: 0 10px 50px rgba(70, 25, 170, 0.35),
+              inset 0 0 0 1px rgba(150, 100, 255, 0.1);
+  padding: 10px 16px 6px 16px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.search-panel:focus-within {
+  border-color: rgba(180, 130, 255, 0.5);
+  box-shadow: 0 10px 55px rgba(100, 45, 255, 0.45),
+              inset 0 0 0 1px rgba(180, 130, 255, 0.18),
+              0 0 0 3px rgba(150, 90, 255, 0.12);
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Shared button base */
+.search-input-wrapper button {
+  background: transparent;
+  border: none;
+  color: #b8a8e8;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.search-input-wrapper button:hover {
+  background: rgba(180, 140, 255, 0.1);
+  color: #e0d4ff;
+  transform: scale(1.1);
+}
+.search-input-wrapper button:active {
+  transform: scale(0.95);
+}
+
+/* Mic active state */
+.mic-btn.listening {
+  color: #b080ff;
+  background: rgba(150, 80, 255, 0.15) !important;
+  box-shadow: 0 0 16px rgba(140, 70, 255, 0.4);
+}
+
+#searchInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ede8ff;
+  font-size: 1.05rem;
+  padding: 10px 4px;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+  min-width: 0;
+  caret-color: #b080ff;
+}
+#searchInput::placeholder {
+  color: rgba(190, 175, 225, 0.35);
+  font-weight: 300;
+  letter-spacing: 0.4px;
+}
+
+.search-hint {
+  display: flex;
+  justify-content: flex-end;
+  padding: 3px 12px 0;
+  font-size: 0.62rem;
+  color: rgba(190, 175, 225, 0.25);
+  letter-spacing: 0.5px;
+}
+
+/* ===================================================================
+   LOADING OVERLAY
+=================================================================== */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(4, 1, 14, 0.72);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s ease;
+}
+.loading-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.loader-ring {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 3px solid rgba(160, 110, 255, 0.1);
+  border-top: 3px solid #b080ff;
+  border-right: 3px solid rgba(160, 110, 255, 0.5);
+  animation: spinRing 0.85s linear infinite;
+  box-shadow: 0 0 40px rgba(130, 70, 255, 0.25);
+}
+.loading-text {
+  margin-top: 24px;
+  color: #b8a8e0;
+  letter-spacing: 1.6px;
+  font-weight: 300;
+  font-size: 0.88rem;
+  animation: pulseText 1.8s ease-in-out infinite;
+}
+@keyframes spinRing { to { transform: rotate(360deg); } }
+@keyframes pulseText {
+  0%, 100% { opacity: 0.35; }
+  50%       { opacity: 0.9; }
+}
+
+/* ===================================================================
+   RESPONSIVE
+=================================================================== */
+@media (max-width: 768px) {
+  .home-btn          { top: 16px; left: 16px; padding: 8px 18px; font-size: 0.82rem; }
+  .snetch-title      { font-size: 2.1rem; letter-spacing: 4px; }
+  .snetch-sub        { font-size: 0.7rem; }
+  .atom-logo         { width: 80px; height: 80px; }
+  .orbit1            { width: 68px; height: 68px; }
+  .orbit2            { width: 88px; height: 88px; }
+  .orbit3            { width: 54px; height: 54px; }
+  .search-panel      { bottom: 26px; padding: 8px 12px 4px 12px; border-radius: 44px; }
+  #searchInput       { font-size: 0.96rem; padding: 8px 2px; }
+  .search-input-wrapper button { width: 34px; height: 34px; }
+  .suggestions       { bottom: 120px; gap: 8px 10px; }
+  .chip              { padding: 6px 15px; font-size: 0.78rem; }
+  .chat-history      { top: 72px; width: 94vw; max-height: calc(100vh - 175px); }
+  .chat-user, .chat-status { max-width: 95%; }
+}
+
+@media (max-width: 480px) {
+  .snetch-title      { font-size: 1.6rem; letter-spacing: 2px; }
+  .atom-logo         { width: 64px; height: 64px; }
+  .orbit1            { width: 54px; height: 54px; }
+  .orbit2            { width: 70px; height: 70px; }
+  .orbit3            { width: 42px; height: 42px; }
+  .search-panel      { width: 96vw; border-radius: 34px; bottom: 16px; }
+  .suggestions       { bottom: 105px; gap: 6px 8px; max-width: 94vw; }
+  .chip              { padding: 5px 12px; font-size: 0.72rem; }
+  .chat-history      { top: 64px; }
+}

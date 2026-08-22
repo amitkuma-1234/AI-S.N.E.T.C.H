@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>S.N.E.T.C.H · Latest News AI</title>
+    <!-- Font & icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="latestnews.css" />
+</head>
+<body>
+    <!-- ===== DEEP SPACE BACKGROUND ===== -->
+    <div id="space-bg">
+        <div class="nebula purple"></div>
+        <div class="nebula blue"></div>
+        <div id="stars"></div>
+        <div id="shooting-stars"></div>
+        <div id="particles"></div>
+    </div>
+
+    <!-- ===== APP CONTAINER ===== -->
+    <div id="app">
+
+        <!-- ===== LEFT SIDEBAR ===== -->
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <span class="brand-icon">◆</span>
+                    <span class="brand-name">S.N.E.T.C.H</span>
+                </div>
+                <div class="brand-sub">LATEST NEWS AI</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="/" class="nav-item" data-action="home"><i class="fas fa-home"></i> Home</a>
+                <a href="#" class="nav-item active" id="new-chat-nav" data-action="new-chat"><i class="fas fa-plus-circle"></i> New Chat</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="glass-badge">v2.1 · Live News AI</div>
+            </div>
+        </aside>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <main id="main-content">
+
+            <!-- ===== HEADER ===== -->
+            <header class="main-header">
+                <div class="header-icon"><i class="fas fa-newspaper"></i></div>
+                <div class="header-text">
+                    <h1>Latest News AI</h1>
+                    <p>Ask anything about breaking news, world news, politics, technology, business, sports, science, finance, entertainment and more.</p>
+                </div>
+            </header>
+
+            <!-- ===== CHAT PANEL ===== -->
+            <section id="chat-panel">
+                <!-- disabled state (start new chat) -->
+                <div id="chat-placeholder" class="chat-placeholder">
+                    <div class="placeholder-icon"><i class="fas fa-newspaper"></i></div>
+                    <h2>Start a New Chat</h2>
+                    <p>Ask me anything about breaking news, world news, politics, sports, business, finance, technology, entertainment and more.</p>
+                    <button id="new-chat-btn" class="primary-btn large"><i class="fas fa-plus-circle"></i> New Chat</button>
+                </div>
+
+                <!-- active chat messages container (hidden until new chat) -->
+                <div id="chat-messages" style="display: none;">
+                    <!-- messages / news cards will be injected here -->
+                </div>
+
+                <!-- floating input bar (fixed at bottom center) -->
+                <div id="input-bar" class="input-bar" style="display: none;">
+                    <div class="input-wrapper">
+                        <input type="text" id="chat-input" placeholder="Ask me about the latest news... (e.g. Technology News)" autocomplete="off" />
+                        <button class="input-btn" id="voice-btn" title="Speak your news request" aria-label="Voice search"><i class="fas fa-microphone"></i></button>
+                        <button class="input-btn send-btn" id="send-btn" title="Send" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                    <div id="voice-indicator" class="voice-indicator" style="display:none;">
+                        <span class="voice-dot"></span><span class="voice-dot"></span><span class="voice-dot"></span>
+                        <span class="voice-label">Listening…</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="latestnews.js"></script>
+</body>
+</html>

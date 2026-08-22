@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S.N.E.T.C.H · Maps &amp; Navigation AI</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="location.css" />
+</head>
+<body>
+  <!-- ===== ANIMATED SPACE BACKGROUND ===== -->
+  <div id="space-bg">
+    <div class="stars"></div>
+    <div class="stars-small"></div>
+    <div class="nebula purple"></div>
+    <div class="nebula blue"></div>
+    <div class="shooting-stars"></div>
+    <div class="particles"></div>
+    <div class="glow-orb left"></div>
+    <div class="glow-orb right"></div>
+  </div>
+
+  <!-- ===== HOME (only button, top-left) ===== -->
+  <button id="homeBtn" class="home-fab" title="Home Dashboard">
+    <i class="fas fa-home"></i>
+  </button>
+
+  <!-- ===== MAIN APP ===== -->
+  <div id="app">
+
+    <main id="mainPanel">
+
+      <!-- WELCOME SCREEN -->
+      <div id="welcomeScreen">
+        <div class="welcome-icon"><i class="fas fa-map-location-dot"></i></div>
+        <h2 class="brand-title">S.N.E.T.C.H</h2>
+        <span class="sub-brand">MAPS &amp; NAVIGATION AI</span>
+        <p class="desc">Ask for directions, nearby places, distances, routes or live weather —
+          just speak or type.</p>
+        <button id="startBtn" class="glow-btn primary">
+          <i class="fas fa-map-pin"></i> Start Location AI
+        </button>
+      </div>
+
+      <!-- ACTIVE ASSISTANT SCREEN -->
+      <div id="assistantScreen" class="hidden">
+
+        <div id="micStage">
+          <button id="micBtn" class="mic-orb" title="Tap to speak">
+            <i class="fas fa-microphone"></i>
+            <span class="mic-pulse"></span>
+          </button>
+          <div id="micStatus">Listening… ask about a location</div>
+        </div>
+
+        <div class="input-row glass">
+          <textarea id="queryInput" rows="1" placeholder="e.g. restaurants near me, navigate to Jaipur…"></textarea>
+          <button class="icon-btn" id="sendBtn" title="Send"><i class="fas fa-paper-plane"></i></button>
+        </div>
+
+        <div class="voice-controls">
+          <button id="startVoiceBtn" class="ctrl-btn"><i class="fas fa-microphone"></i> Start Voice</button>
+          <button id="stopVoiceBtn" class="ctrl-btn"><i class="fas fa-microphone-slash"></i> Stop Voice</button>
+          <button id="clearBtn" class="ctrl-btn"><i class="fas fa-eraser"></i> Clear</button>
+        </div>
+
+        <div id="resultsFeed"></div>
+      </div>
+    </main>
+
+    <!-- EXAMPLES PANEL — always visible -->
+    <aside id="examplesPanel" class="glass">
+      <h3><i class="fas fa-bolt"></i> Try Asking</h3>
+      <div id="examplesList">
+        <button class="example-chip">Where am I?</button>
+        <button class="example-chip">My Current Location</button>
+        <button class="example-chip">Restaurant Near Me</button>
+        <button class="example-chip">Hotels Near Me</button>
+        <button class="example-chip">Hospitals Near Me</button>
+        <button class="example-chip">ATM Near Me</button>
+        <button class="example-chip">Petrol Pump Near Me</button>
+        <button class="example-chip">Pharmacy Near Me</button>
+        <button class="example-chip">Nearest Railway Station</button>
+        <button class="example-chip">Nearest Airport</button>
+        <button class="example-chip">Nearest Bus Stand</button>
+        <button class="example-chip">Nearest Police Station</button>
+        <button class="example-chip">Nearest Shopping Mall</button>
+        <button class="example-chip">Nearest Grocery Store</button>
+        <button class="example-chip">Nearest Coffee Shop</button>
+        <button class="example-chip">Nearest Gym</button>
+        <button class="example-chip">Navigate to Jaipur</button>
+        <button class="example-chip">Navigate to Delhi from Jaipur</button>
+        <button class="example-chip">Navigate to Mumbai Airport</button>
+        <button class="example-chip">Shortest Distance Between Jaipur and Delhi</button>
+        <button class="example-chip">Distance Between Jaipur and Mumbai</button>
+        <button class="example-chip">Fastest Route to Agra</button>
+        <button class="example-chip">Best Route to Udaipur</button>
+        <button class="example-chip">Traffic Between Jaipur and Delhi</button>
+        <button class="example-chip">Tourist Places Near Me</button>
+        <button class="example-chip">Famous Places in Jaipur</button>
+        <button class="example-chip">Weather at My Location</button>
+        <button class="example-chip">Open Google Maps</button>
+      </div>
+    </aside>
+  </div>
+
+  <script src="location.js"></script>
+</body>
+</html>

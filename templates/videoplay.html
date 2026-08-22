@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S.N.E.T.C.H · Video Player</title>
+  <!-- Font & Icons (Font Awesome for clean icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="videoplay.css?v=9" />
+</head>
+<body>
+  <!-- ====== ANIMATED SPACE BACKGROUND ====== -->
+  <div id="space-bg">
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+    <div class="clouds"></div>
+    <div class="nebula-purple"></div>
+    <div class="nebula-blue"></div>
+    <div class="shooting-stars"></div>
+    <div class="particles"></div>
+  </div>
+
+  <!-- ====== MAIN WRAPPER (Video Search screen) ====== -->
+  <div class="app-container" id="searchScreen">
+
+    <!-- 🏠 HOME BUTTON (top left, floating) -->
+    <a href="/" class="home-btn" id="homeBtn" aria-label="Home Dashboard">
+      <i class="fas fa-home"></i>
+    </a>
+
+    <!-- ====== HEADER ====== -->
+    <header class="page-header">
+      <div class="header-icon">
+        <i class="fas fa-play-circle"></i>
+      </div>
+      <h1 class="glow-title">S.N.E.T.C.H</h1>
+      <h2 class="sub-title">AI Video Player</h2>
+      <p class="header-desc">Search any video — S.N.E.T.C.H finds the best match on YouTube instantly.</p>
+    </header>
+
+    <!-- ====== MAIN GLASS CARD ====== -->
+    <main class="glass-card main-panel">
+
+      <!-- STEP 1 : VIDEO NAME INPUT -->
+      <section class="step-section">
+        <h3 class="step-title"><i class="fas fa-magnifying-glass"></i> Enter Video Name</h3>
+        <p class="step-desc">Type the name of the video you want to play.</p>
+        <div class="input-wrapper glass-input">
+          <i class="fas fa-search input-icon-left"></i>
+          <input type="text" id="videoInput" placeholder="e.g. Interstellar Trailer, AI Documentary..." autocomplete="off" />
+          <button id="voiceBtn" class="voice-btn input-icon-right" type="button" title="Search by voice">
+            <i class="fas fa-microphone"></i>
+          </button>
+        </div>
+
+        <!-- Example chips -->
+        <div class="example-chips" id="exampleChips">
+          <button class="chip" type="button">Python Tutorial</button>
+          <button class="chip" type="button">Interstellar Trailer</button>
+          <button class="chip" type="button">Alan Walker Faded</button>
+          <button class="chip" type="button">AI Documentary</button>
+          <button class="chip" type="button">Cricket Highlights</button>
+          <button class="chip" type="button">TED Talk</button>
+          <button class="chip" type="button">Nature Documentary</button>
+        </div>
+      </section>
+
+      <!-- STEP 2 : PLAY BUTTON + description -->
+      <section class="step-section play-section">
+        <p class="step-desc">Click the button below — S.N.E.T.C.H will find and play it inside the app.</p>
+        <button id="playBtn" class="play-btn glow-btn">
+          <i class="fas fa-play"></i> <span class="play-btn-label">Play Video</span>
+        </button>
+        <!-- hidden status message (error/success) -->
+        <div id="statusMessage" class="status-msg"></div>
+      </section>
+
+    </main>
+
+    <!-- ====== FOOTER CARD ====== -->
+    <footer class="glass-card footer-card">
+      <i class="fas fa-shield-alt shield-icon"></i>
+      <p>Only for personal use. Please respect creators and copyright.</p>
+    </footer>
+
+  </div>
+
+  <!-- ====== YOUTUBE MODE (full-screen embedded player) ====== -->
+  <div class="youtube-mode" id="youtubeMode" aria-hidden="true">
+
+    <!-- Top bar: exit + live in-app search -->
+    <div class="yt-topbar">
+      <button class="exit-yt-btn" id="exitYtBtn" type="button">
+        <i class="fas fa-arrow-left"></i> Exit YouTube
+      </button>
+
+      <div class="yt-search-wrapper">
+        <i class="fas fa-search"></i>
+        <input type="text" id="ytSearchInput" placeholder="Search another video..." autocomplete="off" />
+        <button id="ytSearchBtn" type="button" aria-label="Search"><i class="fas fa-arrow-right"></i></button>
+      </div>
+
+      <div class="yt-badge"><i class="fab fa-youtube"></i> YouTube Mode</div>
+    </div>
+
+    <!-- Player + info + related layout -->
+    <div class="yt-body">
+      <div class="yt-player-col">
+        <div class="yt-player-frame">
+          <div class="yt-loading" id="ytLoading">
+            <div class="yt-spinner"></div>
+            <p>Tuning into YouTube...</p>
+          </div>
+          <div id="ytIframe"></div>
+
+          <!-- Double-tap seek overlay zones -->
+          <div class="yt-doubletap-zone yt-doubletap-left" id="ytDoubletapLeft">
+            <div class="yt-doubletap-ripple" id="ytRippleLeft">
+              <div class="yt-doubletap-icon">
+                <i class="fas fa-backward"></i>
+                <span>10 seconds</span>
+              </div>
+            </div>
+          </div>
+          <div class="yt-doubletap-zone yt-doubletap-right" id="ytDoubletapRight">
+            <div class="yt-doubletap-ripple" id="ytRippleRight">
+              <div class="yt-doubletap-icon">
+                <i class="fas fa-forward"></i>
+                <span>10 seconds</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Custom YouTube-style progress bar and controls -->
+          <div class="yt-progress-bar-container" id="ytProgressContainer">
+            <div class="yt-progress-track" id="ytProgressTrack">
+              <div class="yt-progress-buffered" id="ytProgressBuffered"></div>
+              <div class="yt-progress-played" id="ytProgressPlayed">
+                <div class="yt-progress-dot" id="ytProgressDot"></div>
+              </div>
+              <div class="yt-progress-hover-time" id="ytHoverTime">0:00</div>
+            </div>
+            
+            <div class="yt-controls-row">
+              <div class="yt-time-display" id="ytTimeDisplay">
+                <span id="ytCurrentTime">0:00</span>
+                <span class="yt-time-sep">/</span>
+                <span id="ytDuration">0:00</span>
+              </div>
+              <div class="yt-controls-right">
+                <button class="yt-settings-btn" id="ytSettingsBtn" title="Settings">
+                  <i class="fas fa-cog"></i>
+                </button>
+                <button class="yt-settings-btn" id="ytFullscreenBtn" title="Full screen">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Settings Menu Popup -->
+            <div class="yt-settings-menu hidden" id="ytSettingsMenu">
+              <div class="yt-settings-header">
+                <button id="ytSettingsBack" class="hidden"><i class="fas fa-chevron-left"></i></button>
+                <span id="ytSettingsTitle">Settings</span>
+              </div>
+              <div class="yt-settings-body" id="ytSettingsBody">
+                <!-- Main menu -->
+                <ul class="yt-menu-list" id="ytMainMenu">
+                  <li data-menu="speed">
+                    <div class="yt-menu-icon"><i class="fas fa-play-circle"></i></div>
+                    <div class="yt-menu-label">Playback speed</div>
+                    <div class="yt-menu-value" id="ytSpeedValue">Normal</div>
+                    <div class="yt-menu-arrow"><i class="fas fa-chevron-right"></i></div>
+                  </li>
+                  <li data-menu="quality">
+                    <div class="yt-menu-icon"><i class="fas fa-sliders-h"></i></div>
+                    <div class="yt-menu-label">Quality</div>
+                    <div class="yt-menu-value" id="ytQualityValue">Auto</div>
+                    <div class="yt-menu-arrow"><i class="fas fa-chevron-right"></i></div>
+                  </li>
+                  <li data-menu="captions">
+                    <div class="yt-menu-icon"><i class="fas fa-closed-captioning"></i></div>
+                    <div class="yt-menu-label">Captions</div>
+                    <div class="yt-menu-value" id="ytCaptionsValue">Off</div>
+                    <div class="yt-menu-arrow"><i class="fas fa-chevron-right"></i></div>
+                  </li>
+                </ul>
+                
+                <!-- Speed submenu -->
+                <ul class="yt-menu-list hidden" id="ytSpeedMenu">
+                  <!-- Populated by JS -->
+                </ul>
+                
+                <!-- Quality submenu -->
+                <ul class="yt-menu-list hidden" id="ytQualityMenu">
+                  <!-- Populated by JS -->
+                </ul>
+                
+                <!-- Captions submenu -->
+                <ul class="yt-menu-list hidden" id="ytCaptionsMenu">
+                  <!-- Populated by JS -->
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Custom End Screen Overlay -->
+          <div class="custom-yt-overlay hidden" id="customYtOverlay">
+            <div class="custom-yt-overlay-header">
+              <h4>More Videos</h4>
+              <div style="display: flex; gap: 10px;">
+                <button id="customYtReplayBtn" class="replay-btn"><i class="fas fa-play"></i> Resume</button>
+                <button id="customYtCloseBtn" class="replay-btn" style="background: rgba(255,0,0,0.2);"><i class="fas fa-times"></i> Close</button>
+              </div>
+            </div>
+            <div class="custom-overlay-list" id="customOverlayList"></div>
+          </div>
+        </div>
+
+        <div class="yt-now-playing" id="ytNowPlaying">
+          <h3 id="ytTitle">—</h3>
+          <p id="ytChannel"><i class="fas fa-circle-user"></i> <span></span></p>
+        </div>
+      </div>
+
+      <aside class="yt-related-col" id="ytRelatedCol">
+        <h4><i class="fas fa-layer-group"></i> More like this</h4>
+        <div class="yt-related-list" id="ytRelatedList"></div>
+      </aside>
+    </div>
+
+    <!-- Inline error state for YouTube Mode -->
+    <div class="yt-error" id="ytError">
+      <i class="fas fa-triangle-exclamation"></i>
+      <p id="ytErrorMsg">Something went wrong.</p>
+      <button id="ytErrorBackBtn" type="button">Back to Search</button>
+    </div>
+  </div>
+
+  <!-- ====== JAVASCRIPT ====== -->
+  <script src="videoplay.js?v=9"></script>
+</body>
+</html>

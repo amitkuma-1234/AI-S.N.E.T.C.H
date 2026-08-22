@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S.N.E.T.C.H · Web AI Search</title>
+  <link rel="stylesheet" href="askbygoogle.css" />
+</head>
+<body>
+
+  <!-- ====== ANIMATED SPACE BACKGROUND ====== -->
+  <canvas id="spaceCanvas"></canvas>
+
+  <!-- ====== TOP LEFT: HOME BUTTON (text only, no emoji/icon) ====== -->
+  <button class="home-btn" id="homeBtn">Home</button>
+
+  <!-- ====== CENTER: ATOM LOGO + S.N.E.T.C.H (welcome state) ====== -->
+  <div class="center-brand" id="welcomeScreen">
+    <div class="atom-logo" id="atomLogo">
+      <div class="atom-core"></div>
+      <div class="orbit orbit1"><div class="electron"></div></div>
+      <div class="orbit orbit2"><div class="electron"></div></div>
+      <div class="orbit orbit3"><div class="electron"></div></div>
+    </div>
+    <h1 class="snetch-title">S.N.E.T.C.H</h1>
+    <p class="snetch-sub">Web AI Search</p>
+  </div>
+
+  <!-- ====== SUGGESTION CHIPS ====== -->
+  <div class="suggestions" id="suggestionChips">
+    <span class="chip" data-query="Latest AI News">Latest AI News</span>
+    <span class="chip" data-query="Python tutorial">Python Tutorial</span>
+    <span class="chip" data-query="Machine Learning">Machine Learning</span>
+    <span class="chip" data-query="Weather in Jaipur">Weather in Jaipur</span>
+    <span class="chip" data-query="Best AI tools 2025">Best AI Tools</span>
+    <span class="chip" data-query="Top restaurants near me">Restaurants Near Me</span>
+    <span class="chip" data-query="Best laptop under 80000">Best Laptop</span>
+    <span class="chip" data-query="Quantum Computing">Quantum Computing</span>
+    <span class="chip" data-query="Latest SpaceX news">SpaceX News</span>
+  </div>
+
+  <!-- ====== CHAT HISTORY (search conversation log) ====== -->
+  <div id="chatHistory" class="chat-history hidden"></div>
+
+  <!-- ====== SEARCH PANEL (glassmorphism, fixed bottom) ====== -->
+  <div class="search-panel" id="searchPanel">
+    <div class="search-input-wrapper">
+
+      <!-- Voice button — SVG mic icon -->
+      <button class="mic-btn" id="micBtn" title="Voice input" aria-label="Voice input">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </button>
+
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Search anything on the web..."
+        autocomplete="off"
+        spellcheck="true"
+      />
+
+      <!-- Send / Search button — SVG arrow icon -->
+      <button class="search-btn" id="searchBtn" title="Search" aria-label="Search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+
+    </div>
+    <div class="search-hint">
+      <span>Press Enter to search</span>
+    </div>
+  </div>
+
+  <!-- ====== LOADING OVERLAY ====== -->
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loader-ring"></div>
+    <p class="loading-text">Optimising query and opening Google</p>
+  </div>
+
+  <script src="askbygoogle.js"></script>
+</body>
+</html>

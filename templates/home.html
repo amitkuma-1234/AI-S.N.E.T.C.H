@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S.N.E.T.C.H · AI OS</title>
+  <!-- Font & Icons (only needed for the HTML structure) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+  <!-- External CSS and JS are linked separately -->
+  <link rel="stylesheet" href="home.css" />
+</head>
+<body>
+  <!-- ========================================== -->
+  <!-- SPACE BACKGROUND                           -->
+  <!-- ========================================== -->
+  <div class="space-bg">
+    <div class="stars"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="ufo"><i class="fas fa-rocket"></i></div>
+    <div class="ufo"><i class="fas fa-space-shuttle"></i></div>
+    <div class="ufo"><i class="fas fa-satellite"></i></div>
+    <div class="nebula"></div>
+    <div class="nebula-secondary"></div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- APP LAYOUT                                 -->
+  <!-- ========================================== -->
+  <div class="app">
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar">
+      <div class="logo-area">
+        <div class="logo">S.N.E.T.C.H</div>
+        <div class="logo-sub">Smart. Neural. Efficient.</div>
+      </div>
+
+      <div class="nav-menu">
+        <button class="nav-item active" data-page="home"><i class="fas fa-home"></i> Home</button>
+        <button class="nav-item" data-page="settings"><i class="fas fa-sliders-h"></i> Settings</button>
+        <button class="nav-item" data-page="profile"><i class="fas fa-user"></i> Profile</button>
+      </div>
+
+      <div class="premium-card">
+        <div class="premium-badge"><i class="fas fa-crown"></i> PREMIUM</div>
+        <p>Unlock all premium features and get priority support.</p>
+        <button class="upgrade-btn">Upgrade Now</button>
+      </div>
+    </aside>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="main">
+
+      <!-- TOP BAR -->
+      <div class="topbar">
+        <div class="search-wrap">
+          <input type="text" placeholder="Search anything or ask S.N.E.T.C.H..." />
+          <i class="fas fa-search"></i>
+        </div>
+        <div class="user-profile" id="topbar-user">
+          <div class="avatar" id="topbar-avatar">--</div>
+          <div class="user-name">
+            <span id="topbar-username">Loading…</span>
+            <small>Welcome back</small>
+          </div>
+          <i class="fas fa-chevron-down" style="color:#a28bdb; font-size:0.7rem;"></i>
+        </div>
+      </div>
+
+      <!-- ===== HOME PAGE ===== -->
+      <div id="page-home" class="page active-page">
+        <div class="dashboard">
+          <h2>Ready to explore the universe of productivity?</h2>
+          <div class="greeting-sub" id="dashboard-greeting">Loading… · 37 features</div>
+          <div class="card-grid" id="featureGrid"></div>
+        </div>
+      </div>
+
+      <!-- ===== SETTINGS PAGE ===== -->
+      <div id="page-settings" class="page">
+        <h2 style="font-weight:500; font-size:1.8rem; background:linear-gradient(135deg,#d4c6ff,#a88eff); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Settings</h2>
+        <div class="settings-grid" id="settings-grid">
+          <div class="settings-card"><h4>Account</h4><div class="settings-item"><span>Username</span><span id="set-username">—</span></div><div class="settings-item"><span>Email</span><span id="set-email">—</span></div><div class="settings-item"><span>Password</span><span id="set-password">••••••••</span></div></div>
+          <div class="settings-card"><h4>Appearance</h4><div class="settings-item"><span>Dark Mode</span><span id="set-theme">—</span></div><div class="settings-item"><span>Theme Color</span><span id="set-theme-color">—</span></div><div class="settings-item"><span>Font Size</span><span id="set-font-size">—</span></div></div>
+          <div class="settings-card"><h4>Application</h4><div class="settings-item"><span>Default Home</span><span id="set-default-home">—</span></div><div class="settings-item"><span>Animation</span><span id="set-animations">—</span></div><div class="settings-item"><span>Sound Effects</span><span id="set-sound-effects">—</span></div></div>
+          <div class="settings-card"><h4>Notifications</h4><div class="settings-item"><span>Enable</span><span id="set-notifications">—</span></div><div class="settings-item"><span>Reminders</span><span id="set-reminders-notify">—</span></div></div>
+          <div class="settings-card"><h4>Security</h4><div class="settings-item"><span>Privacy</span><span id="set-privacy">—</span></div><div class="settings-item"><span>Session</span><span style="color:#8affb2;">Active</span></div></div>
+          <div class="settings-card"><h4>Language</h4><div class="settings-item"><span>Select</span><span id="set-language">—</span></div></div>
+          <div class="settings-card"><h4>Storage</h4><div class="settings-item"><span>Clear Cache</span><span>128 MB</span></div></div>
+          <div class="settings-card"><h4>Backup</h4><div class="settings-item"><span>Auto Backup</span><span id="set-auto-backup">—</span></div><div class="settings-item"><span>Restore</span><span>Manual</span></div></div>
+          <div class="settings-card"><h4>About</h4><div class="settings-item"><span>Version</span><span>v2.4.1</span></div><div class="settings-item"><span>Developer</span><span>SNETCH Labs</span></div><div class="settings-item"><span>Terms & Privacy</span><span>View</span></div></div>
+        </div>
+      </div>
+
+      <!-- ===== PROFILE PAGE ===== -->
+      <div id="page-profile" class="page">
+        <h2 style="font-weight:500; font-size:1.8rem; background:linear-gradient(135deg,#d4c6ff,#a88eff); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Profile</h2>
+        <div class="profile-header">
+          <div class="profile-avatar-large" id="profile-avatar">--</div>
+          <div class="profile-info">
+            <p><strong style="font-size:1.3rem;" id="profile-name">Loading…</strong></p>
+            <p><span class="label">Username</span> <span id="profile-username">—</span></p>
+            <p><span class="label">Email</span> <span id="profile-email">—</span></p>
+            <p><span class="label">Joined</span> <span id="profile-joined">—</span></p>
+            <p><span class="label">Account</span> <span id="profile-account-type" style="color:#b68aff;">—</span></p>
+            <p><span class="label">Features used</span> <span id="profile-features">— / 31</span></p>
+            <p><span class="label">Last login</span> <span id="profile-last-login">—</span></p>
+            <p><span class="label">Status</span> <span style="color:#8affb2;">Online</span></p>
+          </div>
+        </div>
+        <div class="profile-actions">
+          <button id="btn-edit-profile"><i class="fas fa-edit"></i> Edit Profile</button>
+          <button id="btn-change-password"><i class="fas fa-key"></i> Change Password</button>
+          <button id="btn-export-data"><i class="fas fa-download"></i> Export My Data</button>
+          <button class="logout" id="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- EXTERNAL JAVASCRIPT                        -->
+  <!-- ========================================== -->
+  <script src="home.js"></script>
+</body>
+</html>

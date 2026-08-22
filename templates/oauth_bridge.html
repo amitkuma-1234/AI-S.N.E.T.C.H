@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Signing you in…</title>
+<style>
+  body { background:#070410; color:#e5e0ff; font-family:sans-serif;
+         display:flex; align-items:center; justify-content:center; height:100vh; }
+</style>
+</head>
+<body>
+  <p>Signing you in…</p>
+  <script>
+    // Clear previous user's cached data if switching accounts
+    try {
+      var prev = JSON.parse(localStorage.getItem('snetch_user') || '{}');
+      var newUser = {{ user|tojson }};
+      if (prev.id && newUser.id !== prev.id) {
+        for (var i = localStorage.length - 1; i >= 0; i--) {
+          var key = localStorage.key(i);
+          if (key && key.indexOf('snetch_') === 0) localStorage.removeItem(key);
+        }
+      }
+    } catch(e) {}
+    localStorage.setItem('snetch_access_token', {{ access_token|tojson }});
+    localStorage.setItem('snetch_refresh_token', {{ refresh_token|tojson }});
+    localStorage.setItem('snetch_user', JSON.stringify({{ user|tojson }}));
+    window.location.replace('/?authed=1');
+  </script>
+</body>
+</html>

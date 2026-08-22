@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>S.N.E.T.C.H · Reminder AI</title>
+  <!-- Font & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="reminder.css" />
+</head>
+<body>
+  <!-- ===== ANIMATED SPACE BACKGROUND ===== -->
+  <div id="space-bg">
+    <div class="stars-layer" id="stars"></div>
+    <div class="nebula nebula-purple"></div>
+    <div class="nebula nebula-blue"></div>
+    <div class="shooting-stars" id="shootingStars"></div>
+    <div class="floating-particles" id="particles"></div>
+  </div>
+
+  <!-- ===== MAIN WRAPPER ===== -->
+  <div class="app-wrapper">
+
+    <!-- TOP LEFT: HOME BUTTON (floating) -->
+    <div class="home-btn-container">
+      <a href="/" class="home-btn" id="homeBtn" title="Main Dashboard">
+        <i class="fas fa-home"></i>
+      </a>
+    </div>
+
+    <!-- ===== HEADER ===== -->
+    <header class="reminder-header">
+      <div class="header-icon">
+        <i class="fas fa-bell"></i>
+      </div>
+      <h1 class="header-title">
+        <span class="sne">S.N.E.T.C.H</span>
+        <span class="sub-brand">Reminder AI</span>
+      </h1>
+      <p class="header-sub">
+        Create, manage and organize your reminders intelligently so you never miss an important task.
+      </p>
+    </header>
+
+    <!-- ===== 4 ACTION CARDS (horizontal) ===== -->
+    <section class="cards-grid">
+      <!-- Card 1: Set Reminder -->
+      <div class="action-card" data-card="set">
+        <div class="card-icon"><i class="fas fa-plus-circle"></i></div>
+        <h2 class="card-title">Set Reminder</h2>
+        <p class="card-desc">Create a new reminder with a name, date, time and reminder tone.</p>
+        <button class="card-btn" id="openSetBtn" data-action="set">Set Reminder</button>
+      </div>
+
+      <!-- Card 2: Update Reminder -->
+      <div class="action-card" data-card="update">
+        <div class="card-icon"><i class="fas fa-pen"></i></div>
+        <h2 class="card-title">Update Reminder</h2>
+        <p class="card-desc">Modify an existing reminder's name, date, time or tone.</p>
+        <button class="card-btn" id="openUpdateBtn" data-action="update">Update Reminder</button>
+      </div>
+
+      <!-- Card 3: Show Reminders -->
+      <div class="action-card" data-card="show">
+        <div class="card-icon"><i class="fas fa-list-ul"></i></div>
+        <h2 class="card-title">Show Reminders</h2>
+        <p class="card-desc">View all saved reminders in one organized card layout.</p>
+        <button class="card-btn" id="openShowBtn" data-action="show">Show Reminders</button>
+      </div>
+
+      <!-- Card 4: Delete Reminder -->
+      <div class="action-card" data-card="delete">
+        <div class="card-icon"><i class="fas fa-trash-alt"></i></div>
+        <h2 class="card-title">Delete Reminder</h2>
+        <p class="card-desc">Delete one, several, or all reminders permanently.</p>
+        <button class="card-btn" id="openDeleteBtn" data-action="delete">Delete Reminder</button>
+      </div>
+    </section>
+
+    <!-- ===== NEXT REMINDER PANEL ===== -->
+    <section class="next-reminder-panel glass-panel">
+      <div class="panel-header">
+        <i class="fas fa-clock panel-icon"></i>
+        <h3 class="panel-title">Upcoming Reminder</h3>
+      </div>
+      <div id="nextReminderContent" class="next-content">
+        <div class="empty-reminder">
+          <i class="fas fa-check-circle" style="color:#b47cff;margin-right:0.5rem;"></i>
+          Loading reminders&hellip;
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- SET / UPDATE REMINDER WIZARD                            -->
+  <!-- ===================================================== -->
+  <div id="wizardOverlay" class="popup-overlay">
+    <div class="popup-box wide glass">
+
+      <!-- STEP 0 (Update only): choose which reminder -->
+      <div class="wizard-step" id="stepSelect">
+        <h3><i class="fas fa-list"></i> Select a Reminder to Update</h3>
+        <div id="wizardSelectList" class="reminder-select-list"></div>
+        <div class="popup-actions">
+          <button class="popup-btn secondary" id="stepSelectCancel">Cancel</button>
+          <button class="popup-btn primary" id="stepSelectNext" disabled>Next</button>
+        </div>
+      </div>
+
+      <!-- STEP 1: Name + Date + Time -->
+      <div class="wizard-step" id="stepForm">
+        <h3 id="stepFormTitle"><i class="fas fa-plus-circle"></i> Set Reminder</h3>
+
+        <div class="popup-field">
+          <label>Reminder Name</label>
+          <input type="text" id="fieldName" placeholder="e.g. Submit project report" />
+        </div>
+
+        <div class="field-row">
+          <div class="popup-field">
+            <label>Hour</label>
+            <select id="fieldHour"></select>
+          </div>
+          <div class="popup-field">
+            <label>Minute</label>
+            <select id="fieldMinute"></select>
+          </div>
+          <div class="popup-field">
+            <label>AM/PM</label>
+            <select id="fieldAmPm">
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="popup-field">
+            <label>Day</label>
+            <select id="fieldDay"></select>
+          </div>
+          <div class="popup-field">
+            <label>Month</label>
+            <select id="fieldMonth">
+              <option value="1">January</option>
+              <option value="2">February</option>
+              <option value="3">March</option>
+              <option value="4">April</option>
+              <option value="5">May</option>
+              <option value="6">June</option>
+              <option value="7">July</option>
+              <option value="8">August</option>
+              <option value="9">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+          </div>
+          <div class="popup-field">
+            <label>Year</label>
+            <select id="fieldYear"></select>
+          </div>
+        </div>
+
+        <div id="stepFormError" class="form-error"></div>
+
+        <div class="popup-actions">
+          <button class="popup-btn secondary" id="stepFormCancel">Cancel</button>
+          <button class="popup-btn primary" id="stepFormNext">Next</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Reminder Tone List / Download Reminder Tone / Skip -->
+      <div class="wizard-step" id="stepTone">
+        <h3><i class="fas fa-music"></i> Reminder Tone</h3>
+        <p class="tone-current-label">Currently selected: <span id="toneCurrentName">Default Tone</span></p>
+        <div class="tone-option-grid">
+          <button class="tone-option-btn" id="toneOptionList">
+            <i class="fas fa-list-ul"></i>
+            <span>Reminder Tone List</span>
+          </button>
+          <button class="tone-option-btn" id="toneOptionDownload">
+            <i class="fas fa-download"></i>
+            <span>Download Reminder Tone</span>
+          </button>
+          <button class="tone-option-btn" id="toneOptionSkip">
+            <i class="fas fa-forward"></i>
+            <span id="toneSkipLabel">Skip</span>
+          </button>
+        </div>
+        <div class="popup-actions">
+          <button class="popup-btn secondary" id="stepToneBack">Back</button>
+        </div>
+      </div>
+
+      <!-- STEP 2a: Reminder Tone List -->
+      <div class="wizard-step" id="stepToneList">
+        <h3><i class="fas fa-list-ul"></i> Reminder Tone List</h3>
+        <div id="toneListContainer" class="tone-list-container"></div>
+        <div class="popup-actions">
+          <button class="popup-btn secondary" id="toneListCancel">Cancel</button>
+          <button class="popup-btn primary" id="toneListSave" disabled>Save</button>
+        </div>
+      </div>
+
+      <!-- STEP 2b: Download Reminder Tone -->
+      <div class="wizard-step" id="stepToneDownload">
+        <h3><i class="fas fa-download"></i> Download Reminder Tone</h3>
+        <div class="popup-field"><label>Reminder Tone Name</label><input type="text" id="toneDownloadName" placeholder="e.g. calm chime" /></div>
+        <button class="popup-btn primary download-btn" id="toneDownloadStart">
+          <i class="fas fa-cloud-download-alt"></i> Download
+        </button>
+        <div id="toneDownloadStatus" class="tone-download-status"></div>
+        <div class="popup-actions">
+          <button class="popup-btn secondary" id="toneDownloadCancel">Cancel</button>
+          <button class="popup-btn primary" id="toneDownloadSave" disabled>Save</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- DELETE REMINDER POPUP (one / multiple / select all)     -->
+  <!-- ===================================================== -->
+  <div id="deletePopup" class="popup-overlay">
+    <div class="popup-box wide glass">
+      <h3><i class="fas fa-trash-alt"></i> Delete Reminder</h3>
+      <div class="delete-toolbar">
+        <button class="popup-btn secondary small" id="deleteSelectAllBtn">Select All</button>
+        <button class="popup-btn secondary small" id="deleteClearBtn">Clear Selection</button>
+      </div>
+      <div id="deleteReminderList" class="delete-reminder-list"></div>
+      <div class="popup-actions">
+        <button class="popup-btn secondary" id="cancelDeleteBtn">Cancel</button>
+        <button class="popup-btn danger" id="deleteSelectedBtn" disabled>Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- SHOW REMINDERS POPUP (premium card layout)              -->
+  <!-- ===================================================== -->
+  <div id="showPopup" class="popup-overlay">
+    <div class="popup-box wide glass">
+      <h3><i class="fas fa-list-ul"></i> All Reminders</h3>
+      <div id="showRemindersContainer" class="show-reminders-container"></div>
+      <div class="popup-actions">
+        <button class="popup-btn secondary" id="closeShowBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS TOAST -->
+  <div id="successToast" class="success-toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="successToastMsg">Reminder saved successfully!</span>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- FULL-SCREEN REMINDER ALERT (bell ringing sequence)      -->
+  <!-- ===================================================== -->
+  <div id="reminderAlertOverlay" class="reminder-alert-overlay">
+    <div class="alert-scene">
+
+      <!-- Scene 1: sleeping figure -->
+      <div class="scene scene-sleep" id="sceneSleep">
+        <svg viewBox="0 0 300 200" class="scene-svg">
+          <ellipse cx="150" cy="170" rx="110" ry="14" class="shadow-blob"/>
+          <rect x="70" y="120" width="160" height="34" rx="16" class="bed"/>
+          <circle cx="95" cy="118" r="20" class="sleep-head"/>
+          <path d="M75,132 Q150,105 220,132 L220,150 Q150,120 75,150 Z" class="sleep-blanket"/>
+          <text x="130" y="80" class="zzz z1">Z</text>
+          <text x="150" y="60" class="zzz z2">Z</text>
+          <text x="170" y="40" class="zzz z3">Z</text>
+        </svg>
+      </div>
+
+      <!-- Scene 2: waking in panic + running -->
+      <div class="scene scene-wake" id="sceneWake">
+        <svg viewBox="0 0 300 200" class="scene-svg">
+          <ellipse cx="150" cy="170" rx="110" ry="14" class="shadow-blob"/>
+          <g class="run-figure" id="runFigure">
+            <circle cx="0" cy="60" r="18" class="run-head"/>
+            <line x1="0" y1="78" x2="0" y2="120" class="run-body"/>
+            <line x1="0" y1="90" x2="-22" y2="70" class="run-arm arm-a"/>
+            <line x1="0" y1="90" x2="24" y2="105" class="run-arm arm-b"/>
+            <line x1="0" y1="120" x2="-20" y2="160" class="run-leg leg-a"/>
+            <line x1="0" y1="120" x2="22" y2="158" class="run-leg leg-b"/>
+          </g>
+          <text x="40" y="50" class="alert-mark">!</text>
+        </svg>
+      </div>
+
+      <!-- Scene 3: bell + log ringing -->
+      <div class="scene scene-bell" id="sceneBell">
+        <svg viewBox="0 0 300 220" class="scene-svg">
+          <line x1="150" y1="10" x2="150" y2="40" class="bell-rope"/>
+          <g class="bell-group" id="bellGroup">
+            <path d="M110,50 Q150,20 190,50 L200,120 Q150,145 100,120 Z" class="bell-body"/>
+            <rect x="95" y="118" width="110" height="14" rx="6" class="bell-rim"/>
+            <circle cx="150" cy="140" r="9" class="bell-clapper"/>
+          </g>
+          <g class="log-group" id="logGroup">
+            <line x1="30" y1="150" x2="70" y2="120" class="log-rope"/>
+            <line x1="270" y1="150" x2="230" y2="120" class="log-rope"/>
+            <rect x="10" y="150" width="120" height="20" rx="10" class="log-beam"/>
+          </g>
+          <g class="shatter-group" id="shatterGroup">
+            <polygon points="150,60 160,80 140,80" class="shard s1"/>
+            <polygon points="150,60 170,70 160,90" class="shard s2"/>
+            <polygon points="150,60 130,70 140,90" class="shard s3"/>
+            <polygon points="150,90 165,105 150,120" class="shard s4"/>
+            <polygon points="150,90 135,105 150,120" class="shard s5"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Scene 4: cinematic text -->
+      <div class="scene scene-text" id="sceneText">
+        <p class="cinematic-line">ALL THE BEST FOR</p>
+        <h2 class="cinematic-name" id="cinematicReminderName">Reminder</h2>
+      </div>
+
+    </div>
+
+    <div class="alert-countdown" id="alertCountdown">10</div>
+  </div>
+
+  <audio id="reminderToneAudio" preload="none"></audio>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script src="reminder.js"></script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Launch Apps AI · S.N.E.T.C.H</title>
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <!-- separate CSS -->
+  <link rel="stylesheet" href="openanyapp.css" />
+</head>
+<body>
+
+  <!-- ===== ANIMATED SPACE BACKGROUND ===== -->
+  <div id="space-bg">
+    <canvas id="starCanvas"></canvas>
+    <div class="nebula purple"></div>
+    <div class="nebula blue"></div>
+    <div class="shooting-star" style="top:15%; left:70%; animation-delay:0s;"></div>
+    <div class="shooting-star" style="top:35%; left:20%; animation-delay:4s;"></div>
+    <div class="shooting-star" style="top:60%; left:80%; animation-delay:9s;"></div>
+    <div class="shooting-star" style="top:80%; left:35%; animation-delay:13s;"></div>
+    <div class="floating-particle" style="top:20%; left:10%; width:6px; height:6px; animation-duration:14s;"></div>
+    <div class="floating-particle" style="top:70%; left:85%; width:8px; height:8px; animation-duration:18s; animation-delay:2s;"></div>
+    <div class="floating-particle" style="top:45%; left:45%; width:5px; height:5px; animation-duration:12s; animation-delay:5s;"></div>
+    <div class="floating-particle" style="top:85%; left:25%; width:7px; height:7px; animation-duration:16s; animation-delay:1s;"></div>
+  </div>
+
+  <!-- ===== LEFT PANEL (compact floating) — Home only ===== -->
+  <aside id="left-panel">
+    <div class="panel-inner">
+      <!-- HOME -->
+      <div class="home-btn" id="homeBtn">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </div>
+      <!-- Brand -->
+      <div class="panel-brand">
+        <span class="brand-sn">S.N.E.T.C.H</span>
+        <span class="brand-app">LAUNCH APPS AI</span>
+        <p class="brand-desc">Type or speak an app name and I'll find and open it on your device instantly.</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CHAT CONTAINER ===== -->
+  <main id="chat-container">
+
+    <!-- HEADER -->
+    <header id="chat-header">
+      <div class="header-icon">
+        <i class="fas fa-rocket"></i>
+      </div>
+      <div class="header-text">
+        <h1>Launch Apps</h1>
+        <p>Ask me to open any installed application — by typing or by voice.</p>
+      </div>
+    </header>
+
+    <!-- CHAT MESSAGES -->
+    <section id="chat-messages">
+      <!-- messages will be injected by JS -->
+      <div class="message ai-message">
+        <div class="msg-avatar"><i class="fas fa-robot"></i></div>
+        <div class="msg-bubble">
+          <div class="msg-content">
+            <p>👋 Hi! Try typing <strong>"Chrome"</strong> or <strong>"Task Manager"</strong>, or tap the mic and just say it — I'll open the best match automatically.</p>
+          </div>
+          <div class="msg-footer">
+            <span class="msg-time">10:30 AM</span>
+            <div class="msg-actions">
+              <button class="action-btn copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+              <button class="action-btn like-btn" title="Like"><i class="fas fa-thumbs-up"></i></button>
+              <button class="action-btn dislike-btn" title="Dislike"><i class="fas fa-thumbs-down"></i></button>
+              <button class="action-btn regenerate-btn" title="Regenerate"><i class="fas fa-rotate-right"></i></button>
+              <button class="action-btn tts-btn" title="Text to Speech"><i class="fas fa-volume-up"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- AI card example (static) will be replaced by dynamic -->
+    </section>
+
+    <!-- BOTTOM CHAT BAR (floating) -->
+    <div id="chat-bar">
+      <div class="bar-inner">
+        <div class="input-wrapper">
+          <textarea id="chatInput" rows="1" placeholder="Type an app name, e.g. Chrome, Notepad, VS Code..."></textarea>
+        </div>
+        <button class="bar-btn voice" id="voiceBtn" title="Voice command">
+          <i class="fas fa-microphone"></i>
+          <span class="mic-pulse-ring"></span>
+        </button>
+        <button class="bar-btn send" id="sendBtn" title="Send"><i class="fas fa-paper-plane"></i></button>
+      </div>
+      <p id="voiceStatus" class="voice-status" aria-live="polite"></p>
+    </div>
+
+  </main>
+
+  <!-- ===== APP SELECTION MODAL (shown when several apps match) ===== -->
+  <div id="appSelectOverlay" class="app-select-overlay" hidden>
+    <div class="app-select-modal">
+      <div class="app-select-header">
+        <h3><i class="fas fa-layer-group"></i> Multiple apps found</h3>
+        <button id="appSelectClose" class="app-select-close" title="Cancel"><i class="fas fa-xmark"></i></button>
+      </div>
+      <p class="app-select-sub">Pick the one you'd like to launch.</p>
+      <div id="appSelectList" class="app-select-list">
+        <!-- option rows injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="openanyapp.js"></script>
+</body>
+</html>

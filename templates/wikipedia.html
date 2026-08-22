@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wikipedia AI · S.N.E.T.C.H</title>
+  <!-- Font & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="wikipedia.css">
+</head>
+<body>
+
+  <!-- ====== SPACE BACKGROUND ====== -->
+  <div id="space-bg">
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+    <div class="nebula purple"></div>
+    <div class="nebula blue"></div>
+    <div class="shooting-stars"></div>
+    <div class="shooting-stars s2"></div>
+    <div class="shooting-stars s3"></div>
+    <div class="particles"></div>
+  </div>
+
+  <!-- ====== APP CONTAINER ====== -->
+  <div class="app">
+
+    <!-- ====== SIDEBAR ====== -->
+    <aside class="sidebar glass">
+      <div class="sidebar-brand">
+        <span class="brand-icon"><i class="fas fa-atom"></i></span>
+        <span class="brand-text">S.N.E.T.C.H</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="/" class="nav-item" id="homeLink"><i class="fas fa-home"></i><span class="nav-label">Home</span></a>
+        <button type="button" class="nav-item active" id="newChatBtn">
+          <i class="fas fa-plus"></i><span class="nav-label">New Wikipedia Chat</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-footer">
+        <div class="footer-badge">
+          <i class="fas fa-shield-halved"></i>
+          <span>Live Wikipedia knowledge base</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ====== MAIN CONTENT ====== -->
+    <main class="main-content">
+
+      <!-- ====== HEADER ====== -->
+      <header class="main-header glass">
+        <div class="header-left">
+          <div class="wiki-icon"><span>W</span></div>
+          <div class="header-title">
+            <h1>Wikipedia AI Assistant</h1>
+            <span class="subtitle">Instant knowledge, beautifully explained</span>
+          </div>
+        </div>
+        <div class="header-tagline"><i class="fas fa-circle-nodes"></i> Ask anything. Get knowledge from Wikipedia instantly.</div>
+      </header>
+
+      <!-- ====== CHAT PANEL ====== -->
+      <div class="chat-panel" id="chatPanel">
+        <div class="chat-messages" id="chatMessages">
+          <!-- messages injected via JS; welcome message rendered on load -->
+        </div>
+      </div>
+
+      <!-- ====== BOTTOM CHAT BAR ====== -->
+      <div class="chat-bar-wrap">
+        <div class="voice-status" id="voiceStatus">
+          <span class="voice-dot"></span>
+          <span id="voiceStatusText">Listening… speak your question</span>
+        </div>
+        <div class="chat-bar glass">
+          <div class="input-wrapper">
+            <textarea id="chatInput" rows="1" placeholder="Ask anything from Wikipedia... (e.g. Who is Nikola Tesla?)"></textarea>
+          </div>
+          <button class="bar-btn" id="voiceBtn" title="Ask with your voice"><i class="fas fa-microphone"></i></button>
+          <button class="bar-btn send-btn" id="sendBtn" title="Send"><i class="fas fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- message bubble template -->
+  <template id="userMsgTemplate">
+    <div class="message user">
+      <div class="msg-icon"><i class="fas fa-user"></i></div>
+      <div class="msg-bubble">
+        <p class="msg-text"></p>
+        <span class="timestamp"></span>
+      </div>
+    </div>
+  </template>
+
+  <template id="aiMsgTemplate">
+    <div class="message ai">
+      <div class="msg-icon"><i class="fas fa-atom"></i></div>
+      <div class="msg-bubble">
+        <div class="msg-content"></div>
+        <div class="msg-actions">
+          <button class="copy-btn" title="Copy response"><i class="fas fa-copy"></i></button>
+          <button class="like-btn" title="Like"><i class="far fa-thumbs-up"></i></button>
+          <button class="dislike-btn" title="Dislike"><i class="far fa-thumbs-down"></i></button>
+          <button class="regen-btn" title="Regenerate response"><i class="fas fa-rotate-right"></i></button>
+        </div>
+        <span class="timestamp"></span>
+      </div>
+    </div>
+  </template>
+
+  <template id="typingTemplate">
+    <div class="message ai typing-msg">
+      <div class="msg-icon"><i class="fas fa-atom"></i></div>
+      <div class="msg-bubble">
+        <div class="typing-indicator"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </template>
+
+  <script src="wikipedia.js"></script>
+</body>
+</html>

@@ -1,0 +1,807 @@
+/* ============================================================
+   time.css — S.N.E.T.C.H Real‑Time Clock Dashboard
+   Futuristic · Glassmorphism · Deep Space · Premium
+   ============================================================ */
+
+/* ----- RESET & BASE ----- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-family: 'Inter', 'Orbitron', sans-serif;
+  background: #0b0710;
+  color: #f0eaff;
+  scroll-behavior: smooth;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 20% 30%, #1a0e2e, #0a0512 70%);
+}
+
+/* ----- CANVAS (space background) ----- */
+#spaceCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+/* ----- DASHBOARD WRAPPER ----- */
+.dashboard {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 1440px;
+  min-height: 100vh;
+  padding: 1.5rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  backdrop-filter: blur(2px);
+  margin: 0 auto;
+}
+
+/* ----- HOME BUTTON (top left) ----- */
+.home-btn-wrap {
+  align-self: flex-start;
+  margin-bottom: 0.5rem;
+  z-index: 30;
+}
+
+.home-btn {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(180, 130, 255, 0.25);
+  border-radius: 60px;
+  padding: 0.7rem 1.4rem;
+  font-size: 1.3rem;
+  color: #d4bfff;
+  box-shadow: 0 0 25px rgba(140, 80, 255, 0.15);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+
+.home-btn i {
+  font-size: 1.5rem;
+  color: #b08cff;
+  filter: drop-shadow(0 0 6px #a06eff);
+}
+
+.home-btn:hover {
+  transform: scale(1.04);
+  background: rgba(180, 130, 255, 0.15);
+  border-color: #b28aff;
+  box-shadow: 0 0 45px #8a4aff66, inset 0 0 20px #9f6eff33;
+}
+
+/* ----- HEADER ----- */
+.main-header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 0.2rem;
+  margin-bottom: 1.8rem;
+  text-align: center;
+}
+
+.snetch-title {
+  font-family: 'Orbitron', monospace;
+  font-weight: 800;
+  font-size: 2.6rem;
+  letter-spacing: 6px;
+  background: linear-gradient(135deg, #dcc0ff, #a578ff, #7a4aff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 40px #7f4eff66, 0 0 80px #5b2eff33;
+  margin-bottom: 0.2rem;
+}
+
+.title-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.8rem 1.5rem;
+}
+
+.time-title {
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: 1.8rem;
+  letter-spacing: 3px;
+  color: #d7c4ff;
+  text-shadow: 0 0 20px #9a6aff88;
+}
+
+.subtitle {
+  font-weight: 300;
+  font-size: 1.05rem;
+  letter-spacing: 2px;
+  color: #b7a3dd;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.2rem 1.2rem;
+  border-radius: 40px;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(200, 170, 255, 0.08);
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(120, 60, 255, 0.08);
+  padding: 0.2rem 1.2rem 0.2rem 0.9rem;
+  border-radius: 40px;
+  border: 1px solid rgba(180, 130, 255, 0.2);
+  backdrop-filter: blur(4px);
+}
+
+.live-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #7affb0;
+  box-shadow: 0 0 20px #6effa0, 0 0 60px #5effa088;
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+.live-label {
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  color: #c0f0d0;
+  text-shadow: 0 0 12px #6effb0aa;
+}
+
+/* ----- GLASS CARD BASE (reusable) ----- */
+.glass-card {
+  background: rgba(20, 12, 40, 0.35);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  border: 1px solid rgba(180, 130, 255, 0.2);
+  border-radius: 32px;
+  box-shadow: 0 25px 45px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(160, 110, 255, 0.06) inset;
+  transition: all 0.25s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(200, 160, 255, 0.45);
+  box-shadow: 0 30px 55px -10px #2f1a5e66, 0 0 30px #8f5eff33;
+  transform: translateY(-4px);
+}
+
+/* ----- MAIN CLOCK PANEL (big glass card) ----- */
+.clock-panel {
+  width: 100%;
+  max-width: 1240px;
+  padding: 2rem 2.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem 3rem;
+  background: rgba(12, 6, 28, 0.4);
+  backdrop-filter: blur(20px) saturate(1.6);
+  border: 1px solid rgba(160, 110, 255, 0.2);
+  border-radius: 56px;
+  box-shadow: 0 40px 80px -20px #0a001a, 0 0 0 1px rgba(200, 160, 255, 0.05) inset;
+  margin-bottom: 1.2rem;
+  position: relative;
+  overflow: visible;
+}
+
+/* ----- ANALOG CLOCK (canvas + rings) ----- */
+.analog-wrapper {
+  flex: 0 0 auto;
+  position: relative;
+  width: 340px;
+  height: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#analogCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 35px #7a4aff55);
+}
+
+.analog-clock {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* outer rotating energy rings */
+.clock-ring {
+  position: absolute;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.outer-ring {
+  width: 108%;
+  height: 108%;
+  border: 2px solid rgba(180, 110, 255, 0.2);
+  box-shadow: 0 0 30px #8a4aff33, 0 0 70px #6f3eff22, inset 0 0 40px #7f4eff22;
+  animation: spin-ring 20s linear infinite;
+}
+
+.inner-ring {
+  width: 96%;
+  height: 96%;
+  border: 1.5px solid rgba(130, 200, 255, 0.15);
+  box-shadow: 0 0 40px #3f9eff22, inset 0 0 30px #3f9eff11;
+  animation: spin-ring 30s linear infinite reverse;
+}
+
+.glass-reflection {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.06) 0%, transparent 60%);
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+.pulse-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14%;
+  height: 14%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, #c8adff, #773dff);
+  box-shadow: 0 0 30px #a06eff, 0 0 70px #773dff99, 0 0 120px #5b2eff55;
+  animation: pulse-center 2.4s ease-in-out infinite;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* ----- DIGITAL CLOCK (right side) ----- */
+.info-side {
+  flex: 1 1 340px;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.digital-clock {
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: 3.8rem;
+  letter-spacing: 5px;
+  color: #d4c4ff;
+  text-shadow: 0 0 30px #a06effaa, 0 0 80px #6f3eff66;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 0.1rem 0.5rem 0.1rem 0.8rem;
+  border-radius: 30px;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(200, 160, 255, 0.08);
+  display: inline-block;
+  width: fit-content;
+  line-height: 1.2;
+}
+
+.digital-ampm {
+  font-family: 'Orbitron', monospace;
+  font-weight: 400;
+  font-size: 1.2rem;
+  letter-spacing: 3px;
+  color: #b8a0e6;
+  margin-top: -0.6rem;
+  margin-left: 0.4rem;
+  text-shadow: 0 0 20px #7f4eff66;
+}
+
+/* ----- CARDS GRID (5 info cards) ----- */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 0.9rem;
+  width: 100%;
+  margin: 0.2rem 0 0.4rem;
+}
+
+.info-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 0.2rem;
+  border-radius: 24px;
+  background: rgba(20, 12, 42, 0.3);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(160, 110, 255, 0.15);
+  transition: all 0.25s ease;
+  min-height: 80px;
+  box-shadow: 0 8px 20px -6px #00000055;
+}
+
+.info-card .card-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #b8a6dd;
+  opacity: 0.7;
+  font-weight: 400;
+}
+
+.info-card .card-value {
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: #ebe0ff;
+  text-shadow: 0 0 20px #9f6eff66;
+  margin-top: 0.1rem;
+}
+
+.info-card:hover {
+  border-color: rgba(200, 160, 255, 0.5);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 35px -8px #3e1f6e66, 0 0 30px #7f4eff33;
+}
+
+/* ----- LIVE STATUS CARD ----- */
+.status-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 1.6rem;
+  border-radius: 60px;
+  background: rgba(20, 12, 42, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(180, 130, 255, 0.15);
+  width: 100%;
+  max-width: 280px;
+  margin-top: 0.2rem;
+}
+
+.status-label {
+  font-weight: 400;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  color: #b7a3dd;
+}
+
+.status-running {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #b8e6d0;
+  text-shadow: 0 0 20px #6effb066;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #7affb0;
+  border-radius: 50%;
+  box-shadow: 0 0 20px #6effa0, 0 0 50px #5effa066;
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+
+/* ----- FOOTER ----- */
+.footer-note {
+  margin-top: 1.6rem;
+  font-size: 0.7rem;
+  letter-spacing: 4px;
+  color: #6f5b9e;
+  opacity: 0.5;
+  text-transform: uppercase;
+  font-weight: 300;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes pulse-dot {
+  0% { opacity: 0.3; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0.3; transform: scale(0.85); }
+}
+
+@keyframes pulse-center {
+  0% { transform: translate(-50%, -50%) scale(0.92); box-shadow: 0 0 30px #a06eff, 0 0 70px #773dff88; }
+  50% { transform: translate(-50%, -50%) scale(1.12); box-shadow: 0 0 50px #b38aff, 0 0 110px #773dffcc; }
+  100% { transform: translate(-50%, -50%) scale(0.92); box-shadow: 0 0 30px #a06eff, 0 0 70px #773dff88; }
+}
+
+@keyframes spin-ring {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media screen and (max-width: 1024px) {
+  .clock-panel {
+    padding: 2rem 1.5rem;
+    gap: 2rem;
+  }
+  .analog-wrapper {
+    width: 280px;
+    height: 280px;
+  }
+  .digital-clock {
+    font-size: 3rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .dashboard {
+    padding: 1rem 1.2rem;
+  }
+  .clock-panel {
+    flex-direction: column;
+    align-items: center;
+    padding: 1.8rem 1.2rem;
+    border-radius: 40px;
+  }
+  .analog-wrapper {
+    width: 260px;
+    height: 260px;
+  }
+  .info-side {
+    width: 100%;
+    align-items: center;
+  }
+  .digital-clock {
+    font-size: 2.8rem;
+    text-align: center;
+    width: 100%;
+  }
+  .digital-ampm {
+    text-align: center;
+    margin-left: 0;
+  }
+  .cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .status-card {
+    max-width: 100%;
+  }
+  .snetch-title {
+    font-size: 2rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .analog-wrapper {
+    width: 200px;
+    height: 200px;
+  }
+  .digital-clock {
+    font-size: 2.2rem;
+  }
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+  }
+  .info-card .card-value {
+    font-size: 1.1rem;
+  }
+  .home-btn {
+    padding: 0.4rem 1rem;
+    font-size: 1rem;
+  }
+  .clock-panel {
+    padding: 1.2rem 0.8rem;
+  }
+  .snetch-title {
+    font-size: 1.6rem;
+  }
+}
+
+/* ============================================================
+   TIME NEVER STOPS — CINEMATIC STAGE
+   (Planet Earth panel removed; this section expands to fill the gap)
+   ============================================================ */
+.time-stage {
+  width: 100%;
+  max-width: 1240px;
+  padding: 1.6rem 1.8rem 1.2rem;
+  margin-bottom: 1.2rem;
+  background: rgba(10, 6, 24, 0.4);
+}
+
+.time-stage--expanded {
+  padding: 2rem 2.2rem 1.4rem;
+}
+
+.stage-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.stage-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.15rem;
+  letter-spacing: 2px;
+  color: #d7c4ff;
+  text-shadow: 0 0 18px #9a6aff88;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.stage-title i {
+  color: #b08cff;
+  filter: drop-shadow(0 0 8px #a06eff);
+}
+
+.stage-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  padding: 0.35rem 1rem;
+  border-radius: 40px;
+  background: rgba(120, 60, 255, 0.12);
+  border: 1px solid rgba(180, 130, 255, 0.25);
+  color: #d4c0ff;
+  transition: all 0.3s ease;
+}
+
+.stage-badge.phase-2 {
+  background: rgba(60, 140, 255, 0.12);
+  border-color: rgba(120, 190, 255, 0.3);
+  color: #bfe0ff;
+}
+
+.stage-canvas-wrap {
+  position: relative;
+  width: 100%;
+  border-radius: 28px;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 70% 45%, rgba(50, 20, 90, 0.35), rgba(6, 3, 14, 0.5) 70%);
+  border: 1px solid rgba(160, 110, 255, 0.12);
+  min-height: 380px;
+  will-change: transform;
+}
+
+#stageSvg {
+  width: 100%;
+  height: auto;
+  display: block;
+  position: relative;
+  z-index: 2;
+}
+
+/* ---- localized floating cosmic particles, confined to the stage panel ---- */
+.stage-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.stage-particles span {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #d9c4ff 0%, rgba(180, 130, 255, 0) 75%);
+  opacity: 0.6;
+  animation: stage-dust-drift linear infinite;
+}
+
+@keyframes stage-dust-drift {
+  0%   { transform: translate(0, 0); opacity: 0; }
+  10%  { opacity: 0.7; }
+  90%  { opacity: 0.5; }
+  100% { transform: translate(var(--dust-dx, 40px), var(--dust-dy, -120px)); opacity: 0; }
+}
+
+/* ---- camera shake, applied briefly to the whole stage during impacts ---- */
+.stage-canvas-wrap.cam-shake-light { animation: cam-shake-light 0.28s ease-in-out; }
+.stage-canvas-wrap.cam-shake-heavy { animation: cam-shake-heavy 0.42s ease-in-out; }
+
+@keyframes cam-shake-light {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(1.5px, -1px); }
+  50% { transform: translate(-1.5px, 1px); }
+  75% { transform: translate(1px, 1px); }
+}
+
+@keyframes cam-shake-heavy {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  15% { transform: translate(4px, -3px) scale(1.006); }
+  30% { transform: translate(-5px, 3px) scale(1.004); }
+  45% { transform: translate(4px, 2px) scale(1.006); }
+  60% { transform: translate(-3px, -2px) scale(1.003); }
+  75% { transform: translate(2px, 1px) scale(1.002); }
+  90% { transform: translate(-1px, 1px) scale(1.001); }
+}
+
+/* ---- barrier stages: crystal/energy-shield material with progressive damage ---- */
+.barrier-shape {
+  fill: url(#barrierGrad);
+  stroke: rgba(210, 235, 255, 0.7);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: url(#softGlow);
+}
+
+.barrier-core {
+  fill: rgba(255, 255, 255, 0.18);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.barrier-crack {
+  stroke: rgba(255, 255, 255, 0.85);
+  stroke-width: 1.1;
+  fill: none;
+  opacity: 0;
+  stroke-linecap: round;
+}
+
+.barrier-spark {
+  fill: #eaf6ff;
+  opacity: 0;
+}
+
+.barrier-group[data-stage="1"] .barrier-crack.c1 { opacity: 0.9; }
+.barrier-group[data-stage="1"] .barrier-spark { opacity: 0.8; animation: spark-flicker 0.15s infinite; }
+.barrier-group[data-stage="1"] .barrier-shape { animation: barrier-jitter 0.25s infinite; }
+
+.barrier-group[data-stage="2"] .barrier-crack.c1,
+.barrier-group[data-stage="2"] .barrier-crack.c2 { opacity: 0.95; }
+.barrier-group[data-stage="2"] .barrier-spark { opacity: 1; animation: spark-flicker 0.12s infinite; }
+.barrier-group[data-stage="2"] .barrier-shape { fill-opacity: 0.85; animation: barrier-jitter 0.18s infinite; }
+.barrier-group[data-stage="2"] .barrier-core { opacity: 0.5; animation: light-leak 0.3s ease-in-out infinite; }
+
+.barrier-group[data-stage="3"] .barrier-crack { opacity: 1; }
+.barrier-group[data-stage="3"] .barrier-shape { fill-opacity: 0.55; animation: barrier-jitter-heavy 0.12s infinite; }
+.barrier-group[data-stage="3"] .barrier-core { opacity: 0.85; animation: light-leak 0.15s ease-in-out infinite; }
+
+@keyframes spark-flicker {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+@keyframes light-leak {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.95; }
+}
+
+@keyframes barrier-jitter {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(0.6px, -0.6px); }
+}
+
+@keyframes barrier-jitter-heavy {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(-1.4px, 1px) scale(0.99); }
+  50% { transform: translate(1.6px, -1.2px) scale(1.01); }
+  75% { transform: translate(-1px, -1px) scale(0.995); }
+}
+
+/* ---- debris + explosion (stage 4) ---- */
+.debris-piece {
+  fill: #9fd6ff;
+  opacity: 0.9;
+}
+
+.debris-piece.metal { fill: #cdd8ea; }
+.debris-piece.crystal { fill: #bfeaff; }
+.debris-piece.spark-frag { fill: #ffe9c2; }
+
+.explosion-burst {
+  fill: url(#explosionGrad);
+  opacity: 0;
+  transform-origin: center;
+}
+
+.explosion-shock {
+  fill: none;
+  stroke: rgba(200, 160, 255, 0.8);
+  stroke-width: 3;
+  opacity: 0;
+  transform-origin: center;
+}
+
+.explosion-flash {
+  fill: rgba(255, 255, 255, 0.9);
+  opacity: 0;
+}
+
+.stage-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 2rem;
+  margin-top: 0.9rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(160, 110, 255, 0.12);
+}
+
+.legend-item {
+  font-size: 0.8rem;
+  letter-spacing: 0.3px;
+  color: #b7a3dd;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.rope-dot {
+  background: #c8a06a;
+  box-shadow: 0 0 10px #c8a06a99;
+}
+
+.barrier-dot {
+  background: #6fbfff;
+  box-shadow: 0 0 10px #6fbfffaa;
+}
+
+@media screen and (max-width: 768px) {
+  .stage-header {
+    justify-content: center;
+    text-align: center;
+  }
+  .stage-canvas-wrap {
+    min-height: 300px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .stage-title {
+    font-size: 1rem;
+  }
+  .time-stage {
+    padding: 1.2rem 1rem 1rem;
+  }
+  .time-stage--expanded {
+    padding: 1.4rem 1rem 1rem;
+  }
+  .stage-canvas-wrap {
+    min-height: 260px;
+  }
+}

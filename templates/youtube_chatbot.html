@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S.N.E.T.C.H · YouTube AI Chatbot</title>
+  <!-- Font & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="youtube_chatbot.css">
+  <!-- Lightweight markdown renderer for AI responses (bullets, tables, code blocks, bold/italic) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js"></script>
+</head>
+<body>
+  <!-- ===== SPACE BACKGROUND ===== -->
+  <div id="space-bg">
+    <div class="stars-layer" id="stars"></div>
+    <div class="nebula purple"></div>
+    <div class="nebula blue"></div>
+    <div class="glow-orbs"></div>
+    <div class="shooting-stars"></div>
+    <div class="shooting-stars s2"></div>
+    <div class="particles" id="particles"></div>
+  </div>
+
+  <button id="mobileSidebarToggle" class="mobile-toggle" aria-label="Toggle menu"><i class="fas fa-bars"></i></button>
+
+  <!-- ===== APP CONTAINER ===== -->
+  <div id="app">
+
+    <!-- ===== LEFT SIDEBAR ===== -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="brand">S.N.E.T.C.H</span>
+          <span class="sub-brand"><i class="fab fa-youtube"></i> YOUTUBE AI CHATBOT</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="/" class="nav-item" id="homeBtn"><i class="fas fa-home"></i> Home</a>
+        <a href="#" class="nav-item" id="newChatBtn"><i class="fas fa-plus-circle"></i> New YouTube Chat</a>
+        <div class="search-wrapper">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchChat" placeholder="Search Chats">
+        </div>
+        <a href="#" class="nav-item" id="pinnedBtn"><i class="fas fa-thumbtack"></i> Pinned Chats</a>
+        <a href="#" class="nav-item" id="archiveBtn"><i class="fas fa-archive"></i> Archive Chats</a>
+      </nav>
+
+      <div class="chat-history" id="chatHistory">
+        <div class="history-header"><span id="historyLabel">Recent Chats</span></div>
+        <ul id="chatList"></ul>
+        <div id="emptyState" class="empty-state hidden">
+          <i class="fas fa-comment-slash"></i>
+          <p>No chats yet</p>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="footer-note">Understands the full video &amp; always answers in English</div>
+      </div>
+    </aside>
+
+    <!-- ===== MAIN CONTENT AREA ===== -->
+    <main id="main">
+
+      <!-- VIDEO LOAD SECTION (visible when no video loaded yet) -->
+      <section id="loadSection" class="load-section">
+        <div class="load-card glass-panel" id="loadCard">
+          <div class="load-icon"><i class="fab fa-youtube"></i></div>
+          <h2>Load a YouTube Video to Begin</h2>
+          <p>Paste a YouTube video link below and let the AI learn its content</p>
+          <div class="url-input-group">
+            <i class="fas fa-link"></i>
+            <input type="url" id="videoUrlInput" placeholder="Paste YouTube video URL...">
+            <button id="loadVideoBtn" class="btn-primary"><i class="fas fa-play"></i> Load Video</button>
+          </div>
+          <div id="loadProgress" class="upload-progress hidden">
+            <div class="progress-bar"><div id="progressFill" style="width:0%"></div></div>
+            <div id="statusMessage" class="status-message">Validating URL...</div>
+          </div>
+          <div id="loadError" class="upload-error hidden"></div>
+        </div>
+        <!-- feature cards -->
+        <div class="feature-grid">
+          <div class="feature-card"><i class="fas fa-closed-captioning"></i><h4>Whole-Video Understanding</h4><p>Understands the complete video's context, not just matching lines</p></div>
+          <div class="feature-card"><i class="fas fa-clock"></i><h4>Timestamp Accurate</h4><p>Cites exact moments from the video</p></div>
+          <div class="feature-card"><i class="fas fa-comments"></i><h4>Natural Follow-ups</h4><p>Remembers your conversation within the chat</p></div>
+          <div class="feature-card"><i class="fas fa-microphone"></i><h4>Voice &amp; Text</h4><p>Ask by typing or speaking — your choice</p></div>
+        </div>
+      </section>
+
+      <!-- CHAT VIEW (hidden until video processed) -->
+      <section id="chatView" class="chat-view hidden">
+
+        <!-- Video header card -->
+        <div id="videoCard" class="video-card glass-panel">
+          <div class="video-card-thumb">
+            <img id="videoThumb" src="" alt="video thumbnail">
+            <span class="play-badge"><i class="fab fa-youtube"></i></span>
+          </div>
+          <div class="video-card-body">
+            <div class="video-card-title" id="videoTitle">Video title</div>
+            <div class="video-card-meta">
+              <span id="videoChannel"><i class="fas fa-user-circle"></i> —</span>
+              <span class="dot">•</span>
+              <span id="videoDuration"><i class="fas fa-clock"></i> —</span>
+            </div>
+            <div class="video-card-status">
+              <span class="status-pill" id="processingStatusPill"><i class="fas fa-circle"></i> Processing: <b id="processingStatusText">Pending</b></span>
+              <span class="status-pill" id="transcriptStatusPill"><i class="fas fa-circle"></i> Transcript: <b id="transcriptStatusText">Pending</b></span>
+              <span class="status-pill ok" id="loadedPill"><i class="fas fa-check-circle"></i> Video Loaded</span>
+            </div>
+          </div>
+          <button id="newFromCardBtn" class="icon-btn" title="Start a new chat"><i class="fas fa-plus"></i></button>
+        </div>
+
+        <!-- CHAT PANEL -->
+        <section id="chatPanel" class="chat-panel hidden">
+          <div id="messageContainer" class="message-container"></div>
+          <div class="chat-input-wrapper">
+            <button id="micBtn" class="input-btn mic-btn" title="Ask with your voice"><i class="fas fa-microphone"></i></button>
+            <input type="text" id="chatInput" placeholder="Ask anything about this video..." disabled>
+            <button id="sendBtn" class="input-btn send-btn" disabled><i class="fas fa-paper-plane"></i></button>
+            <button id="stopResponseBtn" class="input-btn stop-btn hidden" title="Stop generating response"><i class="fas fa-stop-circle"></i></button>
+          </div>
+          <div class="input-hint" id="inputHint">Enter to send · Tap the mic to speak</div>
+        </section>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- ===== Three Dot Menu (shared, positioned dynamically) ===== -->
+  <div id="threeDotMenu" class="three-dot-menu" style="display:none">
+    <div class="menu-item" data-action="download"><i class="fas fa-download"></i> Download Chat</div>
+    <div class="menu-item" data-action="rename"><i class="fas fa-pen"></i> Rename Chat</div>
+    <div class="menu-item danger" data-action="delete"><i class="fas fa-trash"></i> Delete Chat</div>
+    <div class="menu-item" data-action="archive"><i class="fas fa-archive"></i> Archive Chat</div>
+    <div class="menu-item" data-action="pin"><i class="fas fa-thumbtack"></i> Pin Chat</div>
+  </div>
+
+  <!-- ===== Rename modal ===== -->
+  <div id="renameModal" class="modal-overlay hidden">
+    <div class="modal-box glass-panel">
+      <h3>Rename Chat</h3>
+      <input type="text" id="renameInput" maxlength="120" placeholder="Chat title">
+      <div class="modal-actions">
+        <button id="renameCancelBtn" class="btn-secondary">Cancel</button>
+        <button id="renameSaveBtn" class="btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Toast ===== -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="youtube_chatbot.js"></script>
+</body>
+</html>

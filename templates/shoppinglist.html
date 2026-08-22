@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>S.N.E.T.C.H · Shopping Planner</title>
+    <!-- Font Awesome 6 (free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <!-- Link to external CSS -->
+    <link rel="stylesheet" href="shoppinglist.css" />
+</head>
+<body>
+    <!-- ====== ANIMATED SPACE BACKGROUND (CSS only) ====== -->
+    <div id="space-bg">
+        <div class="stars-layer"></div>
+        <div class="nebula purple"></div>
+        <div class="nebula blue"></div>
+        <div class="shooting-stars"></div>
+        <div class="particles"></div>
+    </div>
+
+    <!-- ====== GLASS SIDEBAR ====== -->
+    <aside class="sidebar glass-panel">
+        <div class="sidebar-brand">
+            <span class="brand-icon"><i class="fas fa-cube"></i></span>
+            <span class="brand-name">S.N.E.T.C.H</span>
+            <span class="brand-sub">SHOPPING PLANNER</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-action="home"><i class="fas fa-home"></i> <span>Home</span></a>
+            <a href="#" class="nav-item" data-action="new-list"><i class="fas fa-plus-circle"></i> <span>New Shopping List</span></a>
+            <a href="#" class="nav-item" data-action="search"><i class="fas fa-search"></i> <span>Search Shopping List</span></a>
+            <a href="#" class="nav-item" data-action="archive"><i class="fas fa-archive"></i> <span>Archive Shopping Lists</span></a>
+            <a href="#" class="nav-item" data-action="pinned"><i class="fas fa-thumbtack"></i> <span>Pinned Shopping Lists</span></a>
+        </nav>
+
+        <!-- ====== SIDEBAR LISTS (Pinned always above Recent) ====== -->
+        <div class="sidebar-lists">
+            <div class="list-group pinned-lists">
+                <div class="list-header"><i class="fas fa-thumbtack"></i> Pinned Lists</div>
+                <ul id="pinnedListContainer"><!-- dynamically rendered --></ul>
+            </div>
+            <div class="list-group recent-lists">
+                <div class="list-header"><i class="fas fa-clock"></i> Recent Lists</div>
+                <ul id="recentListContainer"><!-- dynamically rendered --></ul>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <span>S.N.E.T.C.H User</span>
+            <span>AI Operating System</span>
+        </div>
+    </aside>
+
+    <!-- ====== MAIN CONTENT ====== -->
+    <main class="main-content">
+        <!-- ====== HEADER ====== -->
+        <header class="main-header">
+            <div class="header-icon"><i class="fas fa-shopping-cart"></i></div>
+            <h1>Shopping Planner</h1>
+            <p>Create, organize and manage your grocery shopping — smart parsing, live totals, zero hassle.</p>
+        </header>
+
+        <!-- ====== ACTIVE LIST BANNER ====== -->
+        <div id="activeListBanner" class="active-list-banner hidden">
+            <div class="banner-left">
+                <i class="fas fa-shopping-basket"></i>
+                <div>
+                    <div id="activeListName" class="banner-name">—</div>
+                    <div id="activeListDate" class="banner-date">—</div>
+                </div>
+            </div>
+            <button class="banner-close" id="closeActiveListBtn" title="Back to Home"><i class="fas fa-times"></i></button>
+        </div>
+
+        <!-- ====== ACTION CARDS (visible when a list is selected) ====== -->
+        <section id="actionCards" class="action-cards hidden">
+            <div class="card glass-panel">
+                <div class="card-icon"><i class="fas fa-plus-circle"></i></div>
+                <h3>Add Item</h3>
+                <p>Type items in plain language — "2 kg rice, 1 dozen eggs".</p>
+                <button class="card-btn" data-action="add-item">Add Item</button>
+            </div>
+            <div class="card glass-panel">
+                <div class="card-icon"><i class="fas fa-edit"></i></div>
+                <h3>Update Item</h3>
+                <p>Select one item and edit its name, quantity or unit.</p>
+                <button class="card-btn" data-action="update-item">Update Item</button>
+            </div>
+            <div class="card glass-panel">
+                <div class="card-icon"><i class="fas fa-trash-alt"></i></div>
+                <h3>Delete Item</h3>
+                <p>Remove one, many, or every item at once.</p>
+                <button class="card-btn" data-action="delete-item">Delete Item</button>
+            </div>
+            <div class="card glass-panel">
+                <div class="card-icon"><i class="fas fa-list-ul"></i></div>
+                <h3>Show Shopping List</h3>
+                <p>View the full list in a clean, premium layout.</p>
+                <button class="card-btn" data-action="show-list">Show List</button>
+            </div>
+            <div class="card glass-panel">
+                <div class="card-icon"><i class="fas fa-check-circle"></i></div>
+                <h3>Shopping Progress</h3>
+                <p>Mark items as purchased and log their price.</p>
+                <button class="card-btn" data-action="progress">Track Progress</button>
+            </div>
+        </section>
+
+        <!-- ====== SHOW SHOPPING LIST PANEL ====== -->
+        <section id="showListPanel" class="workspace-panel glass-panel hidden">
+            <div class="workspace-header">
+                <h2><i class="fas fa-list-ul"></i> Shopping List</h2>
+                <button class="back-btn" data-back="cards"><i class="fas fa-arrow-left"></i> Back</button>
+            </div>
+            <div id="showListBody" class="show-list-body"><!-- rendered --></div>
+            <div id="showListTotals" class="totals-bar"><!-- rendered --></div>
+        </section>
+
+        <!-- ====== SHOPPING PROGRESS PANEL ====== -->
+        <section id="progressPanel" class="workspace-panel glass-panel hidden">
+            <div class="workspace-header">
+                <h2><i class="fas fa-check-circle"></i> Shopping Progress</h2>
+                <button class="back-btn" data-back="cards"><i class="fas fa-arrow-left"></i> Back</button>
+            </div>
+            <div id="progressBody" class="progress-body"><!-- rendered --></div>
+            <div id="progressTotals" class="totals-bar"><!-- rendered --></div>
+        </section>
+
+        <!-- ====== DEFAULT PANEL (no list selected) ====== -->
+        <section id="defaultPanel" class="default-panel glass-panel">
+            <div class="empty-icon"><i class="fas fa-shopping-cart"></i></div>
+            <h2>No Shopping List Selected</h2>
+            <p>Create a new shopping list or select one from the sidebar.</p>
+        </section>
+
+        <!-- ====== SEARCH PANEL ====== -->
+        <section id="searchPanel" class="search-panel glass-panel hidden">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search by list name, date, or item name..." />
+            </div>
+            <div id="searchResults" class="search-results"></div>
+        </section>
+
+        <!-- ====== ARCHIVE PANEL ====== -->
+        <section id="archivePanel" class="archive-panel glass-panel hidden">
+            <h2><i class="fas fa-archive"></i> Archive Shopping Lists</h2>
+            <div id="archiveListContainer" class="archive-list"></div>
+        </section>
+
+        <!-- ====== PINNED PANEL ====== -->
+        <section id="pinnedPanel" class="pinned-panel glass-panel hidden">
+            <h2><i class="fas fa-thumbtack"></i> Pinned Shopping Lists</h2>
+            <div id="pinnedPanelContainer" class="pinned-list-display"></div>
+        </section>
+
+        <!-- ====== THREE-DOT DROPDOWN (global, positioned absolutely) ====== -->
+        <div id="threeDotDropdown" class="three-dot-dropdown glass-panel hidden">
+            <ul>
+                <li data-opt="download"><i class="fas fa-download"></i> Download Shopping List</li>
+                <li data-opt="rename"><i class="fas fa-pen"></i> Rename Shopping List</li>
+                <li data-opt="pin"><i class="fas fa-thumbtack"></i> Pin Shopping List</li>
+                <li data-opt="archive"><i class="fas fa-archive"></i> Archive Shopping List</li>
+                <li data-opt="delete"><i class="fas fa-trash"></i> Delete Shopping List</li>
+            </ul>
+        </div>
+
+        <!-- ====== MODAL (rename / new list / add item / update item / delete item / purchase price) ====== -->
+        <div id="modalOverlay" class="modal-overlay hidden">
+            <div class="modal glass-panel">
+                <span class="modal-close"><i class="fas fa-times"></i></span>
+                <div id="modalContent"></div>
+            </div>
+        </div>
+
+        <!-- ====== TOAST ====== -->
+        <div id="toast" class="toast hidden"></div>
+    </main>
+
+    <!-- ====== JAVASCRIPT (external) ====== -->
+    <script src="shoppinglist.js"></script>
+</body>
+</html>

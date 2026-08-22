@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S.N.E.T.C.H · AI Music Player</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="songplay.css" />
+</head>
+<body>
+  <!-- ====== DEEP SPACE BACKGROUND ====== -->
+  <div id="space-bg">
+    <div class="nebula purple"></div>
+    <div class="nebula blue"></div>
+    <div id="stars"></div>
+    <div id="shooting-stars"></div>
+    <div id="particles"></div>
+  </div>
+
+  <!-- ====== MAIN WRAPPER ====== -->
+  <div class="app-container">
+
+    <!-- TOP LEFT: HOME BUTTON (only button on the left) -->
+    <a href="/" class="home-btn" id="homeBtn" title="Main Dashboard">
+      <i class="fas fa-home"></i><span>Home</span>
+    </a>
+
+    <!-- ====== HEADER ====== -->
+    <header class="song-header">
+      <div class="music-icon-glow">
+        <i class="fas fa-music"></i>
+      </div>
+      <h1>S.N.E.T.C.H <span>AI Music Player</span></h1>
+      <p class="subtitle">Search any song — we'll find and play the best match instantly.</p>
+    </header>
+
+    <!-- ====== SEARCH PANEL (glass card) ====== -->
+    <main class="glass-panel search-panel" id="searchPanel">
+      <section class="step-section">
+        <h2>Enter Song Name</h2>
+        <p class="step-desc">e.g. Believer, Faded, Shape of You, Kesariya, Blinding Lights, Perfect, Tum Hi Ho...</p>
+        <div class="input-wrapper">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" id="songInput" placeholder="Type any song name..." autocomplete="off" />
+          <i class="fas fa-music music-icon"></i>
+        </div>
+      </section>
+
+      <section class="step-section">
+        <button id="playBtn" class="play-btn">
+          <i class="fas fa-play"></i> <span class="play-btn-label">Play Song</span>
+        </button>
+        <div id="feedbackMsg" class="feedback-message" role="status"></div>
+      </section>
+    </main>
+
+    <!-- ====== NOW PLAYING PANEL (glass card, hidden until a song loads) ====== -->
+    <section class="glass-panel player-panel" id="playerPanel" hidden>
+
+      <div class="now-playing-top">
+        <!-- Rotating album cover with glow ring + floating particles -->
+        <div class="cover-stage">
+          <div class="cover-glow-ring"></div>
+          <div class="cover-particles" id="coverParticles"></div>
+          <div class="cover-rotator" id="coverRotator">
+            <img id="coverArt" class="cover-art" src="" alt="Album cover" />
+            <div class="cover-shine"></div>
+          </div>
+          <div class="cover-center-dot"></div>
+        </div>
+
+        <div class="track-meta">
+          <h3 class="track-title" id="trackTitle">—</h3>
+          <p class="track-artist" id="trackArtist">—</p>
+          <p class="track-album" id="trackAlbum">—</p>
+
+          <!-- Animated waveform / equalizer visualizer -->
+          <div class="equalizer" id="equalizer" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Premium progress bar -->
+      <div class="progress-block">
+        <span class="time-label" id="currentTime">0:00</span>
+        <div class="progress-track" id="progressTrack">
+          <div class="progress-fill" id="progressFill"></div>
+          <div class="progress-handle" id="progressHandle"></div>
+        </div>
+        <span class="time-label" id="remainingTime">-0:00</span>
+      </div>
+
+      <!-- Transport controls -->
+      <div class="controls-row main-controls">
+        <button class="ctrl-btn" id="shuffleBtn" title="Shuffle" aria-pressed="false">
+          <i class="fas fa-random"></i>
+        </button>
+        <button class="ctrl-btn" id="prevBtn" title="Previous">
+          <i class="fas fa-step-backward"></i>
+        </button>
+        <button class="ctrl-btn" id="seekBackBtn" title="Seek Backward 10s">
+          <i class="fas fa-backward"></i>
+        </button>
+        <button class="ctrl-btn play-pause-btn" id="playPauseBtn" title="Play / Pause">
+          <i class="fas fa-play" id="playPauseIcon"></i>
+        </button>
+        <button class="ctrl-btn" id="seekFwdBtn" title="Seek Forward 10s">
+          <i class="fas fa-forward"></i>
+        </button>
+        <button class="ctrl-btn" id="nextBtn" title="Next">
+          <i class="fas fa-step-forward"></i>
+        </button>
+        <button class="ctrl-btn" id="repeatBtn" title="Repeat Off" aria-pressed="false" data-mode="off">
+          <i class="fas fa-redo"></i>
+        </button>
+      </div>
+
+      <!-- Secondary controls: stop, restart, volume -->
+      <div class="controls-row secondary-controls">
+        <button class="pill-btn" id="restartBtn" title="Restart Song">
+          <i class="fas fa-undo-alt"></i> Restart
+        </button>
+        <button class="pill-btn" id="stopBtn" title="Stop">
+          <i class="fas fa-stop"></i> Stop
+        </button>
+        <div class="volume-block">
+          <button class="ctrl-btn small" id="muteBtn" title="Mute / Unmute">
+            <i class="fas fa-volume-up" id="volumeIcon"></i>
+          </button>
+          <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="80" />
+        </div>
+      </div>
+
+      <div class="player-feedback" id="playerFeedback" role="status"></div>
+    </section>
+
+    <!-- ====== PLAYLIST / RECENTLY PLAYED ====== -->
+    <section class="glass-panel playlist-panel" id="playlistPanel" hidden>
+      <h3 class="playlist-title"><i class="fas fa-list-ul"></i> Recently Played</h3>
+      <div class="playlist-list" id="playlistList"></div>
+    </section>
+
+    <!-- FOOTER CARD -->
+    <footer class="footer-card">
+      <i class="fas fa-shield-alt shield-icon"></i>
+      <span>Only for personal use. Please respect artists and copyright.</span>
+    </footer>
+
+  </div>
+
+  <!-- hidden native audio element that actually plays the stream -->
+  <audio id="audioEl" preload="auto" crossorigin="anonymous"></audio>
+
+  <script src="songplay.js"></script>
+</body>
+</html>

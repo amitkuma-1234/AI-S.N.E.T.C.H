@@ -1,0 +1,39 @@
+Traceback (most recent call last):
+  File "C:\Users\amitk\AppData\Local\Programs\Python\Python311\Lib\site-packages\yt_dlp\YoutubeDL.py", line 1726, in wrapper
+    def _handle_extraction_exceptions(func):
+                           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\amitk\AppData\Local\Programs\Python\Python311\Lib\site-packages\yt_dlp\YoutubeDL.py", line 1882, in __extract_info
+    if extra_info.get('original_url'):
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\amitk\AppData\Local\Programs\Python\Python311\Lib\site-packages\yt_dlp\YoutubeDL.py", line 1941, in process_ie_result
+    self.record_download_archive(info_copy)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\amitk\AppData\Local\Programs\Python\Python311\Lib\site-packages\yt_dlp\YoutubeDL.py", line 3086, in process_video_result
+    format_selector = self.build_format_selector(req_format)
+yt_dlp.utils.ExtractorError: [youtube] Ty8gcCKuwNI: Requested format is not available. Use --list-formats for a list of available formats
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\amitk\OneDrive\Desktop\projects\SNETCH\downloadvideo.py", line 315, in api_resolve
+    job["error"] = friendly_error(exc)
+    ^^^^^^^
+  File "C:\Users\amitk\OneDrive\Desktop\projects\SNETCH\downloadvideo.py", line 304, in api_resolve
+    })
+       
+  File "C:\Users\amitk\OneDrive\Desktop\projects\SNETCH\downloadvideo.py", line 198, in extract_metadata
+    opts["merge_output_format"] = "mp4"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\amitk\AppData\Local\Programs\Python\Python311\Lib\site-packages\yt_dlp\YoutubeDL.py", line 1715, in extract_info
+    self.to_screen(f'[download] {self._format_screen(temp_id, self.Styles.ID)}: '
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\amitk\AppData\Local\Programs\Python\Python311\Lib\site-packages\yt_dlp\YoutubeDL.py", line 1744, in wrapper
+    msg += '\nThis video is available in {}.'.format(', '.join(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\amitk\AppData\Local\Programs\Python\Python311\Lib\site-packages\yt_dlp\YoutubeDL.py", line 1160, in report_error
+    def report_error(self, message, *args, **kwargs):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\amitk\AppData\Local\Programs\Python\Python311\Lib\site-packages\yt_dlp\YoutubeDL.py", line 1099, in trouble
+    if sys.exc_info()[0] and hasattr(sys.exc_info()[1], 'exc_info') and sys.exc_info()[1].exc_info[0]:
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+yt_dlp.utils.DownloadError: [0;31mERROR:[0m [youtube] Ty8gcCKuwNI: Requested format is not available. Use --list-formats for a list of available formats

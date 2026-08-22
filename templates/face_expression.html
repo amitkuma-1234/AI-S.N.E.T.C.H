@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S.N.E.T.C.H · Face Expression</title>
+  <!-- Fonts & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="face_expression.css" />
+</head>
+<body>
+  <!-- ====== SPACE BACKGROUND (canvas) ====== -->
+  <canvas id="spaceCanvas"></canvas>
+
+  <!-- ====== TOP BAR ====== -->
+  <header class="topbar">
+    <button id="homeBtn" class="home-btn glass-panel">
+      <i class="fas fa-home"></i> <span>Home</span>
+    </button>
+    <div class="topbar-brand">
+      <i class="fas fa-face-smile"></i>
+      <span>S.N.E.T.C.H <em>Face Expression</em></span>
+    </div>
+  </header>
+
+  <!-- ====== MAIN APP ====== -->
+  <main class="app">
+
+    <section class="hero">
+      <div class="glow-icon"><i class="fas fa-face-grin-stars"></i></div>
+      <h1>Face Expression Recognition</h1>
+      <p class="subtitle">Detect faces and recognize emotions — from a photo, a video, or your live camera.</p>
+
+      <!-- mode tabs -->
+      <div class="method-cards">
+        <button class="method-card active" data-mode="image" type="button">
+          <i class="fas fa-image"></i>
+          <h3>Image</h3>
+          <p>Detect emotion in one photo</p>
+        </button>
+        <button class="method-card" data-mode="video" type="button">
+          <i class="fas fa-file-video"></i>
+          <h3>Video</h3>
+          <p>Track expressions across a clip</p>
+        </button>
+        <button class="method-card" data-mode="webcam" type="button">
+          <i class="fas fa-video"></i>
+          <h3>Live Camera</h3>
+          <p>Real-time emotion feed</p>
+        </button>
+      </div>
+
+      <!-- shared calibration controls -->
+      <div class="settings-row glass-panel">
+        <div class="setting">
+          <label for="confSlider"><i class="fas fa-sliders-h"></i> Confidence Threshold <span id="confVal">0.50</span></label>
+          <input type="range" id="confSlider" min="0.1" max="0.95" step="0.05" value="0.5" />
+        </div>
+        <p class="setting-hint">Sirf is threshold se zyada confidence wali emotions hi bounding box ke saath dikhengi.</p>
+      </div>
+
+      <!-- ============ IMAGE PANEL ============ -->
+      <section class="mode-panel" id="panel-image">
+        <div class="dropzone glass-panel" id="imageDropzone">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>Drag &amp; drop an image, or click to browse</p>
+          <span class="dz-hint">JPG · PNG · WEBP</span>
+          <input type="file" id="imageInput" accept="image/*" hidden />
+        </div>
+
+        <div class="preview-row hidden" id="imagePreviewRow">
+          <div class="preview-card glass-panel">
+            <h4><i class="fas fa-file-image"></i> Original</h4>
+            <img id="imageOriginal" alt="Original upload preview" />
+          </div>
+          <div class="preview-card glass-panel">
+            <h4><i class="fas fa-face-smile"></i> Detected</h4>
+            <div class="result-slot" id="imageResultSlot">
+              <div class="spinner"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="count-chips" id="imageCounts"></div>
+
+        <button class="action-btn" id="imageDetectBtn" type="button" disabled>
+          <i class="fas fa-face-smile"></i> Detect Emotion
+        </button>
+      </section>
+
+      <!-- ============ VIDEO PANEL ============ -->
+      <section class="mode-panel hidden" id="panel-video">
+        <div class="dropzone glass-panel" id="videoDropzone">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>Drag &amp; drop a video, or click to browse</p>
+          <span class="dz-hint">MP4 · MOV · AVI · MKV</span>
+          <input type="file" id="videoInput" accept="video/*" hidden />
+        </div>
+
+        <div class="file-chip hidden glass-panel" id="videoFileChip">
+          <i class="fas fa-file-video"></i>
+          <span id="videoFileName">—</span>
+          <button id="videoFileClear" type="button"><i class="fas fa-times"></i></button>
+        </div>
+
+        <button class="action-btn" id="videoStartBtn" type="button" disabled>
+          <i class="fas fa-play"></i> Start Analysis
+        </button>
+
+        <!-- video progress -->
+        <div class="progress-card glass-panel hidden" id="videoProgressCard">
+          <div class="status-pill" id="videoStatusPill">Queued…</div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="videoBarFill" style="width:0%"></div>
+          </div>
+          <div class="progress-percent" id="videoPercent">0%</div>
+          <div class="progress-stats">
+            <div class="stat"><i class="fas fa-film"></i><span id="videoFrameStat">0 / 0</span><label>Frames</label></div>
+            <div class="stat"><i class="fas fa-face-smile"></i><span id="videoFacesStat">0</span><label>Faces Detected</label></div>
+          </div>
+          <button class="cancel-btn" id="videoCancelBtn" type="button"><i class="fas fa-times"></i> Cancel</button>
+        </div>
+
+        <!-- video complete -->
+        <div class="complete-card glass-panel hidden" id="videoCompleteCard">
+          <div class="complete-check"><i class="fas fa-check"></i></div>
+          <h2>Analysis Complete</h2>
+          <video id="videoResultPlayer" controls></video>
+          <div class="count-chips" id="videoEmotionCounts"></div>
+          <p class="done-location"><i class="fas fa-folder-open"></i> Bhi saved to <span>Downloads</span> folder</p>
+          <div class="complete-actions">
+            <a class="action-btn" id="videoDownloadBtn" href="#" download><i class="fas fa-download"></i> Download Output</a>
+            <button class="ghost-btn" id="videoResetBtn" type="button"><i class="fas fa-rotate-left"></i> Analyze Another</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ WEBCAM PANEL ============ -->
+      <section class="mode-panel hidden" id="panel-webcam">
+        <div class="webcam-stage glass-panel">
+          <img id="webcamStream" class="hidden" alt="Live camera emotion feed" />
+          <div class="webcam-placeholder" id="webcamPlaceholder">
+            <i class="fas fa-video-slash"></i>
+            <p>Camera is off</p>
+            <span>Start analysis to go live</span>
+          </div>
+          <div class="live-badge hidden" id="liveBadge"><span class="dot"></span> LIVE</div>
+        </div>
+
+        <div class="webcam-stats">
+          <div class="stat glass-panel"><i class="fas fa-face-smile"></i><span id="webcamFacesStat">0</span><label>Faces In Frame</label></div>
+          <div class="stat glass-panel"><i class="fas fa-heart-pulse"></i><span id="webcamEmotionStat">—</span><label>Dominant Emotion</label></div>
+        </div>
+
+        <div class="webcam-controls">
+          <button class="action-btn" id="webcamStartBtn" type="button"><i class="fas fa-play"></i> Start Camera</button>
+          <button class="cancel-btn hidden" id="webcamStopBtn" type="button"><i class="fas fa-stop"></i> Stop Camera</button>
+        </div>
+      </section>
+
+      <!-- ====== FULLSCREEN CAMERA ====== -->
+      <div id="fullscreenCamContainer" class="fullscreen-cam hide-cam">
+        <div class="video-wrapper">
+          <video id="localVideo" autoplay playsinline muted></video>
+          <canvas id="overlayCanvas"></canvas>
+        </div>
+
+        <div class="cam-overlay-ui">
+          <button class="cam-close-btn" id="camCloseBtn" type="button"><i class="fas fa-times"></i></button>
+          <div class="cam-stats-overlay">
+            <div class="stat-pill"><i class="fas fa-face-smile"></i> <span id="fsFacesStat">0</span> <label>Faces</label></div>
+            <div class="stat-pill"><i class="fas fa-heart-pulse"></i> <span id="fsEmotionStat">—</span> <label>Emotion</label></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== ERROR TOAST ====== -->
+      <div class="error-toast hidden" id="errorToast">
+        <i class="fas fa-triangle-exclamation"></i>
+        <span id="errorMessage">Something went wrong.</span>
+        <button id="errorCloseBtn" type="button"><i class="fas fa-times"></i></button>
+      </div>
+
+      <footer class="copyright">
+        <p>YuNet Face Detector + Custom Emotion Model (best_model.pth) · runs locally · outputs auto-saved to your Downloads folder.</p>
+      </footer>
+    </section>
+
+  </main>
+
+  <script src="face_expression.js?v=1"></script>
+</body>
+</html>

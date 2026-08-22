@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snetch — Sign In</title>
+<meta name="description" content="Sign in to S.N.E.T.C.H — Smart Neural Engine Task Control and Hub">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+<div class="noise"></div>
+<div class="toast-container" id="toast-container"></div>
+
+<div class="stage">
+  <div class="card" id="card">
+
+    <!-- Logo -->
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M4 12C4 7.58 7.58 4 12 4s8 3.58 8 8-3.58 8-8 8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 8v4l3 3" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="4" cy="12" r="2" fill="#fff" opacity="0.6"/>
+        </svg>
+      </div>
+      <span class="logo-name">Snetch</span>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-signin" onclick="switchTab('signin')">Sign In</button>
+      <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Create Account</button>
+    </div>
+
+    <!-- Global Alert -->
+    <div class="global-alert" id="global-alert"></div>
+
+    <!-- ═══════════ SIGN IN TAB ═══════════ -->
+    <div class="tab-content active" id="content-signin">
+
+      <!-- Google Button -->
+      <button class="social-btn" id="google-signin-btn" onclick="handleGoogleSignIn()">
+        <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Continue with Google
+      </button>
+
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span class="divider-text">or sign in with email</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <!-- Email Field -->
+      <div class="field">
+        <label class="field-label" for="login-email">Email</label>
+        <div class="field-wrap">
+          <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email">
+          <span class="field-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M2 7l10 7 10-7"/></svg>
+          </span>
+        </div>
+        <div class="error-msg" id="login-email-err">Please enter a valid email.</div>
+      </div>
+
+      <!-- Password Field -->
+      <div class="field">
+        <label class="field-label" for="login-password">Password</label>
+        <div class="field-wrap">
+          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+          <span class="field-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          <button class="eye-btn" onclick="togglePass('login-password')" type="button" aria-label="Toggle password">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="error-msg" id="login-pass-err">Password must be at least 6 characters.</div>
+      </div>
+
+      <!-- Remember + Forgot -->
+      <div class="row">
+        <label class="check-wrap">
+          <input type="checkbox" id="remember">
+          <span class="check-box"></span>
+          <span class="check-label">Remember me</span>
+        </label>
+        <a href="#" class="forgot" onclick="openForgotModal(event)">Forgot password?</a>
+      </div>
+
+      <!-- Submit -->
+      <button class="submit-btn" id="login-btn" onclick="handleLogin()">
+        <span class="btn-text">Sign in to Snetch</span>
+        <span class="btn-spinner"><span class="spinner-ring"></span></span>
+      </button>
+
+      <p class="card-footer">
+        New to Snetch? <a onclick="switchTab('signup')">Create an account</a>
+      </p>
+    </div>
+
+    <!-- ═══════════ SIGN UP TAB ═══════════ -->
+    <div class="tab-content" id="content-signup">
+
+      <!-- Google Button -->
+      <button class="social-btn" id="google-signup-btn" onclick="handleGoogleSignIn()">
+        <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Sign up with Google
+      </button>
+
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span class="divider-text">or create with email</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <!-- Username Field -->
+      <div class="field">
+        <label class="field-label" for="reg-username">Username</label>
+        <div class="field-wrap">
+          <input type="text" id="reg-username" placeholder="Your display name" autocomplete="name">
+          <span class="field-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </span>
+        </div>
+        <div class="error-msg" id="reg-user-err">Username must be at least 2 characters.</div>
+      </div>
+
+      <!-- Email Field -->
+      <div class="field">
+        <label class="field-label" for="reg-email">Email</label>
+        <div class="field-wrap">
+          <input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email">
+          <span class="field-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M2 7l10 7 10-7"/></svg>
+          </span>
+        </div>
+        <div class="error-msg" id="reg-email-err">Please enter a valid email.</div>
+      </div>
+
+      <!-- Password Field -->
+      <div class="field">
+        <label class="field-label" for="reg-password">Password</label>
+        <div class="field-wrap">
+          <input type="password" id="reg-password" placeholder="Minimum 6 characters" autocomplete="new-password" oninput="updateStrength(this.value)">
+          <span class="field-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          <button class="eye-btn" onclick="togglePass('reg-password')" type="button" aria-label="Toggle password">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="pwd-strength"><div class="pwd-bar" id="pwd-bar"></div></div>
+        <div class="error-msg" id="reg-pass-err">Password must be at least 6 characters.</div>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="field">
+        <label class="field-label" for="reg-confirm">Confirm Password</label>
+        <div class="field-wrap">
+          <input type="password" id="reg-confirm" placeholder="Re-enter your password" autocomplete="new-password">
+          <span class="field-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+        </div>
+        <div class="error-msg" id="reg-confirm-err">Passwords do not match.</div>
+      </div>
+
+      <!-- Submit -->
+      <button class="submit-btn" id="register-btn" onclick="handleRegister()" style="margin-top:10px">
+        <span class="btn-text">Create Account</span>
+        <span class="btn-spinner"><span class="spinner-ring"></span></span>
+      </button>
+
+      <p class="card-footer">
+        Already have an account? <a onclick="switchTab('signin')">Sign in</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════ OTP VERIFICATION MODAL ═══════════ -->
+<div class="modal-overlay" id="otp-modal">
+  <div class="modal-card">
+    <div style="font-size:40px;margin-bottom:12px">✉️</div>
+    <div class="modal-title">Check your email</div>
+    <div class="modal-subtitle">
+      We've sent a 6-digit code to<br>
+      <strong id="otp-email-display" style="color:var(--spark)">your email</strong>
+    </div>
+
+    <div class="otp-inputs" id="otp-inputs">
+      <input type="text" class="otp-input" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
+      <input type="text" class="otp-input" maxlength="1" inputmode="numeric">
+      <input type="text" class="otp-input" maxlength="1" inputmode="numeric">
+      <input type="text" class="otp-input" maxlength="1" inputmode="numeric">
+      <input type="text" class="otp-input" maxlength="1" inputmode="numeric">
+      <input type="text" class="otp-input" maxlength="1" inputmode="numeric">
+    </div>
+
+    <div class="otp-timer" id="otp-timer">Code expires in <strong>10:00</strong></div>
+
+    <button class="otp-resend" id="otp-resend" onclick="resendOTP()" disabled>Resend code</button>
+
+    <div style="margin-top:4px">
+      <button class="submit-btn" id="otp-verify-btn" onclick="verifyOTP()" style="margin-bottom:12px">
+        <span class="btn-text">Verify Email</span>
+        <span class="btn-spinner"><span class="spinner-ring"></span></span>
+      </button>
+    </div>
+
+    <button class="modal-close" onclick="closeOTPModal()">← Back to login</button>
+  </div>
+</div>
+
+<!-- ═══════════ FORGOT PASSWORD MODAL ═══════════ -->
+<div class="modal-overlay" id="forgot-modal">
+  <div class="modal-card">
+    <div style="font-size:40px;margin-bottom:12px">🔑</div>
+    <div class="modal-title" id="forgot-modal-title">Reset your password</div>
+    <div class="modal-subtitle" id="forgot-modal-subtitle">
+      Enter your email and we'll send you a reset code.
+    </div>
+
+    <!-- Step 1: Email -->
+    <div id="forgot-step-email">
+      <div class="field" style="text-align:left;margin-bottom:20px">
+        <label class="field-label" for="forgot-email">Email</label>
+        <div class="field-wrap">
+          <input type="email" id="forgot-email" placeholder="you@example.com" autocomplete="email">
+          <span class="field-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M2 7l10 7 10-7"/></svg>
+          </span>
+        </div>
+      </div>
+      <button class="submit-btn" id="forgot-send-btn" onclick="sendResetCode()" style="margin-bottom:12px">
+        <span class="btn-text">Send Reset Code</span>
+        <span class="btn-spinner"><span class="spinner-ring"></span></span>
+      </button>
+    </div>
+
+    <!-- Step 2: OTP verification, then password reset -->
+    <div id="forgot-step-reset" style="display:none">
+
+      <div id="forgot-step-otp">
+        <div class="modal-subtitle" style="margin-bottom:16px">
+          Code sent to <strong id="forgot-email-display" style="color:var(--spark)"></strong>
+        </div>
+
+        <div class="otp-inputs" id="reset-otp-inputs">
+          <input type="text" class="otp-input reset-otp-input" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
+          <input type="text" class="otp-input reset-otp-input" maxlength="1" inputmode="numeric">
+          <input type="text" class="otp-input reset-otp-input" maxlength="1" inputmode="numeric">
+          <input type="text" class="otp-input reset-otp-input" maxlength="1" inputmode="numeric">
+          <input type="text" class="otp-input reset-otp-input" maxlength="1" inputmode="numeric">
+          <input type="text" class="otp-input reset-otp-input" maxlength="1" inputmode="numeric">
+        </div>
+
+        <div class="otp-timer" id="reset-otp-timer">Code expires in <strong>10:00</strong></div>
+        <button class="otp-resend" id="reset-otp-resend" onclick="resendResetCode()" disabled>Resend code</button>
+
+        <button class="submit-btn" id="reset-verify-btn" onclick="verifyResetCode()" style="margin-bottom:12px">
+          <span class="btn-text">Verify</span>
+          <span class="btn-spinner"><span class="spinner-ring"></span></span>
+        </button>
+      </div>
+
+      <div id="forgot-step-password" style="display:none">
+      <div class="field" style="text-align:left;margin-bottom:14px">
+        <label class="field-label" for="reset-password">New Password</label>
+        <div class="field-wrap">
+          <input type="password" id="reset-password" placeholder="Minimum 6 characters" autocomplete="new-password">
+          <span class="field-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          <button class="eye-btn" onclick="togglePass('reset-password')" type="button" aria-label="Toggle password">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="field" style="text-align:left;margin-bottom:20px">
+        <label class="field-label" for="reset-confirm">Confirm Password</label>
+        <div class="field-wrap">
+          <input type="password" id="reset-confirm" placeholder="Re-enter your password" autocomplete="new-password">
+          <span class="field-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+        </div>
+      </div>
+
+      <button class="submit-btn" id="reset-submit-btn" onclick="submitPasswordReset()" style="margin-bottom:12px">
+        <span class="btn-text">Reset Password</span>
+        <span class="btn-spinner"><span class="spinner-ring"></span></span>
+      </button>
+      </div>
+    </div>
+
+    <button class="modal-close" onclick="closeForgotModal()">← Back to login</button>
+  </div>
+</div>
+
+<script src="login.js"></script>
+</body>
+</html>

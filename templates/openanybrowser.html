@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Open Browser · S.N.E.T.C.H</title>
+  <!-- CSS will be separate, but we link it here -->
+  <link rel="stylesheet" href="openanybrowser.css" />
+  <!-- Font Awesome for icons (optional but used for consistency) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+</head>
+<body>
+  <!-- ====== ANIMATED SPACE BACKGROUND ====== -->
+  <div id="space-bg">
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+    <div class="nebula purple"></div>
+    <div class="nebula blue"></div>
+    <div class="shooting-stars"></div>
+    <div class="particles"></div>
+  </div>
+
+  <!-- ====== MAIN WRAPPER (glassmorphism) ====== -->
+  <div class="app-wrapper">
+
+    <!-- ====== LEFT PANEL (compact floating) ====== -->
+    <aside class="left-panel">
+      <div class="home-btn" id="homeBtn">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </div>
+      <div class="panel-brand">
+        <span class="brand-sn">S.N.E.T.C.H</span>
+        <span class="brand-sub">OPEN BROWSER</span>
+        <p class="brand-desc">Type or speak a browser or website name and I'll open it for you instantly.</p>
+      </div>
+      <!-- No extra chat lists, exactly as reference -->
+    </aside>
+
+    <!-- ====== MAIN CONTENT ====== -->
+    <main class="main-content">
+
+      <!-- ====== HEADER ====== -->
+      <header class="main-header">
+        <div class="header-icon">
+          <i class="fas fa-globe" style="font-size: 2.8rem; color: #b388ff; filter: drop-shadow(0 0 12px #b388ff);"></i>
+        </div>
+        <div class="header-text">
+          <h1>Open Browser</h1>
+          <p>Type a browser or website name, or use voice — I'll figure out the rest.</p>
+        </div>
+      </header>
+
+      <!-- ====== CHAT PANEL ====== -->
+      <div class="chat-panel" id="chatPanel">
+        <div class="chat-messages" id="chatMessages">
+          <!-- messages will be injected by JS -->
+        </div>
+
+        <!-- ====== SELECTION DIALOG (multiple matches) ====== -->
+        <div class="selection-overlay" id="selectionOverlay">
+          <div class="selection-dialog">
+            <div class="selection-header">
+              <i class="fas fa-list-ul"></i>
+              <span>Multiple matches found — pick one</span>
+              <button class="selection-close" id="selectionClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="selection-list" id="selectionList"></div>
+          </div>
+        </div>
+
+        <!-- Chat input floating at bottom -->
+        <div class="chat-input-wrapper">
+          <div class="chat-input-glass">
+            <textarea id="chatInput" rows="1" placeholder="Type a browser or website name..."></textarea>
+            <button class="input-voice" id="voiceBtn" title="Voice command"><i class="fas fa-microphone"></i></button>
+            <button class="input-send" id="sendBtn" title="Open"><i class="fas fa-paper-plane"></i></button>
+          </div>
+          <div class="voice-status" id="voiceStatus"></div>
+        </div>
+      </div>
+
+      <!-- ====== FOOTER / extra (just for reference) ====== -->
+      <div class="footer-note">
+        <!-- subtle, matches S.N.E.T.C.H style -->
+      </div>
+    </main>
+  </div>
+
+  <!-- JavaScript separate -->
+  <script src="openanybrowser.js"></script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>S.N.E.T.C.H · ENTERTAINMENT AI</title>
+  <!-- Font & Icons (consistent with the rest of S.N.E.T.C.H) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <!-- CSS (separate) -->
+  <link rel="stylesheet" href="Entertainment.css">
+</head>
+<body>
+
+  <!-- ===== SPACE BACKGROUND ===== -->
+  <div id="ent-space-bg">
+    <div class="ent-stars"></div>
+    <div class="ent-twinkling"></div>
+    <div class="ent-nebula purple"></div>
+    <div class="ent-nebula blue"></div>
+    <div class="ent-shooting-stars"></div>
+    <div class="ent-shooting-stars ent-shoot-2"></div>
+    <div class="ent-particles"></div>
+  </div>
+
+  <div class="ent-app">
+
+    <!-- ===== LEFT SIDEBAR ===== -->
+    <aside class="ent-sidebar" id="entSidebar">
+      <div class="ent-sidebar-top">
+        <button class="ent-home-btn" id="homeBtn" title="Home"><i class="fas fa-house"></i> Home</button>
+        <button class="ent-sidebar-close" id="sidebarCloseBtn" title="Close"><i class="fas fa-xmark"></i></button>
+      </div>
+
+      <div class="ent-brand">
+        <span class="ent-brand-name">S.N.E.T.C.H</span>
+        <span class="ent-brand-sub"><i class="fas fa-clapperboard"></i> Entertainment AI</span>
+      </div>
+
+      <button class="ent-new-chat-btn" id="newChatBtn">
+        <i class="fas fa-plus"></i> New Entertainment Chat
+      </button>
+
+      <div class="ent-search-wrap">
+        <i class="fas fa-magnifying-glass"></i>
+        <input type="text" id="searchChatsInput" placeholder="Search chats..." autocomplete="off">
+      </div>
+
+      <button class="ent-archive-entry-btn" id="archiveChatsBtn">
+        <i class="fas fa-box-archive"></i> Archive Chats
+      </button>
+
+      <div class="ent-chat-lists" id="entChatLists">
+        <div class="ent-section" id="pinnedSection">
+          <div class="ent-section-title"><i class="fas fa-thumbtack"></i> Pinned Chats</div>
+          <ul class="ent-chat-list" id="pinnedList"></ul>
+        </div>
+
+        <div class="ent-section" id="recentSection">
+          <div class="ent-section-title">Recent Chats</div>
+          <ul class="ent-chat-list" id="recentList"></ul>
+        </div>
+
+        <div class="ent-empty-state" id="chatsEmptyState">
+          <i class="fas fa-film"></i>
+          <p>No chats yet.<br>Start a New Entertainment Chat to begin.</p>
+        </div>
+      </div>
+    </aside>
+
+    <div class="ent-sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- ===== MAIN CHAT PANEL ===== -->
+    <main class="ent-main">
+      <div class="ent-topbar">
+        <button class="ent-mobile-menu-btn" id="mobileMenuBtn" title="Chats"><i class="fas fa-bars"></i></button>
+        <div class="ent-topbar-icon"><i class="fas fa-clapperboard"></i></div>
+        <div class="ent-chat-title" id="chatTitleDisplay">Entertainment AI Assistant</div>
+        <div class="ent-topbar-spacer"></div>
+      </div>
+
+      <div class="ent-chat-scroll" id="chatScroll">
+        <div class="ent-welcome" id="entWelcome">
+          <div class="ent-logo">
+            <div class="ent-logo-core"><i class="fas fa-clapperboard"></i></div>
+            <div class="ent-orbit orbit1"></div>
+            <div class="ent-orbit orbit2"></div>
+            <div class="ent-orbit orbit3"></div>
+          </div>
+          <h1 class="ent-welcome-title">Entertainment AI</h1>
+          <p class="ent-welcome-sub">Movies · Web Series · Anime · Actors · OTT · Music · Awards — ask me anything.</p>
+          <div class="ent-suggestions" id="entSuggestions">
+            <button type="button" class="ent-suggestion-chip">🔥 What's trending this week?</button>
+            <button type="button" class="ent-suggestion-chip">🎬 Tell me about Inception</button>
+            <button type="button" class="ent-suggestion-chip">🍿 Recommend movies like Interstellar</button>
+            <button type="button" class="ent-suggestion-chip">📺 Best Korean dramas to watch</button>
+          </div>
+        </div>
+
+        <div class="ent-messages" id="messagesContainer"></div>
+      </div>
+
+      <div class="ent-input-bar">
+        <div class="ent-input-wrap">
+          <textarea id="chatInput" placeholder="Ask about movies, shows, actors, music, awards..." rows="1" maxlength="4000"></textarea>
+          <button class="ent-mic-btn" id="micBtn" title="Voice input"><i class="fas fa-microphone"></i></button>
+          <button class="ent-send-btn" id="sendBtn" title="Send"><i class="fas fa-paper-plane"></i></button>
+        </div>
+        <div class="ent-input-hint">S.N.E.T.C.H Entertainment can make mistakes. Enter ↵ to send · Shift+Enter for a new line</div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ===== RENAME MODAL ===== -->
+  <div class="modal-overlay" id="renameModal">
+    <div class="modal glass">
+      <div class="modal-header"><i class="fas fa-pen"></i> Rename Chat</div>
+      <div class="modal-body">
+        <input type="text" id="renameInput" class="ent-text-input" placeholder="Chat title" maxlength="80">
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" id="renameCancelBtn">Cancel</button>
+        <button class="modal-btn save" id="renameSaveBtn"><i class="fas fa-check"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DELETE CONFIRM MODAL ===== -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal glass">
+      <div class="modal-header"><i class="fas fa-trash"></i> Delete Chat</div>
+      <div class="modal-body">
+        <p>This chat will be permanently deleted. This can't be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" id="deleteCancelBtn">Cancel</button>
+        <button class="modal-btn danger" id="deleteConfirmBtn"><i class="fas fa-trash"></i> Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ARCHIVE PANEL ===== -->
+  <div class="modal-overlay" id="archiveModal">
+    <div class="modal glass ent-archive-modal">
+      <div class="modal-header"><i class="fas fa-box-archive"></i> Archived Chats</div>
+      <div class="modal-body">
+        <ul class="ent-chat-list" id="archivedList"></ul>
+        <div class="ent-empty-state" id="archiveEmptyState">
+          <i class="fas fa-box-open"></i>
+          <p>No archived chats.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn cancel" id="archiveCloseBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PER-CHAT THREE-DOT MENU (positioned dynamically by JS) ===== -->
+  <div class="ent-dropdown" id="chatDropdown">
+    <button type="button" data-action="download"><i class="fas fa-download"></i> Download Chat</button>
+    <button type="button" data-action="rename"><i class="fas fa-pen"></i> Rename Chat</button>
+    <button type="button" data-action="delete" class="ent-dropdown-danger"><i class="fas fa-trash"></i> Delete Chat</button>
+    <button type="button" data-action="archive"><i class="fas fa-box-archive"></i> <span class="ent-archive-label">Archive Chat</span></button>
+    <button type="button" data-action="pin"><i class="fas fa-thumbtack"></i> <span class="ent-pin-label">Pin Chat</span></button>
+  </div>
+
+  <!-- JavaScript (separate) -->
+  <script src="Entertainment.js"></script>
+</body>
+</html>

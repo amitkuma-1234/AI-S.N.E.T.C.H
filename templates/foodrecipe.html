@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S.N.E.T.C.H · Food Recipe AI</title>
+  <!-- Font & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="foodrecipe.css" />
+</head>
+<body>
+  <!-- SPACE BACKGROUND (canvas + particles overlays) -->
+  <div id="space-bg">
+    <canvas id="starsCanvas"></canvas>
+    <div class="nebula nebula-purple"></div>
+    <div class="nebula nebula-blue"></div>
+    <div class="shooting-stars"></div>
+    <div class="particles-overlay"></div>
+  </div>
+
+  <!-- APP CONTAINER -->
+  <div class="app-container">
+
+    <!-- LEFT SIDEBAR (glassmorphism) -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-icon"><i class="fas fa-robot"></i></span>
+        <div class="brand-text">
+          <span class="brand-snetch">S.N.E.T.C.H</span>
+          <span class="brand-sub">AI RECIPE ASSISTANT</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-nav="home"><i class="fas fa-home"></i> Home</a>
+        <a href="#" class="nav-item" id="newChatBtn"><i class="fas fa-plus-circle"></i> New Chat</a>
+        <a href="#" class="nav-item" id="searchToggleBtn"><i class="fas fa-search"></i> Search Chats</a>
+        <a href="#" class="nav-item" id="archiveToggleBtn"><i class="fas fa-archive"></i> Archive Chats</a>
+        <a href="#" class="nav-item" id="pinnedToggleBtn"><i class="fas fa-thumbtack"></i> Pinned Chats</a>
+      </nav>
+
+      <div class="sidebar-search" id="searchBarContainer" style="display: none;">
+        <input type="text" id="searchChatInput" placeholder="Search by recipe, food..." />
+        <i class="fas fa-times" id="clearSearchBtn"></i>
+      </div>
+
+      <div class="recent-chats-header">
+        <span>Recent Chats</span>
+        <i class="fas fa-chevron-down"></i>
+      </div>
+
+      <div class="recent-chats-list" id="recentChatsList">
+        <!-- dynamic from JS -->
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <span class="avatar">AK</span>
+          <span class="username">Amit Kumawat</span>
+        </div>
+        <i class="fas fa-ellipsis-v"></i>
+      </div>
+    </aside>
+
+    <!-- MAIN PANEL (chat + header) -->
+    <main class="main-panel">
+      <!-- Header -->
+      <header class="main-header">
+        <button class="mobile-menu-btn" id="mobileMenuBtn" title="Chats"><i class="fas fa-bars"></i></button>
+        <div class="header-icon"><i class="fas fa-utensils"></i></div>
+        <div class="header-text">
+          <h1 id="headerChatTitle">Food Recipe AI</h1>
+          <p>Type a dish name for a complete recipe, then ask follow-up questions — I'll remember this chat.</p>
+        </div>
+      </header>
+
+      <!-- Quick dish suggestions -->
+      <div class="quick-chips">
+        <button class="quick-chip">Paneer Butter Masala</button>
+        <button class="quick-chip">Biryani</button>
+        <button class="quick-chip">Pizza</button>
+        <button class="quick-chip">Chole Bhature</button>
+        <button class="quick-chip">Gulab Jamun</button>
+      </div>
+
+      <!-- Chat panel (messages) -->
+      <div class="chat-panel" id="chatPanel">
+        <div class="chat-message ai-message">
+          <div class="message-avatar"><i class="fas fa-robot"></i></div>
+          <div class="message-bubble">
+            <p>👋 Ask me for any recipe — from Paneer Butter Masala to Chocolate Cake!</p>
+            <span class="timestamp">Just now</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating chat bar (fixed bottom) -->
+      <div class="chat-bar-wrapper">
+        <div class="chat-bar glass">
+          <div class="chat-bar-inner">
+            <button class="attach-btn" disabled title="Coming soon"><i class="fas fa-plus"></i></button>
+            <textarea id="chatInput" rows="1" placeholder="Type a dish name, or ask a follow-up question..."></textarea>
+            <button class="voice-btn" disabled title="Coming soon"><i class="fas fa-microphone"></i></button>
+            <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+            <button class="stop-btn" id="stopBtn" style="display: none;"><i class="fas fa-stop"></i></button>
+          </div>
+        </div>
+        <div class="chat-bar-hint">S.N.E.T.C.H can make mistakes. Enter ↵ to send · Shift+Enter for a new line</div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Three-dot dropdown menu (global) -->
+  <div class="dropdown-menu" id="dropdownMenu">
+    <div class="dropdown-item" data-action="download"><i class="fas fa-download"></i> Download Chat</div>
+    <div class="dropdown-item" data-action="rename"><i class="fas fa-pen"></i> Rename Chat</div>
+    <div class="dropdown-item" data-action="delete"><i class="fas fa-trash"></i> Delete Chat</div>
+    <div class="dropdown-item" data-action="archive"><i class="fas fa-archive"></i> Archive Chat</div>
+    <div class="dropdown-item" data-action="pin"><i class="fas fa-thumbtack"></i> Pin Chat</div>
+  </div>
+
+  <!-- Archive modal -->
+  <div class="archive-modal" id="archiveModal" style="display:none;">
+    <div class="archive-content glass">
+      <h2><i class="fas fa-archive"></i> Archived Chats</h2>
+      <div id="archiveList"></div>
+      <button class="close-archive" id="closeArchiveBtn">Close</button>
+    </div>
+  </div>
+
+  <!-- Pinned modal -->
+  <div class="archive-modal" id="pinnedModal" style="display:none;">
+    <div class="archive-content glass">
+      <h2><i class="fas fa-thumbtack"></i> Pinned Chats</h2>
+      <div id="pinnedList"></div>
+      <button class="close-archive" id="closePinnedBtn">Close</button>
+    </div>
+  </div>
+
+  <!-- Rename modal -->
+  <div class="archive-modal" id="renameModal" style="display:none;">
+    <div class="archive-content glass">
+      <h2><i class="fas fa-pen"></i> Rename Chat</h2>
+      <input type="text" id="renameInput" class="rename-input" placeholder="Chat title" maxlength="80" />
+      <div class="modal-btn-row">
+        <button class="close-archive" id="renameCancelBtn">Cancel</button>
+        <button class="close-archive primary" id="renameSaveBtn"><i class="fas fa-check"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete confirm modal -->
+  <div class="archive-modal" id="deleteModal" style="display:none;">
+    <div class="archive-content glass">
+      <h2><i class="fas fa-trash"></i> Delete Chat</h2>
+      <p style="color:#b8b8d0;margin-bottom:16px;">This chat will be permanently deleted. This can't be undone.</p>
+      <div class="modal-btn-row">
+        <button class="close-archive" id="deleteCancelBtn">Cancel</button>
+        <button class="close-archive danger" id="deleteConfirmBtn"><i class="fas fa-trash"></i> Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="foodrecipe.js"></script>
+</body>
+</html>

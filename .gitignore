@@ -1,0 +1,9 @@
+.env
+__pycache__/
+*.pyc
+db_storage/
+vault_storage/
+generated_images/
+models/
+whatsapp_uploads/
+*.log

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S.N.E.T.C.H · Barcode & QR Scanner</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="barcode_qr_scanner.css" />
+</head>
+<body>
+  <canvas id="spaceCanvas"></canvas>
+
+  <header class="topbar">
+    <button id="homeBtn" class="home-btn glass-panel">
+      <i class="fas fa-home"></i> <span>Home</span>
+    </button>
+    <div class="topbar-brand">
+      <i class="fas fa-satellite-dish"></i>
+      <span>S.N.E.T.C.H <em>Barcode &amp; QR Scanner</em></span>
+    </div>
+  </header>
+
+  <main class="app">
+    <section class="hero">
+      <div class="glow-icon"><i class="fas fa-qrcode"></i></div>
+      <h1>Barcode &amp; QR Code Scanner</h1>
+      <p class="subtitle">Scan live with your camera, or select an image — SNETCH reads it and tells you exactly what it means.</p>
+
+      <div class="method-cards">
+        <button class="method-card active" data-mode="camera" type="button">
+          <i class="fas fa-camera"></i>
+          <h3>Live Camera</h3>
+          <p>Point your camera at a code</p>
+        </button>
+        <button class="method-card" data-mode="upload" type="button">
+          <i class="fas fa-upload"></i>
+          <h3>Select Image</h3>
+          <p>Choose a photo from your device</p>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== LIVE CAMERA MODE ===== -->
+    <section id="cameraPanel" class="panel glass-panel">
+      <div class="camera-wrap">
+        <video id="cameraVideo" autoplay playsinline muted></video>
+        <div id="scanBox" class="scan-box hidden"></div>
+        <div class="scan-line"></div>
+        <div id="cameraHint" class="camera-hint">Point the camera at a barcode or QR code</div>
+      </div>
+      <canvas id="captureCanvas" class="hidden"></canvas>
+      <div class="camera-actions">
+        <button id="startCameraBtn" class="primary-btn"><i class="fas fa-video"></i> Start Camera</button>
+        <button id="stopCameraBtn" class="secondary-btn hidden"><i class="fas fa-stop"></i> Stop</button>
+        <button id="switchCameraBtn" class="icon-btn hidden" title="Switch camera">
+          <i class="fas fa-camera-rotate"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== UPLOAD MODE ===== -->
+    <section id="uploadPanel" class="panel glass-panel hidden">
+      <div id="dropzone" class="dropzone">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p>Drag &amp; drop an image, or <span class="link">browse</span></p>
+        <span class="hint">JPG · PNG · WEBP, up to 12MB</span>
+        <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.webp" hidden />
+      </div>
+      <div id="uploadPreviewWrap" class="preview-wrap hidden">
+        <img id="uploadPreview" alt="preview" />
+        <div class="preview-actions">
+          <button id="analyzeUploadBtn" class="primary-btn"><i class="fas fa-search"></i> Scan Image</button>
+          <button id="clearUploadBtn" class="secondary-btn"><i class="fas fa-times"></i> Clear</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== LOADING ===== -->
+    <section id="loadingPanel" class="panel glass-panel hidden">
+      <div class="spinner"></div>
+      <p>Scanning…</p>
+    </section>
+
+    <!-- ===== RESULTS ===== -->
+    <section id="resultsPanel" class="results-panel hidden"></section>
+
+    <!-- ===== NO RESULT / ERROR ===== -->
+    <section id="emptyPanel" class="panel glass-panel hidden">
+      <i class="fas fa-circle-exclamation"></i>
+      <p id="emptyMessage">No barcode or QR code found. Try getting closer or improving the lighting.</p>
+    </section>
+  </main>
+
+  <!-- ===== RESULT CARD TEMPLATE (cloned by JS) ===== -->
+  <template id="resultCardTemplate">
+    <div class="result-card glass-panel">
+      <div class="result-icon"><i class="fas fa-qrcode"></i></div>
+      <div class="result-body">
+        <div class="result-category"></div>
+        <div class="result-summary"></div>
+
+        <div class="result-actions"></div>
+
+        <details class="result-raw">
+          <summary>Show raw data</summary>
+          <code class="result-raw-text"></code>
+          <button class="copy-btn" type="button"><i class="fas fa-copy"></i> Copy</button>
+        </details>
+      </div>
+    </div>
+  </template>
+
+  <script src="barcode_qr_scanner.js"></script>
+</body>
+</html>

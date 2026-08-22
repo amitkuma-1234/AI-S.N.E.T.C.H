@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>S.N.E.T.C.H · SnapLock</title>
+  <!-- CSS (separate) -->
+  <link rel="stylesheet" href="snaplock.css">
+  <!-- Google Font for a modern, techy look -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+  <!-- Font Awesome 6 (neon icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+  <!-- ===== ANIMATED SPACE BACKGROUND ===== -->
+  <div id="space-bg">
+    <div id="stars"></div>
+    <div id="nebula-purple"></div>
+    <div id="galaxy-blue"></div>
+    <div id="particles"></div>
+    <div id="scan-lines"></div>
+  </div>
+
+  <!-- ===== MAIN WRAPPER ===== -->
+  <div class="app-wrapper">
+
+    <!-- TOP LEFT: HOME BUTTON (floating) -->
+    <div class="home-btn-container">
+      <a href="/" id="homeBtn" class="home-btn" aria-label="Home Dashboard">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </a>
+    </div>
+
+    <!-- ===== HEADER ===== -->
+    <header class="snap-header">
+      <div class="header-icon">
+        <i class="fas fa-cube"></i>
+        <i class="fas fa-satellite-dish"></i>
+      </div>
+      <h1 class="glow-title">S.N.E.T.C.H <span>SnapLock</span></h1>
+      <p class="subtitle">AI Powered Object Security Vault — lock your passwords and documents inside any real-world object.</p>
+    </header>
+
+    <!-- ===== HOME OF SNAPLOCK: TWO PREMIUM OPTIONS ===== -->
+    <section class="mode-grid" id="modeGrid">
+      <div class="mode-card mode-camera" data-mode="camera">
+        <div class="mode-icon"><i class="fas fa-camera-retro"></i></div>
+        <h3 class="mode-title">Camera Mode</h3>
+        <p class="mode-desc">Register a real-world object. Capture it from multiple angles, name it, set an Access Password, and lock a password or document inside it.</p>
+        <button class="mode-btn">Register Object <i class="fas fa-arrow-right"></i></button>
+      </div>
+      <div class="mode-card mode-scanner" data-mode="scanner">
+        <div class="mode-icon"><i class="fas fa-radar"></i></div>
+        <h3 class="mode-title">Scanner Mode</h3>
+        <p class="mode-desc">Scan a registered object with your camera. Once the AI confirms a match, enter your Access Password to unlock what's stored inside.</p>
+        <button class="mode-btn">Start Scan <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </section>
+
+    <section class="objects-section" id="objectsSection">
+      <h2 class="section-heading"><i class="fas fa-boxes-stacked"></i> Registered Objects</h2>
+      <div class="objects-list" id="objectsList">
+        <div class="objects-empty">No objects registered yet. Use <strong>Camera Mode</strong> to secure your first object.</div>
+      </div>
+    </section>
+
+    <div class="footer-space"></div>
+  </div>
+
+  <!-- ===== GENERIC MODAL (Camera Mode wizard, Save Content forms, object list actions) ===== -->
+  <div id="snapOverlay" class="snap-overlay hidden">
+    <div class="snap-modal" role="dialog" aria-modal="true">
+      <button class="snap-modal-close" id="snapModalClose" aria-label="Close">
+        <i class="fas fa-times"></i>
+      </button>
+      <div id="snapModalBody" class="snap-modal-body">
+        <!-- injected by snaplock.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCANNER FULL-SCREEN EXPERIENCE ===== -->
+  <div id="scannerOverlay" class="scanner-overlay hidden">
+
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="scanner-sidebar">
+      <div class="sidebar-top">
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-icon"><i class="fas fa-robot"></i></div>
+          <div class="sidebar-logo-text">
+            <span class="sidebar-brand">S.N.E.T.C.H</span>
+            <span class="sidebar-tagline">Smart. Neural. Efficient.</span>
+          </div>
+        </div>
+        <a href="/" class="sidebar-nav-btn" id="scannerHomeBtn"><i class="fas fa-home"></i><span>Home</span></a>
+      </div>
+      <div class="sidebar-bottom">
+        <button class="sidebar-nav-btn" id="scannerSettingsBtn"><i class="fas fa-gear"></i><span>Settings</span></button>
+      </div>
+    </aside>
+
+    <!-- MAIN SCANNER AREA -->
+    <div class="scanner-main" id="scannerMain">
+
+      <!-- TOP HEADER -->
+      <header class="scanner-header">
+        <h1 class="scanner-title" style="display: none;">
+          <span class="scanner-title-bracket">[</span>
+          SCANNER
+          <span class="scanner-title-bracket">]</span>
+        </h1>
+        <button class="scanner-help-btn" id="scannerHelpBtn"><i class="fas fa-circle-question"></i> How to use</button>
+      </header>
+
+      <!-- CENTRAL SCANNER CIRCLE -->
+      <div class="scanner-circle-area">
+        <div class="scanner-circle-container">
+          <!-- Video feed restricted to circle -->
+          <div class="scanner-video-mask">
+            <video id="scannerVideo" autoplay playsinline muted></video>
+            <canvas id="scannerCanvas" class="hidden" style="position: absolute; top:0; left:0; width: 100%; height: 100%; object-fit: cover; z-index: 1;"></canvas>
+            <div class="scanner-laser" id="scannerLaser" style="display: none;"></div>
+          </div>
+          <!-- Outer decorative ring segments -->
+          <div class="ring-outer-deco"></div>
+          <!-- Main glowing rings -->
+          <div class="ring-glow ring-glow-1"></div>
+          <div class="ring-glow ring-glow-2"></div>
+          <div class="ring-glow ring-glow-3"></div>
+          <!-- Rotating arc -->
+          <div class="ring-rotating-arc"></div>
+        </div>
+      </div>
+
+      <!-- Progress overlay (moved below the scanner circle) -->
+      <div class="scan-progress-container" id="scanProgressOverlay">
+        <div id="scanStatusText" style="display: none;">READY</div>
+        <div id="scanStatusSub" style="display: none;">Point camera at object</div>
+        <div class="cyber-progress-box">
+          <div id="scanProgressValue" class="cyber-progress-text">0%</div>
+          <div class="cyber-progress-bar-bg">
+            <div class="cyber-progress-fill" id="cyberProgressFill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scanner-main-action">
+        <button class="scanner-scan-btn" id="scanCaptureBtn">
+          <div class="scan-btn-graphic">
+            <div class="scan-btn-ring"></div>
+            <div class="scan-btn-inner">
+              <i class="fas fa-crosshairs" id="scanBtnIcon"></i>
+            </div>
+          </div>
+          <span class="scan-btn-label" id="scanBtnLabel">SCAN NOW</span>
+        </button>
+      </div>
+
+      <!-- BOTTOM CONTROL BAR -->
+      <div class="scanner-controls-bar">
+        <div class="scanner-control-card">
+          <i class="fas fa-crosshairs"></i>
+          <span class="control-label">Scan Mode</span>
+          <strong class="control-value">Auto Detect</strong>
+        </div>
+        <div class="scanner-control-card">
+          <i class="fas fa-expand"></i>
+          <span class="control-label">Resolution</span>
+          <strong class="control-value">300 DPI</strong>
+        </div>
+        <div class="scanner-control-card">
+          <i class="fas fa-palette"></i>
+          <span class="control-label">Color Mode</span>
+          <strong class="control-value">Auto</strong>
+        </div>
+        <div class="scanner-control-card">
+          <i class="fas fa-file-lines"></i>
+          <span class="control-label">File Format</span>
+          <strong class="control-value">PDF <i class="fas fa-chevron-down" style="font-size:.6rem;margin-left:.2rem;"></i></strong>
+        </div>
+      </div>
+
+      <!-- Hidden HUD data (used by JS) -->
+      <div style="display:none;">
+        <span id="hudStatus"></span>
+        <span id="hudObjectCount"></span>
+        <span id="hudScanState"></span>
+        <span id="confidenceValue"></span>
+        <span id="confidenceFill"></span>
+      </div>
+
+    </div><!-- /.scanner-main -->
+
+    <!-- Close button -->
+    <button class="scanner-close" id="scannerClose" aria-label="Close Scanner"><i class="fas fa-times"></i></button>
+
+    <!-- ACCESS GRANTED cinematic sequence -->
+    <div class="result-stage granted hidden" id="grantedStage">
+      <div class="fx-particles"></div>
+      <div class="fx-rings"></div>
+      <i class="fas fa-shield-halved result-icon"></i>
+      <h1 class="result-title">ACCESS GRANTED</h1>
+      <p class="result-sub" id="grantedObjectName">Object Recognized</p>
+      <div class="result-confidence" id="grantedConfidence">Similarity: 0%</div>
+    </div>
+
+    <!-- ACCESS DENIED (object not recognized) cinematic sequence -->
+    <div class="result-stage denied hidden" id="deniedStage">
+      <div class="fx-glitch"></div>
+      <i class="fas fa-triangle-exclamation result-icon"></i>
+      <h1 class="result-title">ACCESS DENIED</h1>
+      <p class="result-sub">Object Not Recognized</p>
+      <button class="retry-btn" id="retryScanBtn"><i class="fas fa-rotate-right"></i> Try Again</button>
+    </div>
+
+    <!-- PASSWORD VERIFICATION panel -->
+    <div class="verify-stage hidden" id="verifyStage">
+      <div class="verify-card">
+        <i class="fas fa-lock verify-icon"></i>
+        <h2>Enter Access Password</h2>
+        <p id="verifyObjectName">Object</p>
+        <input type="password" id="verifyPasswordInput" class="snap-input" placeholder="Access Password" autocomplete="off">
+        <div class="verify-error hidden" id="verifyError"></div>
+        <button class="verify-btn" id="verifySubmitBtn"><i class="fas fa-unlock"></i> Unlock</button>
+      </div>
+    </div>
+
+    <!-- WRONG PASSWORD cinematic -->
+    <div class="result-stage wrong-pass hidden" id="wrongPassStage">
+      <div class="fx-glitch red"></div>
+      <i class="fas fa-lock result-icon"></i>
+      <h1 class="result-title">ACCESS DENIED</h1>
+      <p class="result-sub">Incorrect Password</p>
+      <button class="retry-btn" id="retryPasswordBtn"><i class="fas fa-rotate-right"></i> Try Again</button>
+    </div>
+
+    <!-- UNLOCKED CONTENT panel -->
+    <div class="content-stage hidden" id="contentStage">
+      <div class="content-card">
+        <div class="content-header">
+          <i class="fas fa-box-open"></i>
+          <h2 id="contentObjectName">Object</h2>
+        </div>
+        <div class="content-list" id="contentList">
+          <!-- injected -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TOAST ROOT ===== -->
+  <div id="snapToastRoot"></div>
+
+  <!-- ===== JAVASCRIPT (separate) ===== -->
+  <script src="snaplock.js"></script>
+</body>
+</html>

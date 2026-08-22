@@ -1,0 +1,62 @@
+Flask==3.1.3
+python-dotenv==1.0.1
+PyJWT==2.9.0
+requests==2.32.3
+
+# --- Password Vault feature dependencies (passwordsave.py) ---
+cryptography>=42.0.0
+
+# --- AI Astrology Assistant feature dependencies (horoscopeapi.py) ---
+langchain-core>=0.3.0
+langchain-ollama>=0.2.0
+langchain-groq>=0.2.0
+gdown>=5.0.0
+# --- File System feature dependencies (filesystem.py) ---
+send2trash==1.8.3
+rapidfuzz==3.9.6
+
+# --- Alarm feature dependencies (alarm.py) ---
+playsound==1.2.2
+yt-dlp>=2024.1.0
+pygame>=2.5.0
+
+# --- AI Image Generator feature dependencies (imagecreater.py) ---
+Pillow>=10.0.0
+
+# --- Launch Apps feature dependencies (openanyapp.py) ---
+# pywin32 is optional: without it, shortcuts still launch fine, they just
+# won't resolve to their underlying .exe path for display purposes.
+pywin32>=306; sys_platform == "win32"
+
+# --- Image Chatbot feature dependencies (image_chatbot.py) ---
+# Requires a local Ollama install with: ollama pull qwen2.5vl:7b
+# Pillow is already listed above (used to validate uploaded images).
+# LangGraph Thread memory is optional; without it the feature still
+# works end-to-end using the SQLite messages table as history.
+langgraph>=0.2.0
+langchain-core>=0.3.0
+
+# --- General System & Backend Dependencies ---
+numpy
+scikit-learn
+sentence-transformers
+youtube-transcript-api
+googlesearch-python
+pywhatkit
+PyMuPDF
+Werkzeug
+
+# --- SnapLock object verification dependencies (snaplock.py) ---
+# DINOv2 (facebook/dinov2-small) is used as a pretrained, local, offline
+# feature extractor for object-instance image embeddings — no cloud APIs,
+# no training. Model weights are downloaded once (first run needs internet)
+# and cached locally afterwards by `transformers`.
+torch>=2.1.0
+transformers>=4.38.0
+
+
+tensorflow>=2.15.0
+nltk>=3.8.1
+emoji>=2.10.0
+beautifulsoup4>=4.12.0
+joblib>=1.3.0

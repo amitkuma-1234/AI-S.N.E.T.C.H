@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S.N.E.T.C.H · Image Chatbot AI</title>
+  <!-- Font & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="image_chatbot.css">
+  <!-- Lightweight markdown renderer for AI responses (bullets, tables, code blocks, bold/italic) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js"></script>
+</head>
+<body>
+  <!-- ===== SPACE BACKGROUND ===== -->
+  <div id="space-bg">
+    <div class="stars-layer" id="stars"></div>
+    <div class="nebula purple"></div>
+    <div class="nebula blue"></div>
+    <div class="glow-orbs"></div>
+    <div class="shooting-stars"></div>
+    <div class="shooting-stars s2"></div>
+    <div class="particles" id="particles"></div>
+  </div>
+
+  <button id="mobileSidebarToggle" class="mobile-toggle" aria-label="Toggle menu"><i class="fas fa-bars"></i></button>
+
+  <!-- ===== APP CONTAINER ===== -->
+  <div id="app">
+
+    <!-- ===== LEFT SIDEBAR ===== -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="brand">S.N.E.T.C.H</span>
+          <span class="sub-brand">IMAGE CHATBOT AI</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="/" class="nav-item" id="homeBtn"><i class="fas fa-home"></i> Home</a>
+        <a href="#" class="nav-item" id="newChatBtn"><i class="fas fa-plus-circle"></i> New Image Chat</a>
+        <div class="search-wrapper">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchChat" placeholder="Search Chats">
+        </div>
+        <a href="#" class="nav-item" id="pinnedBtn"><i class="fas fa-thumbtack"></i> Pinned Chats</a>
+        <a href="#" class="nav-item" id="archiveBtn"><i class="fas fa-archive"></i> Archive Chats</a>
+      </nav>
+
+      <div class="chat-history" id="chatHistory">
+        <div class="history-header"><span id="historyLabel">Recent Chats</span></div>
+        <ul id="chatList"></ul>
+        <div id="emptyState" class="empty-state hidden">
+          <i class="fas fa-image"></i>
+          <p>No image chats yet</p>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="footer-note">Responses are generated based on your uploaded image</div>
+      </div>
+    </aside>
+
+    <!-- ===== MAIN CHAT AREA ===== -->
+    <main id="main">
+
+      <!-- WELCOME / UPLOAD SECTION (visible when no image) -->
+      <section id="uploadSection" class="upload-section">
+        <div class="upload-card glass-panel" id="uploadCard">
+          <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <h2>Upload an Image to Begin</h2>
+          <p>Drag &amp; drop your image here or click to browse</p>
+          <div class="upload-actions">
+            <button id="browseBtn" class="btn-primary"><i class="fas fa-folder-open"></i> Browse Image</button>
+            <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp,image/bmp,image/gif" style="display:none">
+          </div>
+          <div class="upload-formats">Supported formats: PNG, JPG, JPEG, WEBP, BMP, GIF (static) &nbsp;|&nbsp; Max file size: 20MB</div>
+          <div id="uploadProgress" class="upload-progress hidden">
+            <div class="progress-bar"><div id="progressFill" style="width:0%"></div></div>
+            <div id="statusMessage" class="status-message">Uploading...</div>
+          </div>
+          <div id="uploadError" class="upload-error hidden"></div>
+        </div>
+        <!-- feature cards -->
+        <div class="feature-grid">
+          <div class="feature-card"><i class="fas fa-eye"></i><h4>Describe Anything</h4><p>Objects, people, scenes — described in detail</p></div>
+          <div class="feature-card"><i class="fas fa-font"></i><h4>Read Text in Image</h4><p>Extract and read on-image text instantly</p></div>
+          <div class="feature-card"><i class="fas fa-shapes"></i><h4>Count &amp; Analyze</h4><p>Count objects, detect colors and errors</p></div>
+          <div class="feature-card"><i class="fas fa-lock"></i><h4>Secure &amp; Private</h4><p>Your images are safe and never shared</p></div>
+        </div>
+      </section>
+
+      <!-- CHAT VIEW (hidden until image processed) -->
+      <section id="chatView" class="chat-view hidden">
+
+        <!-- Premium image header card -->
+        <div id="imgCard" class="img-card glass-panel">
+          <div class="img-card-thumb">
+            <img id="imgThumb" src="" alt="uploaded preview">
+          </div>
+          <div class="img-card-body">
+            <div class="img-card-name" id="imgName">image.png</div>
+            <div class="img-card-meta">
+              <span id="imgType">PNG</span>
+              <span class="dot">•</span>
+              <span id="imgSize">—</span>
+              <span class="dot">•</span>
+              <span id="imgUploadTime">—</span>
+            </div>
+          </div>
+          <div class="img-card-status">
+            <span class="status-pill" id="uploadStatusPill"><i class="fas fa-circle"></i> Upload: <b id="uploadStatusText">Pending</b></span>
+            <span class="status-pill" id="processingStatusPill"><i class="fas fa-circle"></i> Processing: <b id="processingStatusText">Pending</b></span>
+          </div>
+          <button id="replaceImgBtn" class="icon-btn" title="Start a new image chat"><i class="fas fa-plus"></i></button>
+        </div>
+
+        <!-- CHAT PANEL -->
+        <section id="chatPanel" class="chat-panel hidden">
+          <div id="messageContainer" class="message-container">
+            <!-- messages rendered here -->
+          </div>
+          <div class="chat-input-wrapper">
+            <input type="text" id="chatInput" placeholder="Ask anything about your uploaded image..." disabled>
+            <button id="sendBtn" class="input-btn send-btn" disabled><i class="fas fa-paper-plane"></i></button>
+          </div>
+          <div class="input-hint">Enter to send · Shift+Enter for new line</div>
+        </section>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- ===== Three Dot Menu (shared, positioned dynamically) ===== -->
+  <div id="threeDotMenu" class="three-dot-menu" style="display:none">
+    <div class="menu-item" data-action="download"><i class="fas fa-download"></i> Download Chat</div>
+    <div class="menu-item" data-action="rename"><i class="fas fa-pen"></i> Rename Chat</div>
+    <div class="menu-item danger" data-action="delete"><i class="fas fa-trash"></i> Delete Chat</div>
+    <div class="menu-item" data-action="archive"><i class="fas fa-archive"></i> Archive Chat</div>
+    <div class="menu-item" data-action="pin"><i class="fas fa-thumbtack"></i> Pin Chat</div>
+  </div>
+
+  <!-- ===== Rename modal ===== -->
+  <div id="renameModal" class="modal-overlay hidden">
+    <div class="modal-box glass-panel">
+      <h3>Rename Chat</h3>
+      <input type="text" id="renameInput" maxlength="120" placeholder="Chat title">
+      <div class="modal-actions">
+        <button id="renameCancelBtn" class="btn-secondary">Cancel</button>
+        <button id="renameSaveBtn" class="btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Toast ===== -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="image_chatbot.js"></script>
+</body>
+</html>

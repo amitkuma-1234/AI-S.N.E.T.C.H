@@ -1,0 +1,209 @@
+/* ============================================================
+   S.N.E.T.C.H · Spam Mail Checker
+   Futuristic glassmorphism space theme
+   ============================================================ */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #05060f;
+  color: #e0e6f0;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== SPACE BACKGROUND ===== */
+#space-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(ellipse at 20% 30%, #1b0e3a 0%, #05060f 70%);
+  overflow: hidden;
+}
+
+.stars {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background-image:
+    radial-gradient(2px 2px at 10% 20%, #fff, transparent),
+    radial-gradient(2px 2px at 30% 60%, #fff, transparent),
+    radial-gradient(2px 2px at 50% 10%, #fff, transparent),
+    radial-gradient(1px 1px at 70% 80%, #fff, transparent),
+    radial-gradient(1px 1px at 90% 40%, #fff, transparent),
+    radial-gradient(2px 2px at 15% 85%, #fff, transparent);
+  background-size: 200px 200px;
+  animation: starFloat 80s linear infinite;
+  opacity: 0.7;
+}
+
+.twinkling {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, #fff, transparent),
+    radial-gradient(1px 1px at 40% 70%, #fff, transparent),
+    radial-gradient(1px 1px at 60% 20%, #fff, transparent),
+    radial-gradient(1px 1px at 80% 80%, #fff, transparent);
+  background-size: 300px 300px;
+  animation: twinkle 4s ease-in-out infinite alternate;
+}
+
+.nebula { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.28; animation: nebulaDrift 30s ease-in-out infinite alternate; }
+.nebula.purple { width: 520px; height: 520px; background: #7a3b9e; top: -10%; left: -5%; }
+.nebula.blue { width: 620px; height: 620px; background: #1f3b8a; bottom: -15%; right: -5%; animation-delay: 5s; }
+
+@keyframes starFloat { from { transform: translate(0, 0); } to { transform: translate(-100px, -100px); } }
+@keyframes twinkle { from { opacity: 0.3; } to { opacity: 0.9; } }
+@keyframes nebulaDrift { from { transform: translate(0, 0) scale(1); } to { transform: translate(30px, -20px) scale(1.1); } }
+
+/* ===== GLASS ===== */
+.glass {
+  background: rgba(20, 20, 40, 0.45);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(180, 140, 255, 0.15);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* ===== APP CONTAINER ===== */
+.app-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 680px;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.view-state {
+  width: 100%;
+  animation: scaleFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scaleFadeIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 12px 20px; border-radius: 12px; border: none; cursor: pointer;
+  font-size: 14.5px; font-weight: 600; font-family: 'Inter', sans-serif;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s, background 0.2s;
+}
+.btn:active { transform: scale(0.96); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-primary { background: linear-gradient(135deg, #b48cff, #6a3bd6); color: #fff; box-shadow: 0 4px 18px rgba(180,140,255,0.35); }
+.btn-primary:hover:not(:disabled) { box-shadow: 0 6px 22px rgba(180,140,255,0.5); }
+.btn-ghost { background: rgba(255,255,255,0.06); color: #c3c9de; }
+.btn-ghost:hover { background: rgba(255,255,255,0.1); }
+.btn-huge { font-size: 18px; padding: 18px 40px; border-radius: 100px; margin: 0 auto; }
+.btn-full { width: 100%; }
+
+.btn-home-floating {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  color: #e0e6f0;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-home-floating:hover { background: rgba(255, 255, 255, 0.1); }
+.btn-home-floating:active { transform: scale(0.95); }
+
+/* ===== CARDS ===== */
+.check-card, .result-card, .loading-card {
+  border-radius: 24px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header { text-align: center; margin-bottom: 24px; }
+.card-header h2 { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.card-header p { font-size: 14px; color: #9aa2c0; }
+
+textarea#emailInput {
+  flex: 1; resize: none; width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(180,140,255,0.18);
+  border-radius: 16px; padding: 18px;
+  color: #e8ecf8; font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.6;
+  outline: none; transition: border-color 0.2s;
+  min-height: 200px;
+}
+textarea#emailInput:focus { border-color: #b48cff; box-shadow: 0 0 0 3px rgba(180,140,255,0.12); }
+textarea#emailInput::placeholder { color: #5c6488; }
+
+.check-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; }
+.char-count { font-size: 13px; color: #6c7594; }
+.action-buttons { display: flex; gap: 12px; }
+
+/* ===== LOADING ===== */
+.loading-card { align-items: center; justify-content: center; padding: 60px 32px; text-align: center; }
+.loader-ring {
+  width: 56px; height: 56px; border-radius: 50%;
+  border: 4px solid rgba(180,140,255,0.15); border-top-color: #b48cff;
+  animation: spin 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  margin-bottom: 24px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-card h3 { font-size: 18px; color: #fff; margin-bottom: 6px; }
+.loading-card p { font-size: 14px; color: #8f96b8; }
+
+/* ===== RESULT CARD ===== */
+.result-card { gap: 24px; }
+.result-badge {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 24px; border-radius: 18px; font-size: 22px; font-weight: 800; letter-spacing: 1px;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.result-badge.is-spam { background: rgba(255, 92, 122, 0.14); color: #ff5c7a; box-shadow: inset 0 0 0 1px rgba(255,92,122,0.3), 0 0 32px rgba(255,92,122,0.15); }
+.result-badge.is-ham { background: rgba(75, 227, 160, 0.14); color: #4be3a0; box-shadow: inset 0 0 0 1px rgba(75,227,160,0.3), 0 0 32px rgba(75,227,160,0.15); }
+
+.confidence-block { display: flex; flex-direction: column; gap: 10px; }
+.confidence-label { display: flex; justify-content: space-between; font-size: 14px; color: #9aa2c0; }
+.confidence-track { height: 10px; border-radius: 8px; background: rgba(255,255,255,0.08); overflow: hidden; }
+.confidence-fill { height: 100%; border-radius: 8px; width: 0%; transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s; }
+.confidence-fill.is-spam { background: linear-gradient(90deg, #ff5c7a, #ff9a5c); }
+.confidence-fill.is-ham { background: linear-gradient(90deg, #4be3a0, #6adfff); }
+
+.result-meta { display: flex; flex-direction: column; gap: 12px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); }
+.meta-item { display: flex; justify-content: space-between; font-size: 14px; }
+.meta-label { color: #8f96b8; }
+.meta-value { color: #e0e6f0; font-weight: 600; }
+
+.result-error {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; padding: 24px; text-align: center;
+  background: rgba(255, 154, 92, 0.1); border: 1px solid rgba(255, 154, 92, 0.2); border-radius: 16px;
+}
+.result-error i { font-size: 30px; color: #ff9a5c; }
+.result-error p { font-size: 14px; color: #d7a98a; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .check-card, .result-card, .loading-card { padding: 24px; }
+  .btn-huge { font-size: 16px; padding: 16px 32px; }
+  .action-buttons { flex-direction: column; width: 100%; }
+  .action-buttons .btn { width: 100%; }
+  .check-card-footer { flex-direction: column; gap: 16px; align-items: flex-start; }
+}

@@ -1,0 +1,323 @@
+/* =====================================================================
+   S.N.E.T.C.H GLOBAL RESPONSIVE LAYER
+   This stylesheet cascades over all desktop styles to make the 
+   entire application fully responsive from 3840px down to 320px.
+   ===================================================================== */
+
+/* =====================================================================
+   1. GLOBAL FIXES & UTILITIES
+   ===================================================================== */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+img, video, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Base modal responsiveness */
+.modal, .settings-modal, .alarm-modal, .glass-panel {
+  width: min(95vw, 500px) !important;
+  max-width: 95vw !important;
+  margin: 0 auto;
+}
+
+/* =====================================================================
+   2. BREAKPOINT: ≤ 1024px (Tablets / Small Laptops)
+   ===================================================================== */
+@media screen and (max-width: 1024px) {
+  
+  /* --- SIDEBAR OVERHAUL (Drawer Mode) --- */
+  #sidebar, .sidebar, .aa-sidebar, .yt-sidebar, .ent-sidebar, 
+  .wd-sidebar, .img-sidebar, .doc-sidebar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    height: 100vh !important;
+    transform: translateX(-100%);
+    z-index: 1000 !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.8) !important;
+  }
+
+  /* Sidebar Open State */
+  #sidebar.open, .sidebar.open, .aa-sidebar.open, .yt-sidebar.open, 
+  .ent-sidebar.open, .wd-sidebar.open, .img-sidebar.open, .doc-sidebar.open {
+    transform: translateX(0) !important;
+  }
+
+  /* Main Content Adjustments */
+  .main-content, .aa-main, .yt-main, .ent-main, .chat-container, 
+  .content-wrapper, .app-container {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+
+  /* Mobile Header / Hamburger Toggle */
+  .mobile-header-toggle {
+    display: flex !important;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(10, 8, 20, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 900;
+  }
+  
+  /* Fallback header height when JS handles adding it */
+  .snetch-mobile-header {
+    display: flex;
+    align-items: center;
+    padding: 14px 18px;
+    background: rgba(12, 10, 24, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    position: sticky;
+    top: 0;
+    z-index: 900;
+  }
+
+  .snetch-hamburger {
+    background: transparent;
+    border: none;
+    color: #e8e0ff;
+    font-size: 1.4rem;
+    cursor: pointer;
+    margin-right: 14px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .snetch-header-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f0f4ff;
+    margin: 0;
+  }
+
+  /* Sidebar Overlay Backdrop */
+  .sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+  .sidebar-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Form & Card Grids (Settings, Tools, Reminders) */
+  .grid-container, .card-grid, .ent-card-grid, .settings-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+    gap: 16px !important;
+  }
+}
+
+/* =====================================================================
+   3. BREAKPOINT: ≤ 768px (Tablets / Large Phones)
+   ===================================================================== */
+@media screen and (max-width: 768px) {
+  
+  /* Chat Interface Adjustments */
+  .chat-history, .messages, .aa-messages, .yt-messages, .ent-messages {
+    padding: 10px !important;
+  }
+  
+  .msg-bubble, .message-bubble, .aa-msg-bubble, .yt-msg-bubble, .ent-msg-bubble {
+    max-width: 90% !important;
+  }
+  
+  .input-bar, .chat-input-wrapper, .aa-input-bar, .yt-input-bar, .ent-input-bar {
+    padding: 10px !important;
+  }
+  
+  .input-wrap, .chat-input, .aa-input-wrap, .yt-input-wrap, .ent-input-wrap {
+    padding: 8px 12px !important;
+    border-radius: 16px !important;
+  }
+  
+  /* Tables & Code Blocks (Horizontal Scrolling) */
+  table {
+    display: block !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+  }
+  
+  pre, code, .code-block, .aa-code-block {
+    overflow-x: auto !important;
+    max-width: 100% !important;
+    font-size: 0.85rem !important;
+  }
+  
+  /* Feature specific layout fixes */
+  .weather-card, .recipe-card, .alarm-card {
+    width: 95% !important;
+    margin: 10px auto !important;
+  }
+  
+  .app-wrapper {
+    padding: 10px !important;
+  }
+  
+  .header-icon {
+    font-size: 2.5rem !important;
+  }
+  
+  h1 { font-size: 1.8rem !important; }
+  h2 { font-size: 1.5rem !important; }
+}
+
+/* =====================================================================
+   4. BREAKPOINT: ≤ 480px (Standard & Small Phones)
+   ===================================================================== */
+@media screen and (max-width: 480px) {
+  
+  /* Sidebar width adjustment for tiny screens */
+  #sidebar, .sidebar, .aa-sidebar, .yt-sidebar, .ent-sidebar {
+    width: 85vw !important;
+    min-width: 280px !important;
+  }
+  
+  /* Force single column for all grids */
+  .grid-container, .card-grid, .ent-card-grid, .settings-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Chat avatars and buttons */
+  .msg-avatar, .aa-msg-avatar, .yt-msg-avatar, .ent-msg-avatar {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.8rem !important;
+  }
+  
+  .send-btn, .mic-btn, .aa-send-btn, .aa-mic-btn {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .home-btn {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  .glass {
+    border-radius: 16px !important;
+    padding: 16px !important;
+  }
+  
+  /* specific layout component fixes */
+  .player-controls {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+  
+  .search-wrapper input {
+    font-size: 16px !important; /* Prevents iOS auto-zoom */
+  }
+  
+  textarea, input[type="text"], input[type="password"], input[type="email"] {
+    font-size: 16px !important; /* Prevents iOS auto-zoom */
+  }
+}
+
+/* =====================================================================
+   5. BREAKPOINT: ≤ 360px (Very Small Phones)
+   ===================================================================== */
+@media screen and (max-width: 360px) {
+  .modal, .settings-modal, .alarm-modal, .glass-panel {
+    padding: 12px !important;
+  }
+  
+  h1 { font-size: 1.5rem !important; }
+  
+  .chat-history, .messages {
+    padding: 6px !important;
+  }
+}
+
+/* =====================================================================
+   6. 60 FPS ANIMATION OPTIMIZATIONS
+   ===================================================================== */
+* {
+  /* Prevent scroll chaining on mobile */
+  overscroll-behavior-y: none;
+}
+
+/* Force hardware acceleration for commonly animated properties */
+.logo-hex svg, .ring-outer, .ring-mid, .listening-ring, .waveform-canvas,
+.dot, .bar-viz .bar, .core-center, .msg-bubble, .panel-card,
+.feature-card, .app-card {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =====================================================================
+   7. TOUCH OPTIMIZATIONS (PWA/Mobile)
+   ===================================================================== */
+a, button, .btn, .core-center, .snetch-hamburger, .module-item, .stat-card,
+.chat-input, input, textarea, select {
+  /* Prevent tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent;
+  /* Minimum touch target size */
+  min-height: 44px;
+}
+
+/* Inputs and text areas on mobile shouldn't zoom */
+@media screen and (max-width: 768px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* =====================================================================
+   8. HOME DASHBOARD SPECIFIC WRAPPING FIXES
+   ===================================================================== */
+.main-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 20px !important;
+  width: 100% !important;
+}
+
+/* Make sure module grids and stat grids wrap and size fluidly */
+.module-grid, .bottom-grid, .features-grid, .app-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+
+@media screen and (max-width: 480px) {
+  .module-grid, .bottom-grid, .features-grid, .app-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+  }
+}
+
+/* Fluid feature cards to ensure they never break out of bounds */
+.feature-card, .app-card, .stat-card, .module-item {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}

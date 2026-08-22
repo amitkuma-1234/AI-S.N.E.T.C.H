@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S.N.E.T.C.H · Image Creator</title>
+  <!-- Font & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="imagecreater.css">
+</head>
+<body>
+  <!-- ===== SPACE BACKGROUND ===== -->
+  <div id="space-bg">
+    <div class="stars-layer"></div>
+    <div class="stars-layer layer-2"></div>
+    <div class="nebula purple"></div>
+    <div class="nebula blue"></div>
+    <div class="particles"></div>
+    <div class="particles particles-2"></div>
+    <div class="shooting-stars"></div>
+    <div class="shooting-stars variant-2"></div>
+    <div class="shooting-stars variant-3"></div>
+  </div>
+
+  <!-- ===== APP CONTAINER ===== -->
+  <div class="app-container">
+
+    <!-- ===== LEFT SIDEBAR (Home ONLY) ===== -->
+    <aside class="sidebar glass">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="brand">S.N.E.T.C.H</span>
+          <span class="sub-brand">IMAGE CREATOR</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="/" class="nav-item home-btn" id="homeBtn">
+          <i class="fas fa-house"></i> Home
+        </a>
+      </nav>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+      <!-- HEADER -->
+      <header class="main-header">
+        <div class="header-icon">
+          <i class="fas fa-image" style="color: #b388ff; text-shadow: 0 0 20px #b388ff;"></i>
+        </div>
+        <div class="header-text">
+          <h1>Image Creator</h1>
+          <p>Search for anything and watch the real images download, one by one.</p>
+        </div>
+        <button class="btn-ghost header-reset-btn" id="headerResetBtn" hidden>
+          <i class="fas fa-rotate-right"></i> New Image Generator
+        </button>
+      </header>
+
+      <!-- ===== STAGE ===== -->
+      <section class="stage" id="stage">
+
+        <!-- STAGE 0 · IDLE -->
+        <div class="panel idle-panel" id="idlePanel">
+          <div class="idle-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+          <h2>Ready to find something stunning?</h2>
+          <p>Start a fresh session and search for any image you can imagine.</p>
+          <button class="btn-primary glow-btn big-btn" id="startBtn">
+            <i class="fas fa-plus"></i> New Image Generator
+          </button>
+        </div>
+
+        <!-- STAGE 1 · PROMPT -->
+        <div class="panel prompt-panel glass" id="promptPanel" hidden>
+          <h2>What do you want images of?</h2>
+          <p class="hint">Type a name, a place, an object, an animal — anything you'd search for.</p>
+          <textarea id="promptInput" rows="3" maxlength="200"
+            placeholder="e.g. Neha Kakkar, Lion, Sunset, Cyberpunk city"></textarea>
+          <div class="char-count"><span id="charCount">0</span>/200</div>
+
+          <div class="example-label">Try an example</div>
+          <div class="example-chips" id="exampleChips"></div>
+
+          <div class="panel-actions">
+            <button class="btn-ghost" id="promptBackBtn">Back</button>
+            <button class="btn-primary glow-btn" id="promptNextBtn" disabled>
+              Next <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STAGE 2 · COUNT -->
+        <div class="panel count-panel glass" id="countPanel" hidden>
+          <h2>How many images do you want?</h2>
+          <p class="hint prompt-preview" id="promptPreview"></p>
+
+          <label class="count-input-label" for="countInput">Number of Images</label>
+          <div class="count-input-row">
+            <input type="number" id="countInput" min="1" step="1" placeholder="e.g. 10" />
+          </div>
+          <div class="count-quick-picks" id="countQuickPicks"></div>
+
+          <div class="panel-actions">
+            <button class="btn-ghost" id="countBackBtn">Back</button>
+            <button class="btn-primary glow-btn" id="generateStartBtn" disabled>
+              <i class="fas fa-bolt"></i> Generate Images
+            </button>
+          </div>
+        </div>
+
+        <!-- STAGE 3 · LIVE GALLERY -->
+        <div class="panel gallery-panel" id="galleryPanel" hidden>
+          <div class="gallery-toolbar glass">
+            <div class="progress-info" id="progressInfo">Preparing…</div>
+            <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="toolbar-actions">
+              <button class="btn-secondary" id="downloadAllBtn" disabled>
+                <i class="fas fa-folder-arrow-down"></i> Download All Images
+              </button>
+              <button class="btn-ghost" id="galleryResetBtn">
+                <i class="fas fa-rotate-right"></i> New Image Generator
+              </button>
+            </div>
+          </div>
+          <div class="gallery-grid" id="galleryGrid"></div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- toast for lightweight notifications -->
+  <div class="toast" id="toast"></div>
+
+  <script src="imagecreater.js"></script>
+</body>
+</html>
