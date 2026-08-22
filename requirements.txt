@@ -11,6 +11,7 @@ langchain-core>=0.3.0
 langchain-ollama>=0.2.0
 langchain-groq>=0.2.0
 gdown>=5.0.0
+duckduckgo-search>=6.0.0
 # --- File System feature dependencies (filesystem.py) ---
 send2trash==1.8.3
 rapidfuzz==3.9.6
