@@ -108,8 +108,12 @@
     return `<p>${escapeHtml(text || '').replace(/\n/g, '<br>')}</p>`;
   }
 
+  function authToken() { return localStorage.getItem('snetch_access_token') || ''; }
+
   async function api(path, opts) {
-    const res = await fetch(API_BASE + path, opts);
+    const finalOpts = Object.assign({}, opts);
+    finalOpts.headers = Object.assign({}, finalOpts.headers, { Authorization: 'Bearer ' + authToken() });
+    const res = await fetch(API_BASE + path, finalOpts);
     let data = null;
     try { data = await res.json(); } catch (e) { data = null; }
     if (!res.ok || (data && data.success === false)) {
@@ -460,7 +464,7 @@
     activeAbortController = new AbortController();
     const res = await fetch(API_BASE + path, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authToken() },
       body: JSON.stringify(payload),
       signal: activeAbortController.signal
     });

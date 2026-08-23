@@ -238,16 +238,31 @@
   // ---------------------------------------------------------
   // PERSISTENCE (localStorage + best-effort backend sync)
   // ---------------------------------------------------------
+  function authToken() { return localStorage.getItem('snetch_access_token') || ''; }
+
+  // Namespaces every localStorage key by the currently logged-in user's id,
+  // so switching accounts on the same browser never shows another
+  // account's countdown/stopwatch records (localStorage itself has no
+  // concept of "who is logged in" otherwise).
+  function currentUserSuffix() {
+    try {
+      const u = JSON.parse(localStorage.getItem('snetch_user') || '{}');
+      return u && u.id != null ? (':' + u.id) : ':anon';
+    } catch (e) {
+      return ':anon';
+    }
+  }
+
   function loadList(key) {
     try {
-      const raw = localStorage.getItem(key);
+      const raw = localStorage.getItem(key + currentUserSuffix());
       return raw ? JSON.parse(raw) : [];
     } catch (e) {
       return [];
     }
   }
   function saveList(key, list) {
-    try { localStorage.setItem(key, JSON.stringify(list)); } catch (e) { /* ignore */ }
+    try { localStorage.setItem(key + currentUserSuffix(), JSON.stringify(list)); } catch (e) { /* ignore */ }
   }
 
   function syncApi(method, path, body) {
@@ -255,10 +270,26 @@
     try {
       fetch(API_BASE + path, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authToken() },
         body: body ? JSON.stringify(body) : undefined,
       }).catch(() => {});
     } catch (e) { /* ignore */ }
+  }
+
+  // Pulls the authoritative, per-user list from the backend (app.py now
+  // registers countingset_bp and scopes it by user). Returns null on any
+  // failure so callers can silently keep using the local cache.
+  async function fetchRecordsFromApi(path) {
+    try {
+      const res = await fetch(API_BASE + path, {
+        headers: { Authorization: 'Bearer ' + authToken() },
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return Array.isArray(data.records) ? data.records : null;
+    } catch (e) {
+      return null;
+    }
   }
 
   function addCountdownRecord(name, number, totalSeconds, cycles) {
@@ -561,7 +592,7 @@
   // ============================================================
   // TIMER LISTS — render, modify, delete
   // ============================================================
-  function renderCountdownList() {
+  function renderCountdownListFromLocal() {
     const list = loadList(LS_COUNTDOWNS);
     countdownListBody.innerHTML = '';
     countdownListEmpty.classList.toggle('show', list.length === 0);
@@ -582,7 +613,20 @@
     bindRowActions();
   }
 
-  function renderStopwatchList() {
+  async function renderCountdownList() {
+    // Show the local cache immediately (instant UI), then reconcile with
+    // the per-user backend list in the background — this is what actually
+    // stops another account (on the same browser) from ever seeing these
+    // records, since the backend filters by the logged-in user's id.
+    renderCountdownListFromLocal();
+    const records = await fetchRecordsFromApi('/countdowns');
+    if (records) {
+      saveList(LS_COUNTDOWNS, records);
+      renderCountdownListFromLocal();
+    }
+  }
+
+  function renderStopwatchListFromLocal() {
     const list = loadList(LS_STOPWATCHES);
     stopwatchListBody.innerHTML = '';
     stopwatchListEmpty.classList.toggle('show', list.length === 0);
@@ -601,6 +645,15 @@
       stopwatchListBody.appendChild(tr);
     });
     bindRowActions();
+  }
+
+  async function renderStopwatchList() {
+    renderStopwatchListFromLocal();
+    const records = await fetchRecordsFromApi('/stopwatches');
+    if (records) {
+      saveList(LS_STOPWATCHES, records);
+      renderStopwatchListFromLocal();
+    }
   }
 
   function escapeHtml(str) {

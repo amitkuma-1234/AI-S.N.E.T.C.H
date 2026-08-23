@@ -32,8 +32,15 @@ const toast = document.getElementById('toast');
 // ============================================================
 // API HELPERS
 // ============================================================
+function authToken() { return localStorage.getItem('snetch_access_token') || ''; }
+
 async function api(path, options = {}) {
-    const opts = Object.assign({ headers: { 'Content-Type': 'application/json' } }, options);
+    const opts = Object.assign({}, options);
+    opts.headers = Object.assign(
+        { 'Content-Type': 'application/json' },
+        opts.headers,
+        { Authorization: 'Bearer ' + authToken() }
+    );
     const res = await fetch(API_BASE + path, opts);
     let data = null;
     try { data = await res.json(); } catch (e) { data = null; }
@@ -143,7 +150,7 @@ function renderSidebar(lists) {
             e.stopPropagation();
             const listId = btn.dataset.listId;
             const rect = btn.getBoundingClientRect();
-            showDropdown(rect.left, rect.bottom, listId, lists);
+            showDropdown(rect, listId, lists);
         });
     });
 
@@ -632,11 +639,12 @@ async function unpurchaseItem(itemId) {
 // ============================================================
 // THREE-DOT DROPDOWN
 // ============================================================
-function showDropdown(x, y, listId, lists) {
+function showDropdown(rect, listId, lists) {
     currentDropdownListId = listId;
     threeDotDropdown.classList.remove('hidden');
-    threeDotDropdown.style.left = x + 'px';
-    threeDotDropdown.style.top = y + 'px';
+
+    const sidebarEl = document.querySelector('.sidebar');
+    const sidebarRight = sidebarEl ? sidebarEl.getBoundingClientRect().right : rect.right;
 
     const list = (lists || []).find(l => l.id === listId);
     const pinOpt = threeDotDropdown.querySelector('[data-opt="pin"]');
@@ -645,6 +653,34 @@ function showDropdown(x, y, listId, lists) {
             ? '<i class="fas fa-thumbtack"></i> Unpin Shopping List'
             : '<i class="fas fa-thumbtack"></i> Pin Shopping List';
     }
+
+    // Measure the menu now that it's visible + populated, then clamp/flip
+    // so it always stays fully on-screen instead of running off the bottom.
+    const menuHeight = threeDotDropdown.offsetHeight;
+    const menuWidth = threeDotDropdown.offsetWidth;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const margin = 8;
+
+    let top = rect.bottom;
+    // Anchor to the button's RIGHT edge (not left) so the menu opens
+    // clear of the sidebar instead of overlapping it.
+    let left = sidebarRight + margin;
+
+    if (top + menuHeight > vh - margin) {
+        // Not enough room below the button -> open upward instead.
+        top = rect.top - menuHeight;
+        if (top < margin) top = margin; // clamp if it still doesn't fit
+    }
+    if (left + menuWidth > vw - margin) {
+        // Not enough room to the right either -> fall back to the
+        // button's left edge, still clamped inside the viewport.
+        left = rect.left - menuWidth - margin;
+        if (left < margin) left = margin;
+    }
+
+    threeDotDropdown.style.left = left + 'px';
+    threeDotDropdown.style.top = top + 'px';
 }
 
 document.addEventListener('click', (e) => {

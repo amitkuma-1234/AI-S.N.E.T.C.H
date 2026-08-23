@@ -60,6 +60,7 @@ import shopinglist
 import location
 import spaim_mail
 import youtube_chatbot
+from countingset import countingset_bp
 import songplay
 import songdownload
 import passwordsave
@@ -107,6 +108,7 @@ app.register_blueprint(downloadvideo_bp)
 image_chatbot.register_image_chatbot(app)
 whatsappmessage.register_whatsapp_messenger(app)
 youtube_chatbot.register_youtube_chatbot(app)
+app.register_blueprint(countingset_bp)
 shopinglist.register_shopping_planner(app)
 download_entertainment.register_entertainment_downloader(app)
 document_chatbot.register_document_chatbot(app)
@@ -356,6 +358,12 @@ def api_create_alarm():
 @app.route("/api/alarms/<int:alarm_id>", methods=["PUT"])
 def api_update_alarm(alarm_id):
     """Update an existing alarm. Expects JSON with any of: time, ampm, tone, label."""
+    uid = g.current_user_id
+    if uid is not None:
+        user_ids = set(db.get_user_entities(uid, "alarm"))
+        if str(alarm_id) not in user_ids:
+            return jsonify({"error": "Alarm not found."}), 404
+
     data = request.get_json(force=True, silent=True) or {}
     update_fields = {}
 
@@ -387,10 +395,15 @@ def api_update_alarm(alarm_id):
 @app.route("/api/alarms/<int:alarm_id>", methods=["DELETE"])
 def api_delete_alarm(alarm_id):
     """Delete an alarm by ID."""
+    uid = g.current_user_id
+    if uid is not None:
+        user_ids = set(db.get_user_entities(uid, "alarm"))
+        if str(alarm_id) not in user_ids:
+            return jsonify({"error": "Alarm not found."}), 404
+
     deleted = alarm.api_delete_alarm(alarm_id)
     if not deleted:
         return jsonify({"error": "Alarm not found."}), 404
-    uid = g.current_user_id
     if uid is not None:
         db.unmap_feature_entity(uid, "alarm", str(alarm_id))
     return jsonify({"status": "ok", "message": "Alarm deleted."})
@@ -693,8 +706,11 @@ def api_dailytask_delete_tasks():
     { ids: [id, id, ...] }."""
     data = request.get_json(force=True, silent=True) or {}
     ids = data.get("ids", [])
-    removed = dailytask.api_delete_tasks(ids)
     uid = g.current_user_id
+    if uid is not None:
+        user_ids = set(db.get_user_entities(uid, "dailytask"))
+        ids = [i for i in ids if str(i) in user_ids]
+    removed = dailytask.api_delete_tasks(ids)
     if uid is not None:
         db.unmap_feature_entities(uid, "dailytask", [str(i) for i in ids])
     return jsonify({"status": "ok", "deleted": removed})
@@ -2422,6 +2438,8 @@ _BLUEPRINT_LIST_FILTERS = {
     ("/image_chatbot/api/threads", "GET"): ("image_chatbot", ["pinned", "recent"], "thread_id"),
     ("/document_chatbot/api/threads", "GET"): ("document_chatbot", ["pinned", "recent"], "thread_id"),
     ("/youtube_chatbot/api/threads", "GET"): ("youtube_chatbot", ["pinned", "recent"], "thread_id"),
+    ("/api/countingset/countdowns", "GET"): ("countingset_countdowns", ["records"], "id"),
+    ("/api/countingset/stopwatches", "GET"): ("countingset_stopwatches", ["records"], "id"),
 }
 
 # Map of (path, method) -> (feature_name, id_field, nested_obj_key)
@@ -2433,6 +2451,8 @@ _BLUEPRINT_CREATE_TRACKERS = {
     ("/image_chatbot/api/new_chat", "POST"): ("image_chatbot", "thread_id", None),
     ("/document_chatbot/api/new_chat", "POST"): ("document_chatbot", "thread_id", None),
     ("/youtube_chatbot/api/new_chat", "POST"): ("youtube_chatbot", "thread_id", None),
+    ("/api/countingset/countdowns", "POST"): ("countingset_countdowns", "id", "record"),
+    ("/api/countingset/stopwatches", "POST"): ("countingset_stopwatches", "id", "record"),
 }
 
 # (path_prefix, feature_name) for DELETE routes shaped like
@@ -2442,6 +2462,8 @@ _BLUEPRINT_DELETE_PREFIXES = [
     ("/image_chatbot/api/thread/", "image_chatbot"),
     ("/document_chatbot/api/thread/", "document_chatbot"),
     ("/youtube_chatbot/api/thread/", "youtube_chatbot"),
+    ("/api/countingset/countdowns/", "countingset_countdowns"),
+    ("/api/countingset/stopwatches/", "countingset_stopwatches"),
 ]
 
 

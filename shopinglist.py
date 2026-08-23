@@ -270,6 +270,29 @@ def _fetch_items(conn, list_id):
     return [_serialize_item(r) for r in rows]
 
 
+from flask import g
+import db as _db
+
+
+def _owns_list(list_id):
+    """True if the current logged-in user owns this list (or if no
+    user context exists, fails open like the rest of the app)."""
+    uid = getattr(g, "current_user_id", None)
+    if uid is None:
+        return True
+    user_ids = set(_db.get_user_entities(uid, "shopping"))
+    return list_id in user_ids
+
+
+def _owns_item(item_id, conn):
+    """Resolve item_id -> list_id, then check list ownership.
+    Returns (item_row_or_None, owns_bool)."""
+    item = conn.execute("SELECT * FROM shopping_items WHERE id = ?", (item_id,)).fetchone()
+    if not item:
+        return None, False
+    return item, _owns_list(item["list_id"])
+
+
 # ─────────────────────────────────────────────
 #  Routes — Shopping Lists
 # ─────────────────────────────────────────────
@@ -321,6 +344,8 @@ def create_list():
 
 @shopping_bp.route("/lists/<list_id>", methods=["GET"])
 def get_list_detail(list_id):
+    if not _owns_list(list_id):
+        return jsonify({"error": "Shopping list not found."}), 404
     conn = _get_conn()
     row = _fetch_list(conn, list_id)
     if not row:
@@ -340,6 +365,8 @@ def get_list_detail(list_id):
 @shopping_bp.route("/lists/<list_id>", methods=["PATCH"])
 def update_list(list_id):
     """Rename / pin / unpin / archive / unarchive a list."""
+    if not _owns_list(list_id):
+        return jsonify({"error": "Shopping list not found."}), 404
     data = request.get_json(force=True, silent=True) or {}
     conn = _get_conn()
     row = _fetch_list(conn, list_id)
@@ -384,6 +411,8 @@ def update_list(list_id):
 
 @shopping_bp.route("/lists/<list_id>", methods=["DELETE"])
 def delete_list(list_id):
+    if not _owns_list(list_id):
+        return jsonify({"error": "Shopping list not found."}), 404
     conn = _get_conn()
     row = _fetch_list(conn, list_id)
     if not row:
@@ -398,6 +427,8 @@ def delete_list(list_id):
 
 @shopping_bp.route("/lists/<list_id>/download", methods=["GET"])
 def download_list(list_id):
+    if not _owns_list(list_id):
+        return jsonify({"error": "Shopping list not found."}), 404
     conn = _get_conn()
     row = _fetch_list(conn, list_id)
     if not row:
@@ -456,6 +487,10 @@ def search_lists():
         """,
         (like, like, like),
     ).fetchall()
+    uid = getattr(g, "current_user_id", None)
+    if uid is not None:
+        user_ids = set(_db.get_user_entities(uid, "shopping"))
+        rows = [r for r in rows if r["id"] in user_ids]
     result = [_serialize_list(r) for r in rows]
     conn.close()
     return jsonify({"lists": result})
@@ -467,6 +502,8 @@ def search_lists():
 
 @shopping_bp.route("/lists/<list_id>/items", methods=["GET"])
 def get_items(list_id):
+    if not _owns_list(list_id):
+        return jsonify({"error": "Shopping list not found."}), 404
     conn = _get_conn()
     row = _fetch_list(conn, list_id)
     if not row:
@@ -480,6 +517,8 @@ def get_items(list_id):
 @shopping_bp.route("/lists/<list_id>/items", methods=["POST"])
 def add_items(list_id):
     """Parse natural-language input (comma / newline separated) and add items."""
+    if not _owns_list(list_id):
+        return jsonify({"error": "Shopping list not found."}), 404
     data = request.get_json(force=True, silent=True) or {}
     text = data.get("text") or ""
     parsed = parse_items(text)
@@ -530,8 +569,8 @@ def add_items(list_id):
 def update_item(item_id):
     data = request.get_json(force=True, silent=True) or {}
     conn = _get_conn()
-    item = conn.execute("SELECT * FROM shopping_items WHERE id = ?", (item_id,)).fetchone()
-    if not item:
+    item, owns = _owns_item(item_id, conn)
+    if not item or not owns:
         conn.close()
         return jsonify({"error": "Item not found."}), 404
 
@@ -568,9 +607,14 @@ def delete_items():
     conn = _get_conn()
     placeholder = ",".join("?" * len(ids))
     rows = conn.execute(
-        f"SELECT DISTINCT list_id FROM shopping_items WHERE id IN ({placeholder})", ids
+        f"SELECT id, list_id FROM shopping_items WHERE id IN ({placeholder})", ids
     ).fetchall()
-    list_ids = [r["list_id"] for r in rows]
+    ids = [r["id"] for r in rows if _owns_list(r["list_id"])]
+    list_ids = list({r["list_id"] for r in rows if _owns_list(r["list_id"])})
+    if not ids:
+        conn.close()
+        return jsonify({"error": "No item ids supplied."}), 400
+    placeholder = ",".join("?" * len(ids))
 
     conn.execute(f"DELETE FROM shopping_items WHERE id IN ({placeholder})", ids)
     now = _now()
@@ -596,8 +640,8 @@ def purchase_item(item_id):
         return jsonify({"error": "Price cannot be negative."}), 400
 
     conn = _get_conn()
-    item = conn.execute("SELECT * FROM shopping_items WHERE id = ?", (item_id,)).fetchone()
-    if not item:
+    item, owns = _owns_item(item_id, conn)
+    if not item or not owns:
         conn.close()
         return jsonify({"error": "Item not found."}), 404
 
@@ -618,8 +662,8 @@ def purchase_item(item_id):
 def unpurchase_item(item_id):
     """Undo a purchase mark (in case of a mistake)."""
     conn = _get_conn()
-    item = conn.execute("SELECT * FROM shopping_items WHERE id = ?", (item_id,)).fetchone()
-    if not item:
+    item, owns = _owns_item(item_id, conn)
+    if not item or not owns:
         conn.close()
         return jsonify({"error": "Item not found."}), 404
 

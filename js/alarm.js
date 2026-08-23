@@ -28,10 +28,14 @@
   // ============================================================
   //  API HELPERS
   // ============================================================
+    function authToken() { return localStorage.getItem('snetch_access_token') || ''; }
+
   async function apiRequest(url, options) {
     let res;
+    const opts = options || {};
+    opts.headers = Object.assign({}, opts.headers, { Authorization: 'Bearer ' + authToken() });
     try {
-      res = await fetch(url, options);
+      res = await fetch(url, opts);
     } catch (e) {
       throw new Error('Network error. Please check your connection.');
     }

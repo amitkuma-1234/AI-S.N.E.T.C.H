@@ -545,6 +545,40 @@ image_chatbot_bp = Blueprint(
 )
 
 
+from flask import g
+import db as _db
+
+
+def _owns_thread(thread_id):
+    """True if the current logged-in user owns this thread (or if no
+    user context exists, fails open like the rest of the app)."""
+    uid = _current_uid_for_media()
+    if uid is None:
+        return True
+    user_ids = set(_db.get_user_entities(uid, "image_chatbot"))
+    return thread_id in user_ids
+
+
+def _current_uid_for_media():
+    """Like g.current_user_id, but also accepts a ?token= query param —
+    for <img src> and window.open() calls that can't set custom headers."""
+    uid = getattr(g, "current_user_id", None)
+    if uid is not None:
+        return uid
+    token = request.args.get("token", "")
+    if not token:
+        return None
+    try:
+        import jwt as _jwt
+        from app import JWT_SECRET, JWT_ALGO
+        payload = _jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGO])
+        if payload.get("type") == "access":
+            return int(payload["sub"])
+    except Exception:
+        pass
+    return None
+
+
 @image_chatbot_bp.route("/new_chat", methods=["POST"])
 def api_new_chat():
     thread_id = uuid.uuid4().hex
@@ -558,7 +592,7 @@ def api_upload():
     thread_id = request.form.get("thread_id", "").strip()
     file = request.files.get("file")
 
-    if not thread_id or not get_thread_row(thread_id):
+    if not thread_id or not get_thread_row(thread_id) or not _owns_thread(thread_id):
         return jsonify({"success": False, "error": "Invalid or missing chat thread."}), 400
     if not file or not file.filename:
         return jsonify({"success": False, "error": "No file provided."}), 400
@@ -613,6 +647,8 @@ def api_upload():
 
 @image_chatbot_bp.route("/thread/<thread_id>/image", methods=["GET"])
 def api_thread_image(thread_id):
+    if not _owns_thread(thread_id):
+        return jsonify({"success": False, "error": "Image not found."}), 404
     row = get_thread_row(thread_id)
     if not row or not row["img_path"] or not os.path.isfile(row["img_path"]):
         return jsonify({"success": False, "error": "Image not found."}), 404
@@ -632,6 +668,8 @@ def api_threads():
 
 @image_chatbot_bp.route("/thread/<thread_id>", methods=["GET"])
 def api_thread_detail(thread_id):
+    if not _owns_thread(thread_id):
+        return jsonify({"success": False, "error": "Chat not found."}), 404
     row = get_thread_row(thread_id)
     if not row:
         return jsonify({"success": False, "error": "Chat not found."}), 404
@@ -645,7 +683,7 @@ def api_thread_detail(thread_id):
 
 @image_chatbot_bp.route("/thread/<thread_id>/rename", methods=["POST"])
 def api_rename_thread(thread_id):
-    if not get_thread_row(thread_id):
+    if not _owns_thread(thread_id) or not get_thread_row(thread_id):
         return jsonify({"success": False, "error": "Chat not found."}), 404
     data = request.get_json(force=True, silent=True) or {}
     title = (data.get("title") or "").strip()
@@ -657,6 +695,8 @@ def api_rename_thread(thread_id):
 
 @image_chatbot_bp.route("/thread/<thread_id>/pin", methods=["POST"])
 def api_pin_thread(thread_id):
+    if not _owns_thread(thread_id):
+        return jsonify({"success": False, "error": "Chat not found."}), 404
     row = get_thread_row(thread_id)
     if not row:
         return jsonify({"success": False, "error": "Chat not found."}), 404
@@ -669,6 +709,8 @@ def api_pin_thread(thread_id):
 
 @image_chatbot_bp.route("/thread/<thread_id>/archive", methods=["POST"])
 def api_archive_thread(thread_id):
+    if not _owns_thread(thread_id):
+        return jsonify({"success": False, "error": "Chat not found."}), 404
     row = get_thread_row(thread_id)
     if not row:
         return jsonify({"success": False, "error": "Chat not found."}), 404
@@ -681,6 +723,8 @@ def api_archive_thread(thread_id):
 
 @image_chatbot_bp.route("/thread/<thread_id>", methods=["DELETE"])
 def api_delete_thread(thread_id):
+    if not _owns_thread(thread_id):
+        return jsonify({"success": False, "error": "Chat not found."}), 404
     row = get_thread_row(thread_id)
     if not row:
         return jsonify({"success": False, "error": "Chat not found."}), 404
@@ -696,6 +740,8 @@ def api_delete_thread(thread_id):
 
 @image_chatbot_bp.route("/thread/<thread_id>/download", methods=["GET"])
 def api_download_thread(thread_id):
+    if not _owns_thread(thread_id):
+        return jsonify({"success": False, "error": "Chat not found."}), 404
     row = get_thread_row(thread_id)
     if not row:
         return jsonify({"success": False, "error": "Chat not found."}), 404
@@ -720,6 +766,11 @@ def api_download_thread(thread_id):
 
 @image_chatbot_bp.route("/message/<int:message_id>/feedback", methods=["POST"])
 def api_message_feedback(message_id):
+    conn = _img_conn()
+    row = conn.execute("SELECT thread_id FROM messages WHERE id=?", (message_id,)).fetchone()
+    conn.close()
+    if not row or not _owns_thread(row["thread_id"]):
+        return jsonify({"success": False, "error": "Message not found."}), 404
     data = request.get_json(force=True, silent=True) or {}
     feedback = data.get("type", "none")
     if feedback not in ("like", "dislike", "none"):
@@ -783,7 +834,7 @@ def api_ask():
     data = request.get_json(force=True, silent=True) or {}
     thread_id = (data.get("thread_id") or "").strip()
     question = (data.get("question") or "").strip()
-    if not thread_id or not get_thread_row(thread_id):
+    if not thread_id or not get_thread_row(thread_id) or not _owns_thread(thread_id):
         return jsonify({"success": False, "error": "Invalid chat thread."}), 400
     if not question:
         return jsonify({"success": False, "error": "Question cannot be empty."}), 400
@@ -800,7 +851,7 @@ def api_regenerate():
     data = request.get_json(force=True, silent=True) or {}
     thread_id = (data.get("thread_id") or "").strip()
     row = get_thread_row(thread_id)
-    if not row:
+    if not row or not _owns_thread(thread_id):
         return jsonify({"success": False, "error": "Invalid chat thread."}), 400
 
     msgs = get_message_rows(thread_id)

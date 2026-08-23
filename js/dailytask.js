@@ -181,8 +181,12 @@
     showToast._t = setTimeout(() => successToast.classList.remove('show'), 3200);
   }
 
+  function authToken() { return localStorage.getItem('snetch_access_token') || ''; }
+
   async function api(url, options) {
-    const res = await fetch(url, options);
+    const opts = options || {};
+    opts.headers = Object.assign({}, opts.headers, { Authorization: 'Bearer ' + authToken() });
+    const res = await fetch(url, opts);
     let data = {};
     try { data = await res.json(); } catch (e) { /* no body */ }
     if (!res.ok) {

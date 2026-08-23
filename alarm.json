@@ -1,1 +1,9 @@
-[]
+[
+    {
+        "id": 1,
+        "time": "21:35",
+        "tone": "",
+        "label": "Alarm",
+        "active": true
+    }
+]

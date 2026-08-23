@@ -1,1 +1,1 @@
-web: gunicorn -w 4 -b 0.0.0.0:$PORT wsgi:app
+web: gunicorn -w 1 --threads 4 --timeout 120 -b 0.0.0.0:$PORT wsgi:app

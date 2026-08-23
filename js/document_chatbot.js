@@ -121,8 +121,13 @@
     return `<p>${escapeHtml(text || '').replace(/\n/g, '<br>')}</p>`;
   }
 
+  function authToken() { return localStorage.getItem('snetch_access_token') || ''; }
+
   async function api(path, opts) {
-    const res = await fetch(API_BASE + path, opts);
+    const o = opts || {};
+    const isFormData = o.body instanceof FormData;
+    o.headers = Object.assign({}, o.headers, { Authorization: 'Bearer ' + authToken() });
+    const res = await fetch(API_BASE + path, o);
     let data = null;
     try { data = await res.json(); } catch (e) { data = null; }
     if (!res.ok || (data && data.success === false)) {
@@ -461,7 +466,7 @@
     try {
       const res = await fetch(API_BASE + path, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authToken() },
         body: JSON.stringify(payload),
         signal: abortController.signal
       });

@@ -63,10 +63,14 @@
   // ============================================================
   //  API HELPERS
   // ============================================================
+  function authToken() { return localStorage.getItem('snetch_access_token') || ''; }
+
   async function apiRequest(url, options) {
     let res;
+    const opts = options || {};
+    opts.headers = Object.assign({}, opts.headers, { Authorization: 'Bearer ' + authToken() });
     try {
-      res = await fetch(url, options);
+      res = await fetch(url, opts);
     } catch (e) {
       throw new Error('Network error. Please check your connection.');
     }
@@ -841,7 +845,7 @@
     try {
       const res = await fetch(`/api/askanything/chats/${currentChatId}/messages`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authToken() },
         body: JSON.stringify({ message: text }),
         signal: currentAbortController.signal,
       });
@@ -893,6 +897,7 @@
     try {
       const res = await fetch(`/api/askanything/chats/${currentChatId}/regenerate`, {
         method: 'POST',
+        headers: { Authorization: 'Bearer ' + authToken() },
         signal: currentAbortController.signal,
       });
       if (!res.ok) {

@@ -8,10 +8,16 @@
   'use strict';
 
   // ---------- API HELPERS ----------
+  function authToken() { return localStorage.getItem('snetch_access_token') || ''; }
+
   async function apiRequest(url, options = {}) {
     const res = await fetch(url, {
-      headers: { 'Content-Type': 'application/json' },
       ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+        Authorization: 'Bearer ' + authToken(),
+      },
     });
     let data = {};
     try { data = await res.json(); } catch (e) { data = {}; }

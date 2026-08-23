@@ -148,6 +148,7 @@ def ask_ollama(prompt: str, temperature: float = 0.2, system: str = "") -> str:
         headers={
             "Content-Type": "application/json",
             "Authorization": f"Bearer {os.getenv('GROQ_API_KEY')}",
+            "User-Agent": "Mozilla/5.0 (SNETCH-DocumentChatbot)",
         }, method="POST",
     )
     try:
@@ -179,6 +180,7 @@ def ask_ollama_stream(prompt: str, temperature: float = 0.2, system: str = "",
         headers={
             "Content-Type": "application/json",
             "Authorization": f"Bearer {os.getenv('GROQ_API_KEY')}",
+            "User-Agent": "Mozilla/5.0 (SNETCH-DocumentChatbot)",
         }, method="POST",
     )
     parts = []
@@ -1471,9 +1473,23 @@ else:
 #  FLASK BLUEPRINT — /document_chatbot/api/*
 # ────────────────────────────────────────────────────────────────────────
 
+from flask import g
+import db as _db
+
 document_chatbot_bp = Blueprint(
     "document_chatbot_api", __name__, url_prefix="/document_chatbot/api"
 )
+
+
+def _owns_thread(thread_id):
+    """True if the current logged-in user owns this thread (or if no
+    user context exists, e.g. auth not wired up yet — fails open just
+    like the rest of the app currently does)."""
+    uid = getattr(g, "current_user_id", None)
+    if uid is None:
+        return True
+    user_ids = set(_db.get_user_entities(uid, "document_chatbot"))
+    return thread_id in user_ids
 
 
 @document_chatbot_bp.route("/new_chat", methods=["POST"])
@@ -1489,7 +1505,7 @@ def api_upload():
     thread_id = request.form.get("thread_id", "").strip()
     file = request.files.get("file")
 
-    if not thread_id or not get_thread_row(thread_id):
+    if not thread_id or not get_thread_row(thread_id) or not _owns_thread(thread_id):
         return jsonify({"success": False, "error": "Invalid or missing chat thread."}), 400
     if not file or not file.filename:
         return jsonify({"success": False, "error": "No file provided."}), 400
@@ -1553,7 +1569,7 @@ def api_threads():
 @document_chatbot_bp.route("/thread/<thread_id>", methods=["GET"])
 def api_thread_detail(thread_id):
     row = get_thread_row(thread_id)
-    if not row:
+    if not row or not _owns_thread(thread_id):
         return jsonify({"success": False, "error": "Chat not found."}), 404
     msgs = get_message_rows(thread_id)
     return jsonify({
@@ -1565,7 +1581,7 @@ def api_thread_detail(thread_id):
 
 @document_chatbot_bp.route("/thread/<thread_id>/rename", methods=["POST"])
 def api_rename_thread(thread_id):
-    if not get_thread_row(thread_id):
+    if not get_thread_row(thread_id) or not _owns_thread(thread_id):
         return jsonify({"success": False, "error": "Chat not found."}), 404
     data = request.get_json(force=True, silent=True) or {}
     title = (data.get("title") or "").strip()
@@ -1578,7 +1594,7 @@ def api_rename_thread(thread_id):
 @document_chatbot_bp.route("/thread/<thread_id>/pin", methods=["POST"])
 def api_pin_thread(thread_id):
     row = get_thread_row(thread_id)
-    if not row:
+    if not row or not _owns_thread(thread_id):
         return jsonify({"success": False, "error": "Chat not found."}), 404
     data = request.get_json(force=True, silent=True) or {}
     pinned = data.get("pinned")
@@ -1590,7 +1606,7 @@ def api_pin_thread(thread_id):
 @document_chatbot_bp.route("/thread/<thread_id>/archive", methods=["POST"])
 def api_archive_thread(thread_id):
     row = get_thread_row(thread_id)
-    if not row:
+    if not row or not _owns_thread(thread_id):
         return jsonify({"success": False, "error": "Chat not found."}), 404
     data = request.get_json(force=True, silent=True) or {}
     archived = data.get("archived")
@@ -1602,7 +1618,7 @@ def api_archive_thread(thread_id):
 @document_chatbot_bp.route("/thread/<thread_id>", methods=["DELETE"])
 def api_delete_thread(thread_id):
     row = get_thread_row(thread_id)
-    if not row:
+    if not row or not _owns_thread(thread_id):
         return jsonify({"success": False, "error": "Chat not found."}), 404
     if row["doc_path"] and os.path.isfile(row["doc_path"]):
         try:
@@ -1618,7 +1634,7 @@ def api_delete_thread(thread_id):
 @document_chatbot_bp.route("/thread/<thread_id>/download", methods=["GET"])
 def api_download_thread(thread_id):
     row = get_thread_row(thread_id)
-    if not row:
+    if not row or not _owns_thread(thread_id):
         return jsonify({"success": False, "error": "Chat not found."}), 404
     msgs = get_message_rows(thread_id)
     lines = [
@@ -1703,7 +1719,7 @@ def api_ask():
     data = request.get_json(force=True, silent=True) or {}
     thread_id = (data.get("thread_id") or "").strip()
     question = (data.get("question") or "").strip()
-    if not thread_id or not get_thread_row(thread_id):
+    if not thread_id or not get_thread_row(thread_id) or not _owns_thread(thread_id):
         return jsonify({"success": False, "error": "Invalid chat thread."}), 400
     if not question:
         return jsonify({"success": False, "error": "Question cannot be empty."}), 400
@@ -1720,7 +1736,7 @@ def api_regenerate():
     data = request.get_json(force=True, silent=True) or {}
     thread_id = (data.get("thread_id") or "").strip()
     row = get_thread_row(thread_id)
-    if not row:
+    if not row or not _owns_thread(thread_id):
         return jsonify({"success": False, "error": "Invalid chat thread."}), 400
 
     msgs = get_message_rows(thread_id)
