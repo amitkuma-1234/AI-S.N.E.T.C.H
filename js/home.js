@@ -165,7 +165,7 @@
         "Maps & Navigation", "Launch Apps", "Open Browser", "Password Vault","SnapLock", "Explore World",
         "Smart Reminders", "Shopping Planner", "Email Center", "Music Downloader", "Music Player",
         "World Clock", "Video Player", "WhatsApp Messenger", "Weather Center", "Wiki Search", "YouTube AI",
-        "Object Tracking", "Spam Mail Checker","Face Expression", "Deepfake Detector","Barcode & QR Scanner" 
+        "Object Tracking", "Spam Mail Checker","Face Expression", "Deepfake Detector","Barcode & QR Scanner","SNETCH Assistant"
     ];
 
     // Maps each feature card to its Flask route (must match the
@@ -207,7 +207,8 @@
         "Spam Mail Checker": "/spaim_mail",
         "Face Expression": "/face_expression",
         "Deepfake Detector": "/deepfake_detector",
-        "Barcode & QR Scanner": "/barcode_qr_scanner"
+        "Barcode & QR Scanner": "/barcode_qr_scanner",
+        "SNETCH Assistant": "/snetch"
     };
 
     const iconMap = {
@@ -247,7 +248,8 @@
         "Spam Mail Checker": "fa-shield-virus",
         "Face Expression": "fa-face-smile",
         "Deepfake Detector": "fa-user-secret",
-        "Barcode & QR Scanner": "fa-qrcode"
+        "Barcode & QR Scanner": "fa-qrcode" ,
+        "SNETCH Assistant": "fa-brain"
     };
 
     // ==========================================

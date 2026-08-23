@@ -64,6 +64,7 @@ from countingset import countingset_bp
 import songplay
 import songdownload
 import passwordsave
+import snetch_assistant
 import snaplock 
 import whatsappmessage
 import real_world_information
@@ -96,6 +97,7 @@ horoscopeapi.init_db()
 reminder.init_db()
 passwordsave.init_db()
 passwordsave.register_vault(app)
+snetch_assistant.register_snetch_assistant(app)
 snaplock.init_db() 
 snaplock.register_snaplock(app)
 foodracipie.init_db()
@@ -582,6 +584,15 @@ def api_askanything_regenerate(chat_id):
         mimetype="text/plain",
     )
 
+
+
+
+
+@app.route("/snetch")
+def page_snetch_assistant():
+    return render_template("snetch_assistant.html")
+
+    
 
 @app.route("/askbygoogle")
 def page_askbygoogle():

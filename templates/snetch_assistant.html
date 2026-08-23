@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>S.N.E.T.C.H · SNETCH ASSISTANT</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="snetch_assistant.css">
+</head>
+<body>
+
+  <!-- ===== COSMIC BACKGROUND (same as rest of S.N.E.T.C.H) ===== -->
+  <div id="space-bg">
+    <div class="cosmic-vignette"></div>
+    <div class="nebula-cloud nebula-purple-1"></div>
+    <div class="nebula-cloud nebula-blue-1"></div>
+    <div class="star-field" id="starField"></div>
+    <div class="particle-field" id="particleField"></div>
+  </div>
+
+  <div class="sa-app">
+
+    <!-- ===== TOP BAR ===== -->
+    <header class="sa-topbar">
+      <button class="sa-icon-btn" id="homeBtn" title="Home"><i class="fas fa-home"></i></button>
+      <div class="sa-brand">
+        <h1 id="snetchBrandName">S.N.E.T.C.H</h1>
+        <p>YOUR AI VOICE ASSISTANT</p>
+      </div>
+      <span class="sa-icon-spacer" aria-hidden="true"></span>
+    </header>
+
+    <!-- ===== GREETING ===== -->
+    <div class="sa-greeting">
+      <h2><span id="greetingPhrase">Good Evening</span>, <span id="greetingName" class="sa-name-accent">there</span></h2>
+      <p>I'm here to assist you</p>
+      <div class="sa-dots"><span></span><span></span><span></span></div>
+    </div>
+
+    <!-- ===== ORB (voice visualization) ===== -->
+    <div class="sa-orb-wrap">
+      <div class="sa-orb-rings"></div>
+      <div class="sa-orb" id="snetchOrb">
+        <div class="sa-orb-core"></div>
+      </div>
+    </div>
+
+    <!-- ===== STATUS TEXT ===== -->
+    <div class="sa-status">
+      <h3 id="statusTitle">Tap the mic to speak</h3>
+      <p id="statusSub">Voice only — no typing</p>
+    </div>
+
+    <!-- ===== WAVEFORM (animates while listening/speaking) ===== -->
+    <div class="sa-waveform" id="waveform">
+      <!-- bars injected by JS -->
+    </div>
+
+    <!-- ===== CONTROLS: ON / OFF / CLEAR HISTORY ===== -->
+    <div class="sa-controls">
+      <button id="micOnBtn" class="sa-ctrl-btn sa-ctrl-on">
+        <i class="fas fa-microphone"></i> ON
+      </button>
+      <button id="micOffBtn" class="sa-ctrl-btn sa-ctrl-off">
+        <i class="fas fa-microphone-slash"></i> OFF
+      </button>
+      <button id="clearHistoryBtn" class="sa-ctrl-btn sa-ctrl-clear">
+        <i class="fas fa-trash-alt"></i> Clear All History
+      </button>
+    </div>
+
+    <p class="sa-footer-line"><span id="footerName">S.N.E.T.C.H</span> is all ears <i class="fas fa-heart"></i></p>
+  </div>
+
+  <!-- ===== CLEAR HISTORY CONFIRM OVERLAY ===== -->
+  <div id="resetConfirmOverlay" class="sa-overlay hidden">
+    <div class="sa-overlay-box">
+      <h3>Forget everything?</h3>
+      <p>This permanently deletes all conversation history and everything I've learned about
+      you. This cannot be undone. Type <b>FORGET</b> to confirm.</p>
+      <input type="text" id="resetConfirmInput" placeholder="Type FORGET" />
+      <div class="sa-overlay-actions">
+        <button id="resetCancelBtn" type="button">Cancel</button>
+        <button id="resetConfirmBtn" type="button" disabled>Forget everything</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="snetch_assistant.js"></script>
+</body>
+</html>
