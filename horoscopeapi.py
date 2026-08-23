@@ -925,3 +925,34 @@ def regenerate_last(session_id):
     yield WELCOME_QUESTION
     add_message(session_id, "assistant", WELCOME_QUESTION, kind="welcome")
     _touch(session_id)
+
+
+import threading as _threading_horoscope
+import time as _time_horoscope
+
+COMPLETE_SESSION_TTL_SECONDS = 120     # 2 minutes after reading is delivered
+ABANDONED_SESSION_TTL_SECONDS = 3600   # 1 hour if never completed
+
+def _cleanup_old_horoscope_sessions():
+    while True:
+        try:
+            now = int(_time_horoscope.time())
+            conn = get_conn()
+            old_ids = [r["id"] for r in conn.execute(
+                """SELECT id FROM sessions WHERE
+                   (status = 'complete' AND updated_at < ?)
+                   OR (status != 'complete' AND updated_at < ?)""",
+                (now - COMPLETE_SESSION_TTL_SECONDS, now - ABANDONED_SESSION_TTL_SECONDS),
+            ).fetchall()]
+            for sid in old_ids:
+                conn.execute("DELETE FROM messages WHERE session_id=?", (sid,))
+                conn.execute("DELETE FROM sessions WHERE id=?", (sid,))
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
+        _time_horoscope.sleep(30)  # check every 30 seconds
+
+
+_cleanup_thread_horoscope = _threading_horoscope.Thread(target=_cleanup_old_horoscope_sessions, daemon=True)
+_cleanup_thread_horoscope.start()
