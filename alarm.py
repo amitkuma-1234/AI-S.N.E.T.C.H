@@ -535,6 +535,14 @@ def api_get_tone_list() -> list:
     return ["default"] + get_tones()
 
 
+# Path to an exported YouTube cookies.txt file (Netscape format), used
+# to make server-side downloads look like a logged-in browser instead
+# of an anonymous bot — this is what actually gets around YouTube's
+# "Sign in to confirm you're not a bot" wall on data-center IPs.
+# Set this env var on the server, or drop the file at this default path.
+YTDLP_COOKIES_FILE = os.getenv("YTDLP_COOKIES_FILE", os.path.join(BASE_DIR if 'BASE_DIR' in dir() else os.path.dirname(os.path.abspath(__file__)), "youtube_cookies.txt"))
+
+
 def download_tone_by_name(name: str) -> dict:
     """Non-interactive version of download_tone() for the web API —
     downloads `name` from YouTube audio into TONE_FOLDER as an mp3.
@@ -552,8 +560,10 @@ def download_tone_by_name(name: str) -> dict:
             "outtmpl": f"{out_path}.%(ext)s",
             "ffmpeg_location": ffmpeg_path,
             "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "192"}],
-            "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
+            "extractor_args": {"youtube": {"player_client": ["android", "web", "ios", "tv"]}},
         }
+        if os.path.exists(YTDLP_COOKIES_FILE):
+            ydl_opts["cookiefile"] = YTDLP_COOKIES_FILE
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.extract_info(f"ytsearch1:{name}", download=True)
         if os.path.exists(f"{out_path}.mp3"):
@@ -561,7 +571,14 @@ def download_tone_by_name(name: str) -> dict:
         return {"ok": False, "error": "File did not save after download."}
     except Exception as e:
         print(f"  [Tone Download Error] {e}")
-        return {"ok": False, "error": str(e)}
+        error_msg = str(e)
+        if "Sign in to confirm" in error_msg or "not a bot" in error_msg:
+            error_msg = (
+                "YouTube is blocking this server's IP as a bot. Upload a valid "
+                "youtube_cookies.txt (exported from a logged-in browser) to the "
+                "server, or set the YTDLP_COOKIES_FILE env var to its path."
+            )
+        return {"ok": False, "error": error_msg}
 
 
 # ════════════════════════════════════════════════════════════════
