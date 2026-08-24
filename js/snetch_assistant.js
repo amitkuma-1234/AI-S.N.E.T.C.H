@@ -647,7 +647,7 @@
   //  HOME BUTTON
   // ---------------------------------------------------------
   if (homeBtn) {
-    homeBtn.addEventListener('click', () => { window.location.href = '/home'; });
+    homeBtn.addEventListener('click', () => { window.location.href = '/'; });
   }
 
   // ---------------------------------------------------------
