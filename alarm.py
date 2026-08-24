@@ -552,6 +552,7 @@ def download_tone_by_name(name: str) -> dict:
             "outtmpl": f"{out_path}.%(ext)s",
             "ffmpeg_location": ffmpeg_path,
             "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "192"}],
+            "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.extract_info(f"ytsearch1:{name}", download=True)
