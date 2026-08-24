@@ -535,24 +535,32 @@ def api_get_tone_list() -> list:
     return ["default"] + get_tones()
 
 
-def download_tone_by_name(name: str) -> bool:
+def download_tone_by_name(name: str) -> dict:
     """Non-interactive version of download_tone() for the web API —
-    downloads `name` from YouTube audio into TONE_FOLDER as an mp3."""
+    downloads `name` from YouTube audio into TONE_FOLDER as an mp3.
+    Returns {"ok": bool, "error": str|None} so the real failure reason
+    can be surfaced to the UI instead of a generic message."""
     if not name:
-        return False
+        return {"ok": False, "error": "Tone name is required."}
     try:
         out_path = os.path.join(TONE_FOLDER, name)
+        import shutil
+        ffmpeg_path = shutil.which("ffmpeg") or r"C:\ffmpeg-7.1.1\bin"
         ydl_opts = {
             "format": "bestaudio/best", "noplaylist": True, "quiet": True,
+            "no_warnings": True,
             "outtmpl": f"{out_path}.%(ext)s",
+            "ffmpeg_location": ffmpeg_path,
             "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "192"}],
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.extract_info(f"ytsearch1:{name}", download=True)
-        return os.path.exists(f"{out_path}.mp3")
+        if os.path.exists(f"{out_path}.mp3"):
+            return {"ok": True, "error": None}
+        return {"ok": False, "error": "File did not save after download."}
     except Exception as e:
         print(f"  [Tone Download Error] {e}")
-        return False
+        return {"ok": False, "error": str(e)}
 
 
 # ════════════════════════════════════════════════════════════════

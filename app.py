@@ -442,13 +442,13 @@ def api_download_tone():
     if not name:
         return jsonify({"error": "Tone name is required."}), 400
 
-    success = alarm.download_tone_by_name(name)
-    if success:
+    result = alarm.download_tone_by_name(name)
+    if result.get("ok"):
         # Refresh the tone list
         tones = alarm.api_get_tone_list()
         return jsonify({"status": "ok", "message": f"Tone '{name}' downloaded.", "tones": tones})
     else:
-        return jsonify({"error": f"Failed to download '{name}'. Check the name or your internet connection."}), 500
+        return jsonify({"error": f"Failed to download '{name}': {result.get('error')}"}), 500
 
 @app.route("/askanything")
 def page_askanything():

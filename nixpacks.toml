@@ -1,2 +1,2 @@
 [phases.setup]
-aptPkgs = ["libzbar0"]
+aptPkgs = ["libzbar0", "ffmpeg"]
