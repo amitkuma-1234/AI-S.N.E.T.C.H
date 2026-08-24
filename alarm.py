@@ -540,7 +540,40 @@ def api_get_tone_list() -> list:
 # of an anonymous bot — this is what actually gets around YouTube's
 # "Sign in to confirm you're not a bot" wall on data-center IPs.
 # Set this env var on the server, or drop the file at this default path.
-YTDLP_COOKIES_FILE = os.getenv("YTDLP_COOKIES_FILE", os.path.join(BASE_DIR if 'BASE_DIR' in dir() else os.path.dirname(os.path.abspath(__file__)), "youtube_cookies.txt"))
+_ALARM_DIR = BASE_DIR if 'BASE_DIR' in dir() else os.path.dirname(os.path.abspath(__file__))
+
+
+def _resolve_cookies_file() -> str:
+    """Find the youtube cookies file even if it was exported with a
+    different filename than expected. Browser extensions like
+    "Get cookies.txt LOCALLY" save it as 'www.youtube.com_cookies.txt'
+    by default, not 'youtube_cookies.txt' — previously that mismatch
+    caused os.path.exists() to silently fail and cookies were skipped
+    entirely, so every download looked like an anonymous bot request.
+    Checks (in order): explicit env var -> 'youtube_cookies.txt' ->
+    'www.youtube.com_cookies.txt' -> any '*cookies*.txt' in this folder."""
+    env_path = os.getenv("YTDLP_COOKIES_FILE")
+    if env_path and os.path.exists(env_path):
+        return env_path
+
+    for candidate in ("youtube_cookies.txt", "www.youtube.com_cookies.txt"):
+        p = os.path.join(_ALARM_DIR, candidate)
+        if os.path.exists(p):
+            return p
+
+    try:
+        for fname in os.listdir(_ALARM_DIR):
+            if "cookies" in fname.lower() and fname.lower().endswith(".txt"):
+                return os.path.join(_ALARM_DIR, fname)
+    except OSError:
+        pass
+
+    # Nothing found — return the originally-expected default path so
+    # existing behavior (and the error message below) stays predictable.
+    return os.path.join(_ALARM_DIR, "youtube_cookies.txt")
+
+
+YTDLP_COOKIES_FILE = _resolve_cookies_file()
 
 
 def download_tone_by_name(name: str) -> dict:
@@ -552,18 +585,27 @@ def download_tone_by_name(name: str) -> dict:
         return {"ok": False, "error": "Tone name is required."}
     try:
         out_path = os.path.join(TONE_FOLDER, name)
-        import shutil
-        ffmpeg_path = shutil.which("ffmpeg") or r"C:\ffmpeg-7.1.1\bin"
+        import shutil, platform
+        ffmpeg_path = shutil.which("ffmpeg")
+        if not ffmpeg_path:
+            # Only fall back to a hardcoded Windows path on Windows itself.
+            # Previously this fell back to a Windows path unconditionally,
+            # which silently broke ffmpeg_location on Linux servers even
+            # when ffmpeg was correctly installed but not on PATH.
+            ffmpeg_path = r"C:\ffmpeg-7.1.1\bin" if platform.system() == "Windows" else None
         ydl_opts = {
             "format": "bestaudio/best", "noplaylist": True, "quiet": True,
             "no_warnings": True,
             "outtmpl": f"{out_path}.%(ext)s",
-            "ffmpeg_location": ffmpeg_path,
             "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3", "preferredquality": "192"}],
             "extractor_args": {"youtube": {"player_client": ["android", "web", "ios", "tv"]}},
         }
+        if ffmpeg_path:
+            ydl_opts["ffmpeg_location"] = ffmpeg_path
         if os.path.exists(YTDLP_COOKIES_FILE):
             ydl_opts["cookiefile"] = YTDLP_COOKIES_FILE
+        else:
+            print(f"  [Tone Download] No cookies file found (looked for one in {_ALARM_DIR}) — download will likely be blocked as a bot.")
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.extract_info(f"ytsearch1:{name}", download=True)
         if os.path.exists(f"{out_path}.mp3"):
