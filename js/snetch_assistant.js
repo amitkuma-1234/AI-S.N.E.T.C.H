@@ -7,24 +7,46 @@
 //  VOICE-ONLY MODE: no typed input, no on-screen chat log —
 //  everything happens via mic in / TTS out.
 //
-//  CONVERSATION TIMING (feels human, not robotic):
-//  - While SNETCH is speaking, the mic keeps listening in the
-//    background. The instant it detects ANY sound from the user
-//    (well under 1 second), it cuts its own voice off and flips
-//    into listening mode — like a person stopping mid-sentence
-//    because you started talking.
-//  - It does NOT jump on every browser "final result" the moment
-//    you pause for a breath. Instead it waits for a full 3
-//    seconds of real silence after you stop talking before it
-//    treats your turn as finished and starts replying — the way
-//    a patient person waits for you to actually finish, instead
-//    of cutting you off.
+//  === BARGE-IN REDESIGN (this version) ===
+//  The previous version decided "did the user interrupt me?" by
+//  comparing the RECOGNIZED WORDS against what SNETCH was saying
+//  (text-based echo detection). That was unreliable: SNETCH's own
+//  voice, heard back through the microphone, often gets
+//  mis-transcribed (different accent/voice, recognition errors),
+//  so the words don't line up with what was actually said — and a
+//  real interruption gets falsely detected almost every time
+//  SNETCH speaks, causing the "speak → stop → speak → stop"
+//  behavior.
+//
+//  This version throws away text comparison entirely for barge-in.
+//  Instead it uses the Web Audio API to measure raw microphone
+//  LOUDNESS in real time, independent of what words are (mis)heard.
+//  Speaker-echo picked back up by the mic is naturally much quieter
+//  than a person actually talking nearby, so a simple loudness
+//  threshold — sustained for a short window, not a single spike —
+//  reliably tells "that's just my own voice bouncing back" apart
+//  from "the user is actually talking to me". Speech recognition
+//  itself is paused while SNETCH is speaking (we don't need to
+//  know the WORDS to detect an interruption — only that someone is
+//  talking); it resumes normally the instant a real interruption
+//  is confirmed.
 // =============================================================
 (function () {
   'use strict';
 
   const API_BASE = '/snetch/api';
   const SILENCE_MS = 3000; // how long you must be quiet before SNETCH replies
+
+  // --- Barge-in tuning (volume-based) ---
+  // These control how loud, and for how long, mic input must stay
+  // above the ambient/echo floor before we treat it as a real
+  // interruption. Tune here if it's too sensitive or not sensitive
+  // enough for a given mic/speaker setup.
+  const VAD_SAMPLE_MS = 50;         // how often we sample mic volume
+  const BARGE_IN_HOLD_MS = 220;     // must stay loud for this long (filters clicks/spikes)
+  const BARGE_IN_VOLUME_THRESHOLD = 0.09; // 0..1 scale, above ambient/echo floor
+  const AMBIENT_CALIBRATE_MS = 600; // brief silence-listen at mic-start to learn room/echo floor
+  const AMBIENT_MARGIN = 0.05;      // threshold = ambient floor + this margin (min BARGE_IN_VOLUME_THRESHOLD)
 
   // ---------------------------------------------------------
   //  DOM refs
@@ -52,26 +74,23 @@
   let recognition = null;
   let isSpeaking = false;
 
-  // The exact (cleaned) text SNETCH is currently speaking, so we can
-  // tell the difference between "the mic just picked up SNETCH's own
-  // voice bouncing off the speakers" (echo — must NOT stop the reply)
-  // and "the user actually said something different" (real barge-in).
-  let currentUtteranceText = '';
+  // ---------------------------------------------------------
+  //  TURN / GENERATION TRACKING
+  //  Every backend request and every TTS utterance gets a turn
+  //  number. If a response comes back (or a speak() call fires)
+  //  for a turn that is no longer current, it's discarded. This
+  //  prevents an old, stale reply from ever being spoken after a
+  //  newer one has already started.
+  // ---------------------------------------------------------
+  let currentTurnId = 0;
+  let currentAbortController = null;
 
   // Silence-based "the user has finished talking" detection.
   let silenceTimer = null;
   let pendingTranscript = '';
-  // If a real (non-echo) interruption is detected mid-reply, we keep
-  // the fragment that triggered it here and restart recognition fresh
-  // (so the new session's transcript isn't contaminated by SNETCH's
-  // echoed words), then prepend this fragment back once real listening
-  // resumes.
-  let interruptedPrefix = '';
 
   // ---------------------------------------------------------
   //  VOICE SELECTION — prefer an Indian female English voice.
-  //  Voices load asynchronously in most browsers, so we cache
-  //  the pick once the list is ready and re-pick if it changes.
   // ---------------------------------------------------------
   let cachedVoice = null;
 
@@ -111,19 +130,21 @@
   }
 
   // ---------------------------------------------------------
-  //  AUTH — same pattern as every other feature in this project
+  //  AUTH
   // ---------------------------------------------------------
   function authToken() {
     return localStorage.getItem('snetch_access_token') || '';
   }
 
-  async function api(path, opts) {
+  async function api(path, opts, signal) {
     const o = opts || {};
     o.headers = Object.assign({}, o.headers, { Authorization: 'Bearer ' + authToken() });
+    if (signal) o.signal = signal;
     let res;
     try {
       res = await fetch(API_BASE + path, o);
     } catch (e) {
+      if (e.name === 'AbortError') throw e;
       throw new Error('Network error. Please check your connection.');
     }
     let data = null;
@@ -136,8 +157,7 @@
   }
 
   // ---------------------------------------------------------
-  //  TIME-BASED GREETING — uses the visitor's own device clock,
-  //  so it's correct for whichever timezone they're actually in.
+  //  TIME-BASED GREETING
   // ---------------------------------------------------------
   function timeGreeting() {
     const h = new Date().getHours();
@@ -183,10 +203,6 @@
 
   // ---------------------------------------------------------
   //  MARKDOWN STRIP — safety net for the TTS layer.
-  //  The backend already strips markdown from every reply before
-  //  it's ever sent here, but we never trust a single layer: if
-  //  "**", "*", "#", backticks etc. ever slip through, this makes
-  //  sure they're never spoken aloud as literal symbols.
   // ---------------------------------------------------------
   function stripMarkdownForSpeech(text) {
     if (!text) return text;
@@ -208,53 +224,147 @@
       .trim();
   }
 
-  // ---------------------------------------------------------
-  //  ECHO DETECTION — tells real user interruptions apart from the
-  //  mic simply picking up SNETCH's own voice through the speakers.
-  //  Without dedicated echo-cancellation hardware/headphones, the
-  //  browser's mic *will* hear SNETCH talking — so we compare what
-  //  was just recognized against what SNETCH is currently saying,
-  //  and only treat it as a real interruption if it's genuinely
-  //  different.
-  // ---------------------------------------------------------
-  function normalizeForCompare(s) {
-    return String(s || '')
-      .toLowerCase()
-      .replace(/[^\p{L}\p{N}\s]/gu, '')
-      .replace(/\s+/g, ' ')
-      .trim();
+  // =============================================================
+  //  VOLUME-BASED VOICE ACTIVITY DETECTION (replaces text-compare
+  //  echo detection entirely for the purpose of barge-in).
+  //
+  //  Why this works where text-compare didn't: it never looks at
+  //  WHAT was said, only HOW LOUD the mic input is. Speaker echo
+  //  of SNETCH's own voice, picked up by a laptop/phone mic, is
+  //  reliably quieter than a person actually talking nearby — so a
+  //  loudness floor (calibrated briefly against the room's own
+  //  echo level) separates the two far more reliably than trying
+  //  to match imperfectly-recognized words.
+  // =============================================================
+  let audioCtx = null;
+  let analyser = null;
+  let micStream = null;
+  let vadRafId = null;
+  let vadIntervalId = null;
+  let ambientFloor = 0.02; // learned at mic-start; refined conservatively over time
+  let loudSinceTs = null;  // timestamp when volume first crossed threshold (for the hold window)
+
+  async function initVAD() {
+    try {
+      micStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
+    } catch (e) {
+      console.warn('Microphone access for volume detection failed:', e);
+      return false;
+    }
+
+    const AC = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AC();
+    const source = audioCtx.createMediaStreamSource(micStream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 512;
+    analyser.smoothingTimeConstant = 0.6;
+    source.connect(analyser);
+    return true;
   }
 
-  function looksLikeSelfEcho(candidate, spokenText) {
-    const a = normalizeForCompare(candidate);
-    const b = normalizeForCompare(spokenText);
-    if (!a || !b) return false;
-    // Whole-phrase match (or the recognized bit is simply contained
-    // in what's being spoken) — near-certain echo.
-    if (b.includes(a)) return true;
-    // Otherwise: how many of the recognized words also appear
-    // somewhere in the spoken reply? High overlap = almost certainly
-    // still hearing itself, not the user saying something new.
-    const aWords = a.split(' ').filter(Boolean);
-    if (!aWords.length) return false;
-    const bWords = new Set(b.split(' ').filter(Boolean));
-    let overlap = 0;
-    aWords.forEach((w) => { if (bWords.has(w)) overlap++; });
-    return (overlap / aWords.length) >= 0.6;
+  function currentMicVolume() {
+    if (!analyser) return 0;
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteTimeDomainData(data);
+    // RMS (root-mean-square) of the waveform — a standard, stable
+    // loudness measure, 0 (silence) to ~1 (very loud).
+    let sumSquares = 0;
+    for (let i = 0; i < data.length; i++) {
+      const v = (data[i] - 128) / 128;
+      sumSquares += v * v;
+    }
+    return Math.sqrt(sumSquares / data.length);
+  }
+
+  // Briefly listens to ambient/echo level right when the mic turns
+  // on (before the user necessarily starts talking) so the barge-in
+  // threshold adapts to this room/speaker setup instead of a single
+  // fixed number that might be too sensitive or not sensitive
+  // enough on a given device.
+  function calibrateAmbientFloor() {
+    return new Promise((resolve) => {
+      const samples = [];
+      const start = Date.now();
+      const tick = () => {
+        samples.push(currentMicVolume());
+        if (Date.now() - start < AMBIENT_CALIBRATE_MS) {
+          setTimeout(tick, VAD_SAMPLE_MS);
+        } else {
+          samples.sort((a, b) => a - b);
+          const median = samples[Math.floor(samples.length / 2)] || 0.02;
+          ambientFloor = median;
+          resolve();
+        }
+      };
+      tick();
+    });
+  }
+
+  // Runs continuously while the mic is on. Only DOES something
+  // (triggers barge-in) while SNETCH is actively speaking — the
+  // rest of the time, normal SpeechRecognition handles listening.
+  function startVADLoop() {
+    stopVADLoop();
+    vadIntervalId = setInterval(() => {
+      if (!isSpeaking) {
+        loudSinceTs = null;
+        return;
+      }
+      const vol = currentMicVolume();
+      const threshold = Math.max(BARGE_IN_VOLUME_THRESHOLD, ambientFloor + AMBIENT_MARGIN);
+
+      if (vol > threshold) {
+        if (loudSinceTs === null) loudSinceTs = Date.now();
+        if (Date.now() - loudSinceTs >= BARGE_IN_HOLD_MS) {
+          loudSinceTs = null;
+          handleRealBargeIn();
+        }
+      } else {
+        loudSinceTs = null;
+      }
+    }, VAD_SAMPLE_MS);
+  }
+
+  function stopVADLoop() {
+    if (vadIntervalId) { clearInterval(vadIntervalId); vadIntervalId = null; }
+    loudSinceTs = null;
+  }
+
+  function teardownVAD() {
+    stopVADLoop();
+    if (micStream) {
+      micStream.getTracks().forEach(t => t.stop());
+      micStream = null;
+    }
+    if (audioCtx) {
+      audioCtx.close().catch(() => {});
+      audioCtx = null;
+    }
+    analyser = null;
   }
 
   // ---------------------------------------------------------
-  //  TEXT-TO-SPEECH — SNETCH speaks its reply aloud
+  //  TEXT-TO-SPEECH
   // ---------------------------------------------------------
-  function speak(text) {
+  function speak(text, turnId) {
+    // Stale-response guard: if a newer turn has started since this
+    // reply was requested, never speak it.
+    if (turnId !== currentTurnId) return;
+
     const clean = stripMarkdownForSpeech(text);
-    currentUtteranceText = clean;
     if (!('speechSynthesis' in window) || !clean) {
       setState(micActive ? 'listening' : 'idle');
       return;
     }
     isSpeaking = true;
     setState('speaking');
+
     const utter = new SpeechSynthesisUtterance(clean);
     utter.rate = 1.0;
     utter.pitch = 1.1;
@@ -264,31 +374,52 @@
     } else {
       utter.lang = 'en-IN';
     }
-    utter.onend = () => {
+
+    // Known Chrome bug workaround: very long utterances can get
+    // silently paused (~14s in) unless nudged periodically.
+    let keepAliveId = setInterval(() => {
+      if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+        // no-op nudge; some Chromium builds need pause/resume cycling
+        window.speechSynthesis.pause();
+        window.speechSynthesis.resume();
+      }
+    }, 12000);
+
+    const finish = () => {
+      clearInterval(keepAliveId);
       isSpeaking = false;
-      currentUtteranceText = '';
-      setState(micActive ? 'listening' : 'idle');
+      if (turnId === currentTurnId) {
+        setState(micActive ? 'listening' : 'idle');
+      }
     };
-    utter.onerror = () => {
-      isSpeaking = false;
-      currentUtteranceText = '';
-      setState(micActive ? 'listening' : 'idle');
-    };
+
+    utter.onend = finish;
+    utter.onerror = finish;
+
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utter);
   }
 
-  // Cuts SNETCH off mid-sentence and drops back into listening mode.
-  // Only ever called once a recognition result has been confirmed as
-  // genuinely different from what SNETCH is currently saying (see
-  // looksLikeSelfEcho above) — so this only fires for a real
-  // interruption, never for the mic hearing SNETCH's own voice.
-  function bargeIn() {
+  // Called only after the volume-based VAD confirms real, sustained,
+  // above-threshold mic input while SNETCH is speaking — i.e. a
+  // genuine interruption, never a text-comparison guess.
+  function handleRealBargeIn() {
     if (!isSpeaking) return;
     window.speechSynthesis.cancel();
     isSpeaking = false;
-    currentUtteranceText = '';
+    // Bump the turn so any in-flight backend response for the
+    // current reply is discarded if it arrives late.
+    currentTurnId++;
+    if (currentAbortController) {
+      currentAbortController.abort();
+      currentAbortController = null;
+    }
     setState('listening');
+    pendingTranscript = '';
+    clearSilenceTimer();
+    // Resume normal speech recognition so the interruption's actual
+    // words get captured going forward.
+    ensureRecognitionRunning();
   }
 
   // ---------------------------------------------------------
@@ -298,23 +429,34 @@
     text = (text || '').trim();
     if (!text) return;
 
+    const turnId = ++currentTurnId;
     setState('thinking');
+
+    if (currentAbortController) currentAbortController.abort();
+    currentAbortController = new AbortController();
+    const signal = currentAbortController.signal;
 
     try {
       const data = await api('/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text }),
-      });
+      }, signal);
+
+      // Discard if a newer turn has already started while we waited.
+      if (turnId !== currentTurnId) return;
 
       if (data.assistant_name) {
         assistantName = data.assistant_name;
         updateBrandName(assistantName);
       }
 
-      speak(data.reply);
+      speak(data.reply, turnId);
     } catch (e) {
-      speak('Sorry — ' + e.message);
+      if (e.name === 'AbortError') return; // superseded by a newer turn — not an error
+      if (turnId === currentTurnId) {
+        speak('Sorry — ' + e.message, turnId);
+      }
     }
   }
 
@@ -324,12 +466,13 @@
   }
 
   // ---------------------------------------------------------
-  //  SPEECH-TO-TEXT (mic ON)
-  //  interimResults is ON so we can (a) detect the user talking
-  //  as fast as possible for barge-in, and (b) keep resetting a
-  //  3-second "they've gone quiet" timer instead of firing the
-  //  instant the browser's own endpointing thinks a sentence is
-  //  done.
+  //  SPEECH-TO-TEXT
+  //  Recognition now only runs to CAPTURE WORDS while SNETCH is
+  //  NOT speaking. While SNETCH is speaking, recognition is paused
+  //  entirely — we don't need words during that time, only the
+  //  volume-based VAD above, which decides IF an interruption
+  //  happened at all. This removes the text-based echo-guessing
+  //  step completely.
   // ---------------------------------------------------------
   function getRecognition() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -337,7 +480,7 @@
     const r = new SR();
     r.continuous = true;
     r.interimResults = true;
-    r.lang = 'en-IN'; // works well for Hindi/English mixed speech in most browsers
+    r.lang = 'en-IN';
     return r;
   }
 
@@ -348,21 +491,19 @@
     }
   }
 
-  // Called on every recognition result (interim or final) while the
-  // mic is on. Resets the 3-second "user has stopped talking" clock
-  // every time new speech comes in, and only actually sends the
-  // message once that clock completes uninterrupted.
   function armSilenceTimer() {
     clearSilenceTimer();
     silenceTimer = setTimeout(() => {
       silenceTimer = null;
       const toSend = pendingTranscript.trim();
       pendingTranscript = '';
-      interruptedPrefix = '';
-      if (toSend) {
-        sendMessage(toSend);
-      }
+      if (toSend) sendMessage(toSend);
     }, SILENCE_MS);
+  }
+
+  function ensureRecognitionRunning() {
+    if (!micActive || !recognition) return;
+    try { recognition.start(); } catch (e) { /* already running */ }
   }
 
   function startMic() {
@@ -382,66 +523,49 @@
     micActive = true;
     micOnBtn.classList.add('active');
     micOffBtn.classList.remove('active');
-    setState('listening');
     pendingTranscript = '';
-    interruptedPrefix = '';
     clearSilenceTimer();
 
     recognition.onresult = (event) => {
-      // The recognizer's current best guess for the phrase in
-      // progress right now (this is what we check for echo, not the
-      // whole accumulated session — it's the freshest signal).
-      const lastResult = event.results[event.results.length - 1];
-      const lastText = lastResult[0].transcript;
+      // While SNETCH is speaking, recognition is supposed to be
+      // paused (see below) — but if a stray result still arrives in
+      // that window, ignore it. Barge-in decisions are made purely
+      // by the volume-based VAD now, never by transcript content.
+      if (isSpeaking) return;
 
-      if (isSpeaking) {
-        if (looksLikeSelfEcho(lastText, currentUtteranceText)) {
-          // The mic is almost certainly just hearing SNETCH's own
-          // voice bounce back through the speakers — NOT the user
-          // interrupting. Ignore it completely: keep talking.
-          return;
-        }
-        // Genuinely different from what SNETCH is saying — a real
-        // interruption. Stop talking immediately and restart
-        // recognition fresh so the transcript we build next doesn't
-        // have any of SNETCH's echoed words mixed into it.
-        bargeIn();
-        interruptedPrefix = lastText.trim();
-        pendingTranscript = interruptedPrefix;
-        armSilenceTimer();
-        try { recognition.stop(); } catch (e) { /* onend restarts it */ }
-        return;
-      }
-
-      // Not speaking — normal listening flow: rebuild the full
-      // transcript for this session (prefixed with anything captured
-      // right at the moment of a real interruption above) and reset
-      // the 3-second "gone quiet" clock. We only ever finalize and
-      // send on that timer, never the instant a result looks final.
       let combined = '';
       for (let i = 0; i < event.results.length; i++) {
         combined += event.results[i][0].transcript;
       }
-      combined = (interruptedPrefix ? interruptedPrefix + ' ' : '') + combined;
       pendingTranscript = combined.trim();
       armSilenceTimer();
     };
 
     recognition.onerror = (event) => {
-      if (event.error === 'no-speech') return; // just keep listening
+      if (event.error === 'no-speech') return;
       console.warn('Speech recognition error:', event.error);
     };
 
     recognition.onend = () => {
-      // Browsers auto-stop recognition after a while (or after a long
-      // pause) — restart it automatically as long as the user hasn't
-      // pressed OFF, so listening truly never has a gap.
-      if (micActive) {
+      // Auto-restart, but only if we're still meant to be listening
+      // and SNETCH isn't currently speaking (during speech, we
+      // deliberately keep recognition off — see toggling below).
+      if (micActive && !isSpeaking) {
         try { recognition.start(); } catch (e) { /* already running */ }
       }
     };
 
-    try { recognition.start(); } catch (e) { /* already running */ }
+    (async () => {
+      setState('listening');
+      statusSub.textContent = 'Calibrating room noise...';
+      const ok = await initVAD();
+      if (ok) {
+        await calibrateAmbientFloor();
+        startVADLoop();
+      }
+      setState('listening');
+      try { recognition.start(); } catch (e) { /* already running */ }
+    })();
   }
 
   function stopMic() {
@@ -451,17 +575,37 @@
     setTimeout(() => micOffBtn.classList.remove('active'), 400);
     clearSilenceTimer();
     pendingTranscript = '';
-    interruptedPrefix = '';
+    currentTurnId++; // invalidate anything in flight
+    if (currentAbortController) { currentAbortController.abort(); currentAbortController = null; }
     if (recognition) {
-      recognition.onend = null; // prevent auto-restart
+      recognition.onend = null;
       try { recognition.stop(); } catch (e) {}
       recognition = null;
     }
     window.speechSynthesis && window.speechSynthesis.cancel();
     isSpeaking = false;
-    currentUtteranceText = '';
+    teardownVAD();
     setState('idle');
   }
+
+  // Whenever `isSpeaking` flips, keep SpeechRecognition and the VAD
+  // loop in sync with it: recognition off / VAD on while SNETCH
+  // talks, and back the other way once it's done. This is driven
+  // from the single state-changing points (speak()/finish() and
+  // handleRealBargeIn()) via this watcher instead of scattering the
+  // same toggling logic across multiple call sites.
+  let lastSpeakingFlag = false;
+  setInterval(() => {
+    if (!micActive) return;
+    if (isSpeaking !== lastSpeakingFlag) {
+      lastSpeakingFlag = isSpeaking;
+      if (isSpeaking) {
+        if (recognition) { try { recognition.stop(); } catch (e) {} }
+      } else {
+        ensureRecognitionRunning();
+      }
+    }
+  }, 100);
 
   micOnBtn.addEventListener('click', startMic);
   micOffBtn.addEventListener('click', stopMic);
@@ -507,9 +651,7 @@
   }
 
   // ---------------------------------------------------------
-  //  BOOTSTRAP — load identity + greeting (history stays in
-  //  memory server-side for context; not rendered on screen —
-  //  this app is voice-only).
+  //  BOOTSTRAP
   // ---------------------------------------------------------
   async function bootstrap() {
     setState('idle');
