@@ -2546,9 +2546,13 @@ def google_start():
     state = secrets.token_urlsafe(16)
     session["google_oauth_state"] = state
 
+    redirect_uri = url_for("google_callback", _external=True)
+    if "127.0.0.1" in redirect_uri:
+        redirect_uri = redirect_uri.replace("127.0.0.1", "localhost")
+
     params = {
         "client_id": GOOGLE_CLIENT_ID,
-        "redirect_uri": url_for("google_callback", _external=True),
+        "redirect_uri": redirect_uri,
         "response_type": "code",
         "scope": "openid email profile",
         "state": state,
@@ -2576,13 +2580,17 @@ def google_callback():
     if not code:
         return redirect("/login?error=google_failed")
 
+    redirect_uri = url_for("google_callback", _external=True)
+    if "127.0.0.1" in redirect_uri:
+        redirect_uri = redirect_uri.replace("127.0.0.1", "localhost")
+
     try:
         token_resp = requests.post("https://oauth2.googleapis.com/token", data={
             "client_id": GOOGLE_CLIENT_ID,
             "client_secret": GOOGLE_CLIENT_SECRET,
             "code": code,
             "grant_type": "authorization_code",
-            "redirect_uri": url_for("google_callback", _external=True),
+            "redirect_uri": redirect_uri,
         }, timeout=10)
         token_resp.raise_for_status()
         google_access_token = token_resp.json()["access_token"]
