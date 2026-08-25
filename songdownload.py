@@ -112,7 +112,14 @@ def search_song(raw_query: str) -> dict:
     if not query:
         raise SongNotFoundError("Please enter a song name.")
 
-    search_target = f"ytsearch1:{query} audio"
+    # Fetch several candidates instead of just the top one — some
+    # results are blocked by YouTube's extra verification checks
+    # regardless of cookies, and if that happens to be the very first
+    # result, a single-result search would fail the whole request even
+    # though other (often near-duplicate) uploads of the same song work
+    # fine. This picks the first candidate that's actually accessible,
+    # so the "same song" experience is preserved for the user.
+    search_target = f"ytsearch5:{query} audio"
 
     opts = {
         "quiet": True,
@@ -122,7 +129,17 @@ def search_song(raw_query: str) -> dict:
         "socket_timeout": REQUEST_TIMEOUT,
         "extract_flat": False,
         "default_search": "ytsearch",
+        "extractor_args": {"youtube": {"player_client": ["android", "web", "ios", "tv"]}},
+        # If one of the 5 results is blocked by YouTube's extra
+        # verification checks, this makes yt-dlp skip just that entry
+        # instead of failing the whole search — so `entries` naturally
+        # ends up containing only the candidates that are actually
+        # accessible, in original relevance order.
+        "ignoreerrors": True,
     }
+    _cookies_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "www.youtube.com_cookies.txt")
+    if os.path.exists(_cookies_file):
+        opts["cookiefile"] = _cookies_file
 
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
@@ -133,7 +150,7 @@ def search_song(raw_query: str) -> dict:
         ) from exc
 
     entries = info.get("entries") or ([info] if info.get("id") else [])
-    entries = [e for e in entries if e]
+    entries = [e for e in entries if e and e.get("id")]
     if not entries:
         raise SongNotFoundError(f'No song found for "{query}". Try a different name.')
 

@@ -606,11 +606,35 @@ def download_tone_by_name(name: str) -> dict:
             ydl_opts["cookiefile"] = YTDLP_COOKIES_FILE
         else:
             print(f"  [Tone Download] No cookies file found (looked for one in {_ALARM_DIR}) — download will likely be blocked as a bot.")
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.extract_info(f"ytsearch1:{name}", download=True)
-        if os.path.exists(f"{out_path}.mp3"):
-            return {"ok": True, "error": None}
-        return {"ok": False, "error": "File did not save after download."}
+
+        # Not every YouTube result for a given search allows this kind
+        # of server-side download — some are blocked by extra
+        # verification checks regardless of cookies. Rather than only
+        # trying the single top result (which fails the whole request
+        # if that one video happens to be restricted), pull several
+        # candidates and use the first one that actually works.
+        last_error = None
+        with yt_dlp.YoutubeDL({**ydl_opts, "extract_flat": "in_playlist", "quiet": True}) as search_ydl:
+            search_result = search_ydl.extract_info(f"ytsearch5:{name}", download=False)
+        candidates = (search_result or {}).get("entries") or []
+        if not candidates:
+            return {"ok": False, "error": "No results found for that search."}
+
+        for entry in candidates:
+            video_url = entry.get("url") or entry.get("webpage_url") or entry.get("id")
+            if not video_url:
+                continue
+            try:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    ydl.extract_info(video_url, download=True)
+                if os.path.exists(f"{out_path}.mp3"):
+                    return {"ok": True, "error": None}
+            except Exception as e:
+                last_error = e
+                print(f"  [Tone Download] Candidate '{video_url}' failed, trying next: {e}")
+                continue
+
+        raise last_error or RuntimeError("File did not save after download.")
     except Exception as e:
         print(f"  [Tone Download Error] {e}")
         error_msg = str(e)

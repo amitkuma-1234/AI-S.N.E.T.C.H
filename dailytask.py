@@ -272,9 +272,32 @@ def download_tone_by_name(name: str) -> dict:
     if os.path.exists(YTDLP_COOKIES_FILE):
         ydl_opts["cookiefile"] = YTDLP_COOKIES_FILE
 
+    # Some search results are blocked by YouTube's extra verification
+    # checks regardless of cookies — try several candidates instead of
+    # only the single top result, using the first one that works.
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.extract_info(f"ytsearch1:{safe_name}", download=True)
+        with yt_dlp.YoutubeDL({**ydl_opts, "extract_flat": "in_playlist", "quiet": True}) as search_ydl:
+            search_result = search_ydl.extract_info(f"ytsearch5:{safe_name}", download=False)
+        candidates = (search_result or {}).get("entries") or []
+        if not candidates:
+            return {"ok": False, "filename": "", "error": "No results found for that search."}
+
+        last_error = None
+        downloaded = False
+        for entry in candidates:
+            video_url = entry.get("url") or entry.get("webpage_url") or entry.get("id")
+            if not video_url:
+                continue
+            try:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    ydl.extract_info(video_url, download=True)
+                downloaded = True
+                break
+            except Exception as e:
+                last_error = e
+                continue
+        if not downloaded:
+            raise last_error or RuntimeError("All candidates failed.")
     except Exception as e:
         return {"ok": False, "filename": "", "error": f"Download failed: {e}"}
 
