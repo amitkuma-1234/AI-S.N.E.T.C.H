@@ -39,12 +39,7 @@ logging.getLogger("httpcore").setLevel(logging.WARNING)
 
 try:
     import numpy as np
-    from youtube_transcript_api import (
-        YouTubeTranscriptApi,
-        TranscriptsDisabled,
-        NoTranscriptFound,
-        VideoUnavailable,
-    )
+    import yt_dlp
     from sentence_transformers import SentenceTransformer, CrossEncoder
     from sklearn.feature_extraction.text import TfidfVectorizer
     from sklearn.metrics.pairwise import cosine_similarity
@@ -93,6 +88,7 @@ _active_video_id = None
 
 # ── Web feature config (Flask blueprint, SQLite, per-thread sessions) ──
 BASE_DIR       = os.path.dirname(os.path.abspath(__file__))
+YT_COOKIES_FILE = os.path.join(BASE_DIR, "www.youtube.com_cookies.txt")
 DB_STORAGE_DIR = os.path.join(BASE_DIR, "db_storage")
 YT_DB_PATH     = os.path.join(DB_STORAGE_DIR, "youtube_chatbot.db")
 CHECKPOINT_DB_PATH = os.path.join(DB_STORAGE_DIR, "youtube_chatbot_checkpoints.db")
@@ -315,30 +311,120 @@ def _fetch_video_metadata(video_id: str) -> dict:
         return {"title": "", "author": ""}
 
 
-def _get_transcript_segments(video_id: str):
-    try:
-        ytt = YouTubeTranscriptApi()
-        try:
-            fetched = ytt.fetch(video_id, languages=["en", "en-US", "en-GB", "hi", "hi-IN"])
-        except NoTranscriptFound:
-            transcript_list = ytt.list(video_id)
-            available = next(iter(transcript_list), None)
-            if available is None:
-                return None, "no_transcript"
-            fetched = available.fetch()
+_VTT_TIME_RE = re.compile(
+    r"(\d{2}):(\d{2}):(\d{2})[.,](\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})[.,](\d{3})"
+)
+_VTT_INLINE_TAG_RE = re.compile(r"<[^>]+>")  # strips <c>, <00:00:01.000> word-timing tags, etc.
 
-        segments = [
-            {"text": c.text, "start": c.start, "duration": getattr(c, "duration", 0)}
-            for c in fetched
-        ]
-        return segments, None
-    except TranscriptsDisabled:
-        return None, "disabled"
-    except VideoUnavailable:
-        return None, "unavailable"
-    except Exception as e:
-        logger.error(f"Transcript fetch error: {e}")
+
+def _vtt_timestamp_to_seconds(h, m, s, ms) -> float:
+    return int(h) * 3600 + int(m) * 60 + int(s) + int(ms) / 1000.0
+
+
+def _parse_vtt_to_segments(vtt_text: str) -> list:
+    """Parses WebVTT subtitle text (what yt-dlp downloads) into
+    [{"text", "start", "duration"}, ...] segments — the same shape
+    the rest of this file already expects, so nothing downstream
+    needs to change."""
+    segments = []
+    blocks = re.split(r"\n\s*\n", vtt_text.strip())
+    last_text = None  # auto-captions often repeat the previous line — skip exact repeats
+    for block in blocks:
+        lines = [l for l in block.splitlines() if l.strip()]
+        if not lines:
+            continue
+        time_line_idx = None
+        for i, line in enumerate(lines):
+            if "-->" in line:
+                time_line_idx = i
+                break
+        if time_line_idx is None:
+            continue
+        m = _VTT_TIME_RE.search(lines[time_line_idx])
+        if not m:
+            continue
+        start = _vtt_timestamp_to_seconds(*m.groups()[0:4])
+        end = _vtt_timestamp_to_seconds(*m.groups()[4:8])
+
+        text_lines = lines[time_line_idx + 1:]
+        text = " ".join(text_lines).strip()
+        text = _VTT_INLINE_TAG_RE.sub("", text).strip()
+        if not text or text == last_text:
+            continue
+        last_text = text
+        segments.append({"text": text, "start": start, "duration": max(0.0, end - start)})
+    return segments
+
+
+def _get_transcript_segments(video_id: str):
+    """Fetches captions via yt-dlp instead of youtube-transcript-api.
+    yt-dlp supports cookies properly (youtube-transcript-api's cookie
+    support is disabled upstream as of this writing), which is what
+    lets this keep working when the server's IP gets flagged by
+    YouTube as a bot/datacenter address."""
+    if not YT_DEPS_OK:
         return None, "unknown"
+
+    url = f"https://www.youtube.com/watch?v={video_id}"
+    lang_priority = ["en", "en-US", "en-GB", "hi", "hi-IN"]
+
+    ydl_opts = {
+        "skip_download": True,
+        "writesubtitles": True,
+        "writeautomaticsub": True,
+        "subtitleslangs": lang_priority,
+        "subtitlesformat": "vtt",
+        "quiet": True,
+        "no_warnings": True,
+        "noplaylist": True,
+    }
+    if os.path.isfile(YT_COOKIES_FILE) and os.path.getsize(YT_COOKIES_FILE) > 0:
+        ydl_opts["cookiefile"] = YT_COOKIES_FILE
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+    except yt_dlp.utils.DownloadError as e:
+        msg = str(e).lower()
+        if "private" in msg or "unavailable" in msg:
+            return None, "unavailable"
+        logger.error(f"Transcript fetch (yt-dlp) error: {e}")
+        return None, "unknown"
+    except Exception as e:
+        logger.error(f"Transcript fetch (yt-dlp) error: {e}")
+        return None, "unknown"
+
+    if info is None:
+        return None, "unavailable"
+
+    manual_subs = info.get("subtitles") or {}
+    auto_subs = info.get("automatic_captions") or {}
+
+    def _pick_track(subs_dict):
+        for lang in lang_priority:
+            if lang in subs_dict:
+                return subs_dict[lang]
+        return None
+
+    track = _pick_track(manual_subs) or _pick_track(auto_subs)
+    if not track:
+        return None, "disabled" if not manual_subs and not auto_subs else "no_transcript"
+
+    vtt_entry = next((f for f in track if f.get("ext") == "vtt"), track[0] if track else None)
+    if not vtt_entry or not vtt_entry.get("url"):
+        return None, "no_transcript"
+
+    try:
+        resp = requests.get(vtt_entry["url"], timeout=15)
+        resp.raise_for_status()
+        segments = _parse_vtt_to_segments(resp.text)
+    except Exception as e:
+        logger.error(f"Transcript download/parse error: {e}")
+        return None, "unknown"
+
+    if not segments:
+        return None, "no_transcript"
+    return segments, None
 
 
 def _sentence_aware_chunks_with_ts(segments: list, max_words: int = CHUNK_MAX_WORDS,
