@@ -19,11 +19,13 @@ Public functions used by app.py:
 Both exception types carry a clean, user-friendly message.
 """
 
+import os
 import re
 import yt_dlp
 
 REQUEST_TIMEOUT = 15   # seconds
 RELATED_RESULTS = 8    # extra matches pulled back for the recent/playlist rail
+YT_COOKIES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "www.youtube.com_cookies.txt")
 
 
 class SongNotFoundError(Exception):
@@ -188,8 +190,20 @@ def get_audio_stream(video_id: str) -> dict:
             "format": "bestaudio/best",
             "quiet": True, "no_warnings": True, "noplaylist": True,
             "socket_timeout": REQUEST_TIMEOUT,
+            "extractor_args": {"youtube": {"player_client": ["tv"]}},
+        },
+        {
+            "format": "bestaudio/best",
+            "quiet": True, "no_warnings": True, "noplaylist": True,
+            "socket_timeout": REQUEST_TIMEOUT,
         },
     ]
+    # YouTube blocks/challenges data-center IPs far more than home
+    # internet — passing real cookies alongside the client fallbacks
+    # above is what makes this work reliably once deployed.
+    if os.path.exists(YT_COOKIES_FILE):
+        for _opts in opts_list:
+            _opts["cookiefile"] = YT_COOKIES_FILE
 
     last_error = None
     for opts in opts_list:

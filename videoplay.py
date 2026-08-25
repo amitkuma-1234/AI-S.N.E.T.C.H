@@ -26,11 +26,13 @@ Both exceptions carry a clean, user-friendly message so app.py can turn
 them into JSON error responses without any extra translation.
 """
 
+import os
 import re
 import yt_dlp
 
 REQUEST_TIMEOUT = 15  # seconds
 RELATED_RESULTS = 6   # how many extra results to pull for the "related" rail
+YT_COOKIES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "www.youtube.com_cookies.txt")
 
 
 class VideoNotFoundError(Exception):
@@ -58,7 +60,13 @@ def _ydl_opts(extra=None):
         "socket_timeout": REQUEST_TIMEOUT,
         "extract_flat": "in_playlist",
         "default_search": "ytsearch",
+        # See songplay.py / songdownload.py — same reasoning: cloud
+        # server IPs get bot-challenged by YouTube far more than home
+        # internet, so real browser cookies are needed once deployed.
+        "extractor_args": {"youtube": {"player_client": ["android", "web", "ios", "tv"]}},
     }
+    if os.path.exists(YT_COOKIES_FILE):
+        opts["cookiefile"] = YT_COOKIES_FILE
     if extra:
         opts.update(extra)
     return opts

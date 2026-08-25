@@ -287,7 +287,15 @@ def start_download(video_id: str, title: str = "song") -> str:
                 "preferredquality": "320",
             }],
             "progress_hooks": [_progress_hook],
+            # YouTube blocks/challenges requests from data-center IPs (cloud
+            # servers) far more aggressively than home internet. Passing a
+            # real browser's cookies, plus falling back across player
+            # clients, is what gets around that on a deployed server.
+            "extractor_args": {"youtube": {"player_client": ["android", "web", "ios", "tv"]}},
         }
+        _cookies_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "www.youtube.com_cookies.txt")
+        if os.path.exists(_cookies_file):
+            ydl_opts["cookiefile"] = _cookies_file
 
         try:
             with _downloads_lock:

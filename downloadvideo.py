@@ -198,6 +198,16 @@ def build_ydl_opts(download_path=None, progress_hook=None, browser=None):
 
     if browser:
         opts["cookiesfrombrowser"] = (browser, )
+    else:
+        # On a deployed server there's no local Chrome/Edge to pull
+        # cookies from — fall back to an exported cookies file instead
+        # (same file used by the rest of the YouTube-dependent
+        # features). Without this, "Requested format is not
+        # available" / bot-check failures happen on cloud IPs even
+        # though the same code works fine on a local PC.
+        _cookies_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "www.youtube.com_cookies.txt")
+        if os.path.exists(_cookies_file):
+            opts["cookiefile"] = _cookies_file
 
     if ffmpeg_path:
         opts["ffmpeg_location"] = ffmpeg_path

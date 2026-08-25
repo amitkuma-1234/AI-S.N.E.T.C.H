@@ -199,7 +199,11 @@ def download_tone_by_name(name: str) -> dict:
             "preferredcodec": "mp3",
             "preferredquality": "192",
         }],
+        "extractor_args": {"youtube": {"player_client": ["android", "web", "ios", "tv"]}},
     }
+    _cookies_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "www.youtube.com_cookies.txt")
+    if os.path.exists(_cookies_file):
+        ydl_opts["cookiefile"] = _cookies_file
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
