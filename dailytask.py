@@ -201,6 +201,31 @@ def _safe_tone_list(tones) -> list:
     return ordered
 
 
+_DT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def _resolve_cookies_file() -> str:
+    """Find the youtube cookies file — checks env var, then common
+    filenames, then any '*cookies*.txt' in the project folder."""
+    env_path = os.getenv("YTDLP_COOKIES_FILE")
+    if env_path and os.path.exists(env_path):
+        return env_path
+    for candidate in ("www.youtube.com_cookies.txt", "youtube_cookies.txt"):
+        p = os.path.join(_DT_DIR, candidate)
+        if os.path.exists(p):
+            return p
+    try:
+        for fname in os.listdir(_DT_DIR):
+            if "cookies" in fname.lower() and fname.lower().endswith(".txt"):
+                return os.path.join(_DT_DIR, fname)
+    except OSError:
+        pass
+    return os.path.join(_DT_DIR, "youtube_cookies.txt")
+
+
+YTDLP_COOKIES_FILE = _resolve_cookies_file()
+
+
 def download_tone_by_name(name: str) -> dict:
     """
     Non-interactive tone download for the web API.
@@ -242,7 +267,10 @@ def download_tone_by_name(name: str) -> dict:
             "preferredcodec": "mp3",
             "preferredquality": "192",
         }],
+        "extractor_args": {"youtube": {"player_client": ["android", "web", "ios", "tv"]}},
     }
+    if os.path.exists(YTDLP_COOKIES_FILE):
+        ydl_opts["cookiefile"] = YTDLP_COOKIES_FILE
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
