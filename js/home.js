@@ -88,7 +88,7 @@
         const el = id => document.getElementById(id);
         if (el('topbar-avatar')) el('topbar-avatar').textContent = initials;
         if (el('topbar-username')) el('topbar-username').textContent = name;
-        if (el('dashboard-greeting')) el('dashboard-greeting').textContent = name + ' · 37 features';
+        if (el('dashboard-greeting')) el('dashboard-greeting').textContent = name + ' · 38 features';
     }
 
     // ==========================================
