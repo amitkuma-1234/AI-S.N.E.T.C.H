@@ -92,16 +92,24 @@ except ImportError:
 try:
     import pyautogui
     PYAUTOGUI_OK = True
-except ImportError:
+except Exception as e:
+    # Broad except (not just ImportError) on purpose: on a headless
+    # server (no DISPLAY, e.g. AWS EC2), pyautogui's own import chain
+    # (via mouseinfo) raises a bare KeyError('DISPLAY') at import time
+    # instead of ImportError. This feature is desktop-automation only
+    # and can never work on a headless server anyway, so we degrade
+    # gracefully instead of crashing the whole app on boot.
     PYAUTOGUI_OK = False
-    print("[whatsappmessage] 'pyautogui' not installed. Run: pip install pyautogui")
+    print(f"[whatsappmessage] 'pyautogui' unavailable ({e}). "
+          f"WhatsApp desktop-automation features will be disabled.")
 
 try:
     import pygetwindow as gw
     PYGETWINDOW_OK = True
-except ImportError:
+except Exception as e:
     PYGETWINDOW_OK = False
-    print("[whatsappmessage] 'pygetwindow' not installed. Run: pip install pygetwindow")
+    print(f"[whatsappmessage] 'pygetwindow' unavailable ({e}). "
+          f"WhatsApp desktop-automation features will be disabled.")
 
 if platform.system() == "Windows":
     try:
