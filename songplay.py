@@ -172,29 +172,33 @@ def get_audio_stream(video_id: str) -> dict:
     watch_url = f"https://www.youtube.com/watch?v={video_id}"
 
     # Try a few extraction strategies, since YouTube periodically throttles
-    # or blocks one client type but not another (mirrors the resilience of
-    # the project's original playback code).
+    # or blocks one client type but not another. "android" leads because
+    # it's the most reliable for audio-only format resolution; "ios" was
+    # dropped from this list — its audio-only streams frequently don't
+    # match yt-dlp's "bestaudio" filter at all (a known yt-dlp/YouTube
+    # quirk), causing a hard "Requested format is not available" error
+    # instead of falling through to try another client.
     opts_list = [
         {
-            "format": "bestaudio/best",
-            "quiet": True, "no_warnings": True, "noplaylist": True,
-            "socket_timeout": REQUEST_TIMEOUT,
-            "extractor_args": {"youtube": {"player_client": ["ios"]}},
-        },
-        {
-            "format": "bestaudio/best",
+            "format": "bestaudio*/bestaudio/best",
             "quiet": True, "no_warnings": True, "noplaylist": True,
             "socket_timeout": REQUEST_TIMEOUT,
             "extractor_args": {"youtube": {"player_client": ["android"]}},
         },
         {
-            "format": "bestaudio/best",
+            "format": "bestaudio*/bestaudio/best",
             "quiet": True, "no_warnings": True, "noplaylist": True,
             "socket_timeout": REQUEST_TIMEOUT,
             "extractor_args": {"youtube": {"player_client": ["tv"]}},
         },
         {
-            "format": "bestaudio/best",
+            "format": "bestaudio*/bestaudio/best",
+            "quiet": True, "no_warnings": True, "noplaylist": True,
+            "socket_timeout": REQUEST_TIMEOUT,
+            "extractor_args": {"youtube": {"player_client": ["web"]}},
+        },
+        {
+            "format": "bestaudio*/bestaudio/best",
             "quiet": True, "no_warnings": True, "noplaylist": True,
             "socket_timeout": REQUEST_TIMEOUT,
         },
