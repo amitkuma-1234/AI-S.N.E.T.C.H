@@ -218,7 +218,15 @@ def download_tone_by_name(name: str) -> dict:
         last_error = None
         downloaded = False
         for entry in candidates:
-            video_url = entry.get("url") or entry.get("webpage_url") or entry.get("id")
+            video_id = entry.get("id")
+            if not video_id:
+                continue
+            # Build the watch URL explicitly from the raw video ID —
+            # entry.get("url") from a flat/in_playlist search often
+            # holds just the bare ID (not a full URL), which yt-dlp
+            # cannot resolve on its own, making every candidate look
+            # like it failed even when it was actually fine.
+            video_url = f"https://www.youtube.com/watch?v={video_id}"
             if not video_url:
                 continue
             try:
