@@ -30,7 +30,7 @@ import jwt
 import requests
 from flask import (
     Flask, request, jsonify, render_template, redirect,
-    send_from_directory, abort, session, url_for,
+    send_from_directory, send_file, abort, session, url_for,
     Response, stream_with_context, g
 )
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -1649,6 +1649,28 @@ def api_songdownload_progress(download_id):
     """Return real-time progress data for a download."""
     data = songdownload.get_progress(download_id)
     return jsonify(data)
+
+
+@app.route("/api/songdownload/file/<download_id>")
+def api_songdownload_file(download_id):
+    """Streams the finished MP3 to the browser as an actual download.
+
+    Previously the file only ever got saved into this server's own
+    filesystem (~/Downloads *on the server*, not the visitor's own
+    computer) — the UI showed "Download Completed Successfully", but
+    nothing was ever sent back over the network. This route is what
+    makes the file actually land on the person's own device: the
+    browser calls it once progress status is "completed", and Flask
+    streams the real file bytes with a Content-Disposition header
+    that triggers the browser's normal Save/Download behavior.
+    """
+    data = songdownload.get_progress(download_id)
+    if data.get("status") != "completed":
+        return jsonify({"success": False, "error": "This download isn't finished yet."}), 409
+    filepath = data.get("filename")
+    if not filepath or not os.path.exists(filepath):
+        return jsonify({"success": False, "error": "File no longer exists on the server."}), 404
+    return send_file(filepath, as_attachment=True, download_name=os.path.basename(filepath))
 
 
 

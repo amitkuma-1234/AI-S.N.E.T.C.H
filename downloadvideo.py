@@ -23,7 +23,7 @@ import shutil
 import threading
 import traceback
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file
 
 # ANSI escape sequence pattern (used to clean yt-dlp error messages)
 _ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
@@ -442,6 +442,40 @@ def api_progress(job_id):
         payload = {k: v for k, v in job.items() if not k.startswith("_")}
 
     return jsonify({"ok": True, **payload})
+
+
+@downloadvideo_bp.route("/file/<job_id>", methods=["GET"])
+def api_download_file(job_id):
+    """Streams the finished file to the browser as an actual download.
+
+    Previously the file only ever got saved into this server's own
+    filesystem (~/Downloads *on the server*, not the visitor's own
+    computer) — the UI showed a "completed" message, but nothing was
+    ever sent back over the network for the browser to save. This
+    route is what makes the file actually land on the person's own
+    device: the browser calls it once the job status is "finished",
+    and Flask streams the real file bytes with a Content-Disposition
+    header that tells the browser to trigger its normal Save/Download
+    behavior — the same as clicking a download link on any other
+    website.
+    """
+    with jobs_lock:
+        job = jobs.get(job_id)
+        if not job:
+            return jsonify({"ok": False, "error": "Unknown download job."}), 404
+        filepath = job.get("filepath")
+        status = job.get("status")
+
+    if status != "finished" or not filepath:
+        return jsonify({"ok": False, "error": "This download isn't finished yet."}), 409
+    if not os.path.exists(filepath):
+        return jsonify({"ok": False, "error": "File no longer exists on the server."}), 404
+
+    return send_file(
+        filepath,
+        as_attachment=True,
+        download_name=os.path.basename(filepath),
+    )
 
 
 @downloadvideo_bp.route("/cancel/<job_id>", methods=["POST"])

@@ -311,7 +311,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     doneThumb.src = data.thumbnail || '';
     doneTitle.textContent = data.title || 'Video downloaded';
-    doneLocation.textContent = data.downloads_folder || 'Downloads';
+    // This used to show the SERVER's own filesystem path (e.g.
+    // "/home/ubuntu/Downloads"), which means nothing to the person
+    // using the site — that folder is on the server, not their
+    // device. The actual download is triggered below instead.
+    doneLocation.textContent = 'Your Downloads folder';
+
+    // Actually hand the file to the browser so it lands on the
+    // person's own device — previously nothing ever did this, the
+    // file only ever existed on the server's disk.
+    if (activeJobId) {
+      const a = document.createElement('a');
+      a.href = `${API}/file/${activeJobId}`;
+      a.download = '';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
 
     let seconds = 3;
     resetCountdown.textContent = seconds;

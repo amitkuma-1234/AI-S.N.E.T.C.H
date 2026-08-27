@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Check terminal states
         if (data.status === 'completed') {
           stopPolling();
-          showComplete(song, data.filename);
+          showComplete(song, data.filename, downloadId);
         } else if (data.status === 'error') {
           stopPolling();
           showError(data.error || 'Download failed. Please try again.');
@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── COMPLETE STATE ────────────────────────────────────────
 
-  function showComplete(song, filename) {
+  function showComplete(song, filename, downloadId) {
     isDownloading = false;
 
     completeCover.src = song.cover || '';
@@ -271,14 +271,24 @@ document.addEventListener('DOMContentLoaded', () => {
     completeTitle.textContent = song.title || 'Unknown';
     completeArtist.textContent = song.artist || 'Unknown Artist';
 
-    // Show Downloads folder
+    // This used to show the SERVER's own filesystem folder (e.g.
+    // "/home/ubuntu/Downloads"), which is meaningless to the person
+    // using the site — that path is on the server, not their device.
+    // What actually matters is that the file is now downloading to
+    // THEIR computer, which the browser trigger below takes care of.
     const locationSpan = completeLocation.querySelector('span');
-    if (filename) {
-      // Show just the folder (strip filename for privacy)
-      const folder = filename.replace(/\\/g, '/').split('/').slice(0, -1).join('/');
-      locationSpan.textContent = folder || 'Downloads folder';
-    } else {
-      locationSpan.textContent = 'Downloads folder';
+    locationSpan.textContent = 'Your Downloads folder';
+
+    // Actually hand the file to the browser so it lands on the
+    // person's own device — previously nothing ever did this, the
+    // file only ever existed on the server's disk.
+    if (downloadId) {
+      const a = document.createElement('a');
+      a.href = `/api/songdownload/file/${downloadId}`;
+      a.download = '';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
     }
 
     showSection('completeSection');
