@@ -29,10 +29,10 @@ them into JSON error responses without any extra translation.
 import os
 import re
 import yt_dlp
+import yt_cookies
 
 REQUEST_TIMEOUT = 15  # seconds
 RELATED_RESULTS = 6   # how many extra results to pull for the "related" rail
-YT_COOKIES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "www.youtube.com_cookies.txt")
 
 
 class VideoNotFoundError(Exception):
@@ -65,8 +65,14 @@ def _ydl_opts(extra=None):
         # internet, so real browser cookies are needed once deployed.
         "extractor_args": {"youtube": {"player_client": ["android", "web", "ios", "tv"]}},
     }
-    if os.path.exists(YT_COOKIES_FILE):
-        opts["cookiefile"] = YT_COOKIES_FILE
+    # Give yt-dlp a disposable COPY of the cookies file, never the
+    # real one — see yt_cookies.py for why. This makes a small fresh
+    # temp copy per call rather than tracking cleanup across every
+    # caller of this shared helper; each copy is only a couple KB and
+    # the OS temp directory is cleaned up on its own over time.
+    _cookie_copy = yt_cookies.get_cookiefile_for_this_run()
+    if _cookie_copy:
+        opts["cookiefile"] = _cookie_copy
     if extra:
         opts.update(extra)
     return opts

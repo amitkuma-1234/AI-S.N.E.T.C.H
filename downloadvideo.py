@@ -30,6 +30,7 @@ _ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 
 try:
     import yt_dlp
+    import yt_cookies
 except ImportError:  # pragma: no cover - surfaced as a clean error at request time
     yt_dlp = None
 
@@ -200,14 +201,14 @@ def build_ydl_opts(download_path=None, progress_hook=None, browser=None):
         opts["cookiesfrombrowser"] = (browser, )
     else:
         # On a deployed server there's no local Chrome/Edge to pull
-        # cookies from — fall back to an exported cookies file instead
-        # (same file used by the rest of the YouTube-dependent
-        # features). Without this, "Requested format is not
-        # available" / bot-check failures happen on cloud IPs even
-        # though the same code works fine on a local PC.
-        _cookies_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "www.youtube.com_cookies.txt")
-        if os.path.exists(_cookies_file):
-            opts["cookiefile"] = _cookies_file
+        # cookies from — fall back to a disposable COPY of the
+        # exported cookies file instead (never the real one — see
+        # yt_cookies.py for why). Without this, "Requested format is
+        # not available" / bot-check failures happen on cloud IPs
+        # even though the same code works fine on a local PC.
+        _cookie_copy = yt_cookies.get_cookiefile_for_this_run()
+        if _cookie_copy:
+            opts["cookiefile"] = _cookie_copy
 
     if ffmpeg_path:
         opts["ffmpeg_location"] = ffmpeg_path

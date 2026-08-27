@@ -251,6 +251,7 @@ def download_tone_by_name(name: str) -> dict:
 
     try:
         import yt_dlp
+        import yt_cookies
     except ImportError:
         return {"ok": False, "filename": "", "error": "yt-dlp is not installed on the server."}
 
@@ -269,8 +270,11 @@ def download_tone_by_name(name: str) -> dict:
         }],
         "extractor_args": {"youtube": {"player_client": ["android", "web", "ios", "tv"]}},
     }
-    if os.path.exists(YTDLP_COOKIES_FILE):
-        ydl_opts["cookiefile"] = YTDLP_COOKIES_FILE
+    # Give yt-dlp a disposable COPY of the cookies file, never the
+    # real one — see yt_cookies.py for why.
+    _cookie_copy = yt_cookies.get_cookiefile_for_this_run()
+    if _cookie_copy:
+        ydl_opts["cookiefile"] = _cookie_copy
 
     # Some search results are blocked by YouTube's extra verification
     # checks regardless of cookies — try several candidates instead of
@@ -308,6 +312,8 @@ def download_tone_by_name(name: str) -> dict:
             raise last_error or RuntimeError("All candidates failed.")
     except Exception as e:
         return {"ok": False, "filename": "", "error": f"Download failed: {e}"}
+    finally:
+        yt_cookies.cleanup_cookiefile(_cookie_copy)
 
     final_file = f"{safe_name}.mp3"
     final_path = os.path.join(TONE_FOLDER, final_file)

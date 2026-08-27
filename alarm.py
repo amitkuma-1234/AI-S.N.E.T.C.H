@@ -9,6 +9,7 @@ import datetime, time, os, json, threading
 
 from playsound import playsound
 import yt_dlp
+import yt_cookies
 
 TONE_FOLDER = "alarm_tone"
 ALARM_FILE  = "alarm.json"
@@ -602,8 +603,13 @@ def download_tone_by_name(name: str) -> dict:
         }
         if ffmpeg_path:
             ydl_opts["ffmpeg_location"] = ffmpeg_path
-        if os.path.exists(YTDLP_COOKIES_FILE):
-            ydl_opts["cookiefile"] = YTDLP_COOKIES_FILE
+        # Give yt-dlp a disposable COPY of the cookies file, never the
+        # real one — yt-dlp writes back to whatever cookiefile it's
+        # given, which silently corrupts the real login cookies over
+        # repeated runs if pointed at them directly. See yt_cookies.py.
+        _cookie_copy = yt_cookies.get_cookiefile_for_this_run()
+        if _cookie_copy:
+            ydl_opts["cookiefile"] = _cookie_copy
         else:
             print(f"  [Tone Download] No cookies file found (looked for one in {_ALARM_DIR}) — download will likely be blocked as a bot.")
 
@@ -614,35 +620,36 @@ def download_tone_by_name(name: str) -> dict:
         # if that one video happens to be restricted), pull several
         # candidates and use the first one that actually works.
         last_error = None
-        with yt_dlp.YoutubeDL({**ydl_opts, "extract_flat": "in_playlist", "quiet": True}) as search_ydl:
-            search_result = search_ydl.extract_info(f"ytsearch5:{name}", download=False)
-        candidates = (search_result or {}).get("entries") or []
-        if not candidates:
-            return {"ok": False, "error": "No results found for that search."}
+        try:
+            with yt_dlp.YoutubeDL({**ydl_opts, "extract_flat": "in_playlist", "quiet": True}) as search_ydl:
+                search_result = search_ydl.extract_info(f"ytsearch5:{name}", download=False)
+            candidates = (search_result or {}).get("entries") or []
+            if not candidates:
+                return {"ok": False, "error": "No results found for that search."}
 
-        for entry in candidates:
-            video_id = entry.get("id")
-            if not video_id:
-                continue
-            # Build the watch URL explicitly from the raw video ID —
-            # entry.get("url") from a flat/in_playlist search often
-            # holds just the bare ID (not a full URL), which yt-dlp
-            # cannot resolve on its own, making every candidate look
-            # like it failed even when it was actually fine.
-            video_url = f"https://www.youtube.com/watch?v={video_id}"
-            if not video_url:
-                continue
-            try:
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    ydl.extract_info(video_url, download=True)
-                if os.path.exists(f"{out_path}.mp3"):
-                    return {"ok": True, "error": None}
-            except Exception as e:
-                last_error = e
-                print(f"  [Tone Download] Candidate '{video_url}' failed, trying next: {e}")
-                continue
+            for entry in candidates:
+                video_id = entry.get("id")
+                if not video_id:
+                    continue
+                # Build the watch URL explicitly from the raw video ID —
+                # entry.get("url") from a flat/in_playlist search often
+                # holds just the bare ID (not a full URL), which yt-dlp
+                # cannot resolve on its own, making every candidate look
+                # like it failed even when it was actually fine.
+                video_url = f"https://www.youtube.com/watch?v={video_id}"
+                try:
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        ydl.extract_info(video_url, download=True)
+                    if os.path.exists(f"{out_path}.mp3"):
+                        return {"ok": True, "error": None}
+                except Exception as e:
+                    last_error = e
+                    print(f"  [Tone Download] Candidate '{video_url}' failed, trying next: {e}")
+                    continue
 
-        raise last_error or RuntimeError("File did not save after download.")
+            raise last_error or RuntimeError("File did not save after download.")
+        finally:
+            yt_cookies.cleanup_cookiefile(_cookie_copy)
     except Exception as e:
         print(f"  [Tone Download Error] {e}")
         error_msg = str(e)

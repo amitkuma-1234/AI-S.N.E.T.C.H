@@ -23,6 +23,7 @@ import uuid
 import threading
 import time
 import yt_dlp
+import yt_cookies
 
 REQUEST_TIMEOUT = 15  # seconds
 
@@ -137,9 +138,11 @@ def search_song(raw_query: str) -> dict:
         # accessible, in original relevance order.
         "ignoreerrors": True,
     }
-    _cookies_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "www.youtube.com_cookies.txt")
-    if os.path.exists(_cookies_file):
-        opts["cookiefile"] = _cookies_file
+    # Give yt-dlp a disposable COPY of the cookies file, never the
+    # real one — see yt_cookies.py for why.
+    _cookie_copy = yt_cookies.get_cookiefile_for_this_run()
+    if _cookie_copy:
+        opts["cookiefile"] = _cookie_copy
 
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
@@ -148,6 +151,8 @@ def search_song(raw_query: str) -> dict:
         raise SongDownloadError(
             "Could not reach the music service. Please check your network connection."
         ) from exc
+    finally:
+        yt_cookies.cleanup_cookiefile(_cookie_copy)
 
     entries = info.get("entries") or ([info] if info.get("id") else [])
     entries = [e for e in entries if e and e.get("id")]
@@ -310,9 +315,9 @@ def start_download(video_id: str, title: str = "song") -> str:
             # clients, is what gets around that on a deployed server.
             "extractor_args": {"youtube": {"player_client": ["android", "web", "ios", "tv"]}},
         }
-        _cookies_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "www.youtube.com_cookies.txt")
-        if os.path.exists(_cookies_file):
-            ydl_opts["cookiefile"] = _cookies_file
+        _cookie_copy = yt_cookies.get_cookiefile_for_this_run()
+        if _cookie_copy:
+            ydl_opts["cookiefile"] = _cookie_copy
 
         try:
             with _downloads_lock:
@@ -342,6 +347,8 @@ def start_download(video_id: str, title: str = "song") -> str:
                 if state:
                     state["status"] = "error"
                     state["error"] = str(exc) or "Download failed. Please try again."
+        finally:
+            yt_cookies.cleanup_cookiefile(_cookie_copy)
 
     # Launch download in background thread
     thread = threading.Thread(target=_run_download, daemon=True)

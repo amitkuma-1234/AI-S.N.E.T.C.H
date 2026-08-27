@@ -40,6 +40,7 @@ logging.getLogger("httpcore").setLevel(logging.WARNING)
 try:
     import numpy as np
     import yt_dlp
+    import yt_cookies
     from sentence_transformers import SentenceTransformer, CrossEncoder
     from sklearn.feature_extraction.text import TfidfVectorizer
     from sklearn.metrics.pairwise import cosine_similarity
@@ -378,8 +379,13 @@ def _get_transcript_segments(video_id: str):
         "no_warnings": True,
         "noplaylist": True,
     }
-    if os.path.isfile(YT_COOKIES_FILE) and os.path.getsize(YT_COOKIES_FILE) > 0:
-        ydl_opts["cookiefile"] = YT_COOKIES_FILE
+    # Give yt-dlp a disposable COPY of the cookies file, not the real
+    # one — yt-dlp writes back to whatever cookiefile it's given, and
+    # pointing several features at one shared file let it silently
+    # corrupt the real login cookies over time. See yt_cookies.py.
+    _cookie_copy = yt_cookies.get_cookiefile_for_this_run()
+    if _cookie_copy:
+        ydl_opts["cookiefile"] = _cookie_copy
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -393,6 +399,8 @@ def _get_transcript_segments(video_id: str):
     except Exception as e:
         logger.error(f"Transcript fetch (yt-dlp) error: {e}")
         return None, "unknown"
+    finally:
+        yt_cookies.cleanup_cookiefile(_cookie_copy)
 
     if info is None:
         return None, "unavailable"

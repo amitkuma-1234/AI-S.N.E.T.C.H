@@ -22,6 +22,7 @@ Both exception types carry a clean, user-friendly message.
 import os
 import re
 import yt_dlp
+import yt_cookies
 
 REQUEST_TIMEOUT = 15   # seconds
 RELATED_RESULTS = 8    # extra matches pulled back for the recent/playlist rail
@@ -200,34 +201,41 @@ def get_audio_stream(video_id: str) -> dict:
     ]
     # YouTube blocks/challenges data-center IPs far more than home
     # internet — passing real cookies alongside the client fallbacks
-    # above is what makes this work reliably once deployed.
-    if os.path.exists(YT_COOKIES_FILE):
+    # above is what makes this work reliably once deployed. All 4
+    # strategies share ONE disposable temp copy (see yt_cookies.py) —
+    # never the real cookies file, so yt-dlp's own write-back never
+    # corrupts it.
+    _cookie_copy = yt_cookies.get_cookiefile_for_this_run()
+    if _cookie_copy:
         for _opts in opts_list:
-            _opts["cookiefile"] = YT_COOKIES_FILE
+            _opts["cookiefile"] = _cookie_copy
 
     last_error = None
-    for opts in opts_list:
-        try:
-            with yt_dlp.YoutubeDL(opts) as ydl:
-                info = ydl.extract_info(watch_url, download=False)
-                url = info.get("url")
-                if not url and info.get("requested_formats"):
-                    url = info["requested_formats"][0].get("url")
-                if url:
-                    headers = info.get("http_headers") or {
-                        "User-Agent": (
-                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                            "AppleWebKit/537.36 (KHTML, like Gecko) "
-                            "Chrome/124.0 Safari/537.36"
-                        )
-                    }
-                    return {
-                        "url": url,
-                        "headers": headers,
-                        "mime_type": f"audio/{info.get('ext') or 'webm'}",
-                    }
-        except Exception as exc:
-            last_error = exc
+    try:
+        for opts in opts_list:
+            try:
+                with yt_dlp.YoutubeDL(opts) as ydl:
+                    info = ydl.extract_info(watch_url, download=False)
+                    url = info.get("url")
+                    if not url and info.get("requested_formats"):
+                        url = info["requested_formats"][0].get("url")
+                    if url:
+                        headers = info.get("http_headers") or {
+                            "User-Agent": (
+                                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                                "Chrome/124.0 Safari/537.36"
+                            )
+                        }
+                        return {
+                            "url": url,
+                            "headers": headers,
+                            "mime_type": f"audio/{info.get('ext') or 'webm'}",
+                        }
+            except Exception as exc:
+                last_error = exc
+    finally:
+        yt_cookies.cleanup_cookiefile(_cookie_copy)
 
     raise SongServiceError(
         "Playback failed — could not resolve an audio stream for this song."
