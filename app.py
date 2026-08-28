@@ -94,6 +94,7 @@ db.init_db()
 askanything.init_db()
 Entertainment.init_db()
 horoscopeapi.init_db()
+songplay.init_db()
 reminder.init_db()
 passwordsave.init_db()
 passwordsave.register_vault(app)
@@ -1677,6 +1678,50 @@ def api_songdownload_file(download_id):
 @app.route("/songplay")
 def page_songplay():
     return render_template("songplay.html")
+
+
+@app.route("/api/songplay/recent", methods=["GET"])
+def api_songplay_get_recent():
+    """Returns only the CURRENT logged-in user's own recently-played
+    list — never another account's, even on the same browser/device."""
+    uid = g.current_user_id
+    if uid is None:
+        return jsonify({"success": False, "error": "Login required."}), 401
+    return jsonify({"success": True, "recent": songplay.get_recently_played(uid)})
+
+
+@app.route("/api/songplay/recent", methods=["POST"])
+def api_songplay_add_recent():
+    """Records a play against the CURRENT logged-in user only."""
+    uid = g.current_user_id
+    if uid is None:
+        return jsonify({"success": False, "error": "Login required."}), 401
+    song = request.get_json(silent=True) or {}
+    if not song.get("video_id") and not song.get("id"):
+        return jsonify({"success": False, "error": "Missing video_id."}), 400
+    songplay.add_recently_played(uid, song)
+    return jsonify({"success": True})
+
+
+@app.route("/api/songplay/recent/<video_id>", methods=["DELETE"])
+def api_songplay_remove_recent(video_id):
+    """Removes one song from the CURRENT logged-in user's own history."""
+    uid = g.current_user_id
+    if uid is None:
+        return jsonify({"success": False, "error": "Login required."}), 401
+    songplay.remove_recently_played(uid, video_id)
+    return jsonify({"success": True})
+
+
+@app.route("/api/songplay/recent", methods=["DELETE"])
+def api_songplay_clear_recent():
+    """Wipes the CURRENT logged-in user's entire history — never
+    another account's, even sharing this same browser/device."""
+    uid = g.current_user_id
+    if uid is None:
+        return jsonify({"success": False, "error": "Login required."}), 401
+    songplay.clear_recently_played(uid)
+    return jsonify({"success": True})
 
 
 @app.route("/api/songplay/search", methods=["POST"])

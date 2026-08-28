@@ -46,12 +46,13 @@
 
   const audioEl = document.getElementById("audioEl");
 
-  const PLAYLIST_KEY = "snetch_songplay_recent";
   const MAX_PLAYLIST = 15;
   const SEEK_STEP = 10; // seconds
 
+  function authToken() { return localStorage.getItem("snetch_access_token") || ""; }
+
   // --- State ---
-  let playlist = loadPlaylist();
+  let playlist = []; // populated async from the server below
   let currentSong = null;
   let currentIndex = -1;
   let shuffleOn = false;
@@ -60,24 +61,36 @@
   let isSeeking = false;
 
   // ============================================================
-  // Persistence helpers
+  // Persistence helpers — per logged-in Gmail account, on the
+  // server, NOT the browser's localStorage. localStorage is shared
+  // by whoever is using this browser, so two different Gmail
+  // accounts on the same device used to see each other's history —
+  // this keeps each account's "Recently Played" genuinely their own.
   // ============================================================
-  function loadPlaylist() {
+  async function loadPlaylistFromServer() {
     try {
-      const raw = localStorage.getItem(PLAYLIST_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed : [];
+      const res = await fetch("/api/songplay/recent", {
+        headers: { Authorization: "Bearer " + authToken() },
+      });
+      const data = await res.json();
+      if (data && data.success && Array.isArray(data.recent)) {
+        playlist = data.recent;
+        renderPlaylist();
+      }
     } catch (e) {
-      return [];
+      /* offline / not logged in — playlist just starts empty */
     }
   }
 
-  function savePlaylist() {
-    try {
-      localStorage.setItem(PLAYLIST_KEY, JSON.stringify(playlist));
-    } catch (e) {
-      /* storage unavailable — playlist just won't persist across reloads */
-    }
+  function savePlaylist(song) {
+    fetch("/api/songplay/recent", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + authToken(),
+      },
+      body: JSON.stringify(song),
+    }).catch(() => { /* best-effort — playback already succeeded either way */ });
   }
 
   // ============================================================
@@ -140,8 +153,6 @@
     playlist.forEach((song, idx) => {
       const item = document.createElement("div");
       item.className = "playlist-item" + (idx === currentIndex ? " active" : "");
-      item.setAttribute("role", "button");
-      item.setAttribute("tabindex", "0");
 
       const img = document.createElement("img");
       img.src = song.cover || "";
@@ -159,23 +170,56 @@
       meta.appendChild(titleEl);
       meta.appendChild(artistEl);
 
-      const icon = document.createElement("i");
-      icon.className = "playlist-item-icon fas " + (idx === currentIndex ? "fa-volume-up" : "fa-play");
+      const actions = document.createElement("div");
+      actions.className = "playlist-item-actions";
+
+      const playBtnEl = document.createElement("button");
+      playBtnEl.type = "button";
+      playBtnEl.className = "playlist-item-btn playlist-item-play";
+      playBtnEl.title = "Play";
+      playBtnEl.setAttribute("aria-label", `Play ${song.title}`);
+      playBtnEl.innerHTML = `<i class="fas ${idx === currentIndex ? "fa-volume-up" : "fa-play"}"></i>`;
+      playBtnEl.addEventListener("click", (e) => {
+        e.stopPropagation();
+        playFromPlaylist(idx);
+      });
+
+      const removeBtnEl = document.createElement("button");
+      removeBtnEl.type = "button";
+      removeBtnEl.className = "playlist-item-btn playlist-item-remove";
+      removeBtnEl.title = "Remove from history";
+      removeBtnEl.setAttribute("aria-label", `Remove ${song.title} from history`);
+      removeBtnEl.innerHTML = `<i class="fas fa-trash-alt"></i>`;
+      removeBtnEl.addEventListener("click", (e) => {
+        e.stopPropagation();
+        removeFromPlaylist(idx);
+      });
+
+      actions.appendChild(playBtnEl);
+      actions.appendChild(removeBtnEl);
 
       item.appendChild(img);
       item.appendChild(meta);
-      item.appendChild(icon);
-
-      item.addEventListener("click", () => playFromPlaylist(idx));
-      item.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          playFromPlaylist(idx);
-        }
-      });
+      item.appendChild(actions);
 
       playlistList.appendChild(item);
     });
+  }
+
+  function removeFromPlaylist(idx) {
+    const song = playlist[idx];
+    if (!song) return;
+    playlist.splice(idx, 1);
+    if (idx === currentIndex) {
+      currentIndex = -1; // currently-playing song was removed from the list
+    } else if (idx < currentIndex) {
+      currentIndex -= 1; // keep pointing at the same song after the shift
+    }
+    renderPlaylist();
+    fetch(`/api/songplay/recent/${encodeURIComponent(song.video_id)}`, {
+      method: "DELETE",
+      headers: { Authorization: "Bearer " + authToken() },
+    }).catch(() => { /* best-effort — local list already updated */ });
   }
 
   function addToPlaylist(song) {
@@ -186,7 +230,7 @@
     playlist.unshift(song);
     if (playlist.length > MAX_PLAYLIST) playlist.length = MAX_PLAYLIST;
     currentIndex = 0;
-    savePlaylist();
+    savePlaylist(song);
     renderPlaylist();
   }
 
@@ -543,6 +587,7 @@
   updateVolumeUI();
   setFeedback("✨ Enter a song and press Play", "info");
   renderPlaylist();
+  loadPlaylistFromServer();
 
   // Expose a little debug surface (harmless, mirrors project convention).
   window.__snetch_songplay = { playlist, get currentSong() { return currentSong; } };

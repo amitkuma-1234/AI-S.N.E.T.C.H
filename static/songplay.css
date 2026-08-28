@@ -710,6 +710,40 @@ body {
 }
 .playlist-item-icon { color: #c98aff; font-size: 0.85rem; flex-shrink: 0; }
 
+.playlist-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+.playlist-item-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(180, 130, 255, 0.25);
+  background: rgba(255, 255, 255, 0.04);
+  color: #c98aff;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.playlist-item-btn:hover {
+  background: rgba(180, 130, 255, 0.2);
+  border-color: #b77aff;
+  transform: scale(1.08);
+}
+.playlist-item-remove {
+  color: #ff8a8a;
+  border-color: rgba(255, 120, 120, 0.2);
+}
+.playlist-item-remove:hover {
+  background: rgba(255, 90, 90, 0.15);
+  border-color: #ff7a7a;
+}
+
 /* ===== FOOTER CARD ===== */
 .footer-card {
   margin-top: 0.4rem;

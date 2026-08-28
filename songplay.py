@@ -21,12 +21,119 @@ Both exception types carry a clean, user-friendly message.
 
 import os
 import re
+import json
+import time
+import sqlite3
 import yt_dlp
 import yt_cookies
 
 REQUEST_TIMEOUT = 15   # seconds
 RELATED_RESULTS = 8    # extra matches pulled back for the recent/playlist rail
 YT_COOKIES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "www.youtube.com_cookies.txt")
+
+# ---------------------------------------------------------------
+#  RECENTLY-PLAYED STORAGE — per Gmail account, not per browser.
+#  ---------------------------------------------------------------
+#  This used to live in the browser's localStorage, which meant it
+#  was really tied to the BROWSER, not the logged-in person — two
+#  different Gmail accounts using the same browser saw the exact
+#  same "Recently Played" list, and it followed nobody to a second
+#  device. Moving it here, keyed by user_id like the rest of the
+#  app's isolated features (horoscope, vault, snaplock, etc.), makes
+#  each Gmail account's history genuinely its own.
+# ---------------------------------------------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_DIR = os.path.join(BASE_DIR, "db_storage")
+os.makedirs(DB_DIR, exist_ok=True)
+DB_PATH = os.path.join(DB_DIR, "songplay.db")
+MAX_RECENT = 30  # keep the list from growing forever
+
+
+def _get_conn():
+    conn = sqlite3.connect(DB_PATH, timeout=10)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL;")
+    return conn
+
+
+def init_db():
+    conn = _get_conn()
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS recently_played (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id     INTEGER NOT NULL,
+            video_id    TEXT NOT NULL,
+            song_json   TEXT NOT NULL,
+            played_at   INTEGER NOT NULL
+        )
+    """)
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_recent_user ON recently_played(user_id, played_at)")
+    conn.commit()
+    conn.close()
+
+
+def get_recently_played(user_id):
+    """Returns this user's own recently-played list, newest first."""
+    conn = _get_conn()
+    rows = conn.execute(
+        "SELECT song_json FROM recently_played WHERE user_id=? ORDER BY played_at DESC LIMIT ?",
+        (user_id, MAX_RECENT),
+    ).fetchall()
+    conn.close()
+    out = []
+    for r in rows:
+        try:
+            out.append(json.loads(r["song_json"]))
+        except (TypeError, ValueError):
+            continue
+    return out
+
+
+def add_recently_played(user_id, song):
+    """Records a play for this user only. If the same video was
+    already in their history, the old entry is removed first so it
+    simply moves back to the top instead of appearing twice."""
+    video_id = (song or {}).get("video_id") or (song or {}).get("id")
+    if not video_id:
+        return
+    conn = _get_conn()
+    conn.execute(
+        "DELETE FROM recently_played WHERE user_id=? AND video_id=?",
+        (user_id, video_id),
+    )
+    conn.execute(
+        "INSERT INTO recently_played (user_id, video_id, song_json, played_at) VALUES (?,?,?,?)",
+        (user_id, video_id, json.dumps(song), int(time.time())),
+    )
+    # Trim anything past MAX_RECENT for this user.
+    conn.execute(
+        """DELETE FROM recently_played WHERE user_id=? AND id NOT IN (
+               SELECT id FROM recently_played WHERE user_id=? ORDER BY played_at DESC LIMIT ?
+           )""",
+        (user_id, user_id, MAX_RECENT),
+    )
+    conn.commit()
+    conn.close()
+
+
+def remove_recently_played(user_id, video_id):
+    """Deletes a single song from this user's own history only."""
+    conn = _get_conn()
+    conn.execute(
+        "DELETE FROM recently_played WHERE user_id=? AND video_id=?",
+        (user_id, video_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+def clear_recently_played(user_id):
+    """Wipes this user's ENTIRE recently-played history — never
+    touches any other user's rows."""
+    conn = _get_conn()
+    conn.execute("DELETE FROM recently_played WHERE user_id=?", (user_id,))
+    conn.commit()
+    conn.close()
 
 
 class SongNotFoundError(Exception):
