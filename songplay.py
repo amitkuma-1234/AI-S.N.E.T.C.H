@@ -346,6 +346,7 @@ def get_audio_stream(video_id: str) -> dict:
             except Exception as exc:
                 last_error = exc
     finally:
+        yt_cookies.sync_back_if_healthy(_cookie_copy)
         yt_cookies.cleanup_cookiefile(_cookie_copy)
 
     raise SongServiceError(

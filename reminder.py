@@ -245,6 +245,7 @@ def download_tone_by_name(name: str) -> dict:
     except Exception as e:
         return {"ok": False, "filename": "", "error": f"Download failed: {e}"}
     finally:
+        yt_cookies.sync_back_if_healthy(_cookie_copy)
         yt_cookies.cleanup_cookiefile(_cookie_copy)
 
     final_file = f"{safe_name}.mp3"

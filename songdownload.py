@@ -152,6 +152,7 @@ def search_song(raw_query: str) -> dict:
             "Could not reach the music service. Please check your network connection."
         ) from exc
     finally:
+        yt_cookies.sync_back_if_healthy(_cookie_copy)
         yt_cookies.cleanup_cookiefile(_cookie_copy)
 
     entries = info.get("entries") or ([info] if info.get("id") else [])
@@ -348,6 +349,7 @@ def start_download(video_id: str, title: str = "song") -> str:
                     state["status"] = "error"
                     state["error"] = str(exc) or "Download failed. Please try again."
         finally:
+            yt_cookies.sync_back_if_healthy(_cookie_copy)
             yt_cookies.cleanup_cookiefile(_cookie_copy)
 
     # Launch download in background thread

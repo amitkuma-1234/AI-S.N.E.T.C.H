@@ -400,6 +400,7 @@ def _get_transcript_segments(video_id: str):
         logger.error(f"Transcript fetch (yt-dlp) error: {e}")
         return None, "unknown"
     finally:
+        yt_cookies.sync_back_if_healthy(_cookie_copy)
         yt_cookies.cleanup_cookiefile(_cookie_copy)
 
     if info is None:

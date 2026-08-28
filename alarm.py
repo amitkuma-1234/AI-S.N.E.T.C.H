@@ -649,6 +649,7 @@ def download_tone_by_name(name: str) -> dict:
 
             raise last_error or RuntimeError("File did not save after download.")
         finally:
+            yt_cookies.sync_back_if_healthy(_cookie_copy)
             yt_cookies.cleanup_cookiefile(_cookie_copy)
     except Exception as e:
         print(f"  [Tone Download Error] {e}")
